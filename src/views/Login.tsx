@@ -31,7 +31,7 @@ export default function Login({ onLogin }: LoginProps) {
           <div className="bg-blue-100 p-3 rounded-full mb-4">
             <ShieldCheck className="w-10 h-10 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">SmartField Portal</h1>
+          <h1 className="text-2xl font-bold text-gray-800">SMARTFieldForce.AI Portal</h1>
           <p className="text-gray-500 text-sm mt-1">Enterprise Field Force Management</p>
         </div>
 

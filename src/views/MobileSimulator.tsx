@@ -28,7 +28,6 @@ import {
   Search,
   BookOpen,
   Navigation,
-  HardDrive,
   UserCircle,
   Radar,
   Map,
@@ -44,7 +43,7 @@ interface MobileSimulatorProps {
   config: AppConfig;
 }
 
-type Screen = 'home' | 'bot' | 'vision' | 'reports' | 'training' | 'planner' | 'assets' | 'performance' | 'stock' | 'territory';
+type Screen = 'home' | 'bot' | 'vision' | 'reports' | 'training' | 'planner' | 'performance' | 'stock' | 'territory';
 type VisionStep = 
   | 'capture-board' 
   | 'fetching-skus' 
@@ -69,7 +68,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       reports: 'salesInsights',
       training: 'trainingHub',
       planner: 'routeOptimizer',
-      assets: 'assetTracker',
       performance: 'userProfile',
       stock: 'inventoryRadar',
       territory: 'territoryMap'
@@ -280,7 +278,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     ClipboardList: <ClipboardList />,
     BookOpen: <BookOpen />,
     Navigation: <Navigation />,
-    HardDrive: <HardDrive />,
     UserCircle: <UserCircle />,
     Radar: <Radar />,
     Map: <Map />
@@ -315,8 +312,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       'visionAutomation', 
       'salesInsights', 
       'trainingHub', 
-      'routeOptimizer', 
-      'assetTracker'
+      'routeOptimizer'
     ];
     return enabledFeatures.filter(f => screensWithUI.includes(f.id)).slice(0, 3);
   }, [enabledFeatures]);
@@ -349,7 +345,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                    <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                       <Brain className="w-4 h-4 text-white" />
                    </div>
-                   <span className="font-black text-slate-800 tracking-tight text-[11px] uppercase">SmartField AI</span>
+                   <span className="font-black text-slate-800 tracking-tight text-[11px] uppercase">SMARTFieldForce.AI</span>
                 </div>
              </div>
              <div className="flex items-center gap-2">
@@ -381,7 +377,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             <Brain className="w-6 h-6" />
                          </div>
                          <div>
-                            <p className="text-sm font-black text-slate-800 uppercase tracking-tight">SmartField</p>
+                            <p className="text-sm font-black text-slate-800 uppercase tracking-tight">SMARTFieldForce.AI</p>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v2.4.0-AI</p>
                          </div>
                       </div>
@@ -415,7 +411,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           salesInsights: 'reports',
                           trainingHub: 'training',
                           routeOptimizer: 'planner',
-                          assetTracker: 'assets',
                           userProfile: 'performance',
                           inventoryRadar: 'stock',
                           territoryMap: 'territory'
@@ -483,7 +478,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           <h3 className="text-lg font-black text-slate-800 leading-tight mb-2 tracking-tight">
                             {enabledFeatures[0].id === 'visionAutomation' ? `Audit Required: ${sampleVisionData.storeName}` : `Next Up: ${enabledFeatures[0].name}`}
                           </h3>
-                          <p className="text-[11px] font-medium text-slate-500 leading-relaxed max-w-[200px]">
+                          <p className="text-11px font-medium text-slate-500 leading-relaxed max-w-[200px]">
                             {enabledFeatures[0].description} - Optimized by AI for your current route.
                           </p>
                           
@@ -494,7 +489,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               else if (enabledFeatures[0].id === 'salesInsights') setActiveScreen('reports');
                               else if (enabledFeatures[0].id === 'trainingHub') setActiveScreen('training');
                               else if (enabledFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
-                              else if (enabledFeatures[0].id === 'assetTracker') setActiveScreen('assets');
                               else if (enabledFeatures[0].id === 'userProfile') setActiveScreen('performance');
                               else if (enabledFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
                               else if (enabledFeatures[0].id === 'territoryMap') setActiveScreen('territory');
@@ -539,7 +533,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             else if (feature.id === 'salesInsights') setActiveScreen('reports');
                             else if (feature.id === 'trainingHub') setActiveScreen('training');
                             else if (feature.id === 'routeOptimizer') setActiveScreen('planner');
-                            else if (feature.id === 'assetTracker') setActiveScreen('assets');
                             else if (feature.id === 'userProfile') setActiveScreen('performance');
                             else if (feature.id === 'inventoryRadar') setActiveScreen('stock');
                             else if (feature.id === 'territoryMap') setActiveScreen('territory');
@@ -1122,44 +1115,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                         </div>
                       ))}
                    </div>
-                </motion.div>
-              )}
-
-              {activeScreen === 'assets' && (
-                <motion.div
-                  key="assets"
-                  initial={{ rotate: -2, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  className="p-6 space-y-6"
-                >
-                   <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white text-center space-y-4">
-                      <div className="w-16 h-16 rounded-[2rem] bg-blue-500/20 text-blue-400 flex items-center justify-center mx-auto border border-blue-500/30">
-                         <HardDrive className="w-8 h-8" />
-                      </div>
-                      <div>
-                         <h3 className="text-xl font-black">Asset Guard</h3>
-                         <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-2">Active Maintenance Loop</p>
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
-                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Coolers Tracked</p>
-                         <p className="text-2xl font-black text-slate-800">42</p>
-                         <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-                            <div className="w-3/4 h-full bg-emerald-500" />
-                         </div>
-                      </div>
-                      <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
-                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Health Score</p>
-                         <p className="text-2xl font-black text-slate-800">92%</p>
-                         <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-                            <div className="w-[92%] h-full bg-blue-500" />
-                         </div>
-                      </div>
-                   </div>
-                   
-                </motion.div>
+                 </motion.div>
               )}
 
               {activeScreen === 'performance' && (
@@ -1319,7 +1275,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                  salesInsights: 'reports',
                  trainingHub: 'training',
                  routeOptimizer: 'planner',
-                 assetTracker: 'assets',
                  userProfile: 'performance',
                  inventoryRadar: 'stock',
                  territoryMap: 'territory'

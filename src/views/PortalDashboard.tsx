@@ -85,7 +85,7 @@ export default function PortalDashboard({ config: deployedConfig, setConfig, onD
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-2 text-blue-400 font-bold text-xl">
             <div className="w-8 h-8 rounded bg-blue-500 text-white flex items-center justify-center">S</div>
-            <span>SmartPortal</span>
+            <span>SMARTFieldForce.AI</span>
           </div>
           <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold">Admin Panel</p>
         </div>

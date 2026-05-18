@@ -16,7 +16,6 @@ export interface AppConfig {
     locationReporting: boolean;
     trainingHub: boolean;
     routeOptimizer: boolean;
-    assetTracker: boolean;
     userProfile: boolean;
     inventoryRadar: boolean;
     territoryMap: boolean;
@@ -45,8 +44,7 @@ export const AVAILABLE_FEATURES: Feature[] = [
   { id: 'locationReporting', name: 'Smart Check-in', description: 'Geofenced location verification', icon: 'MapPin' },
   { id: 'trainingHub', name: 'Training Hub', description: 'Interactive learning and resource center', icon: 'BookOpen' },
   { id: 'routeOptimizer', name: 'Route Planner', description: 'AI-powered trip and distance optimization', icon: 'Navigation' },
-  { id: 'assetTracker', name: 'Asset Guard', description: 'Fridge & Cooler health verification', icon: 'HardDrive' },
-  { id: 'userProfile', name: 'Performance Hub', description: 'Agent performance and target tracking', icon: 'UserCircle' },
+  { id: 'userProfile', name: 'Performance Hub', description: 'Performance & target tracking', icon: 'UserCircle' },
   { id: 'inventoryRadar', name: 'Stock Radar', description: 'Nearby store stock levels and transfers', icon: 'Radar' },
   { id: 'territoryMap', name: 'Territory Map', description: 'Assigned outlets and coverage area', icon: 'Map' },
 ];

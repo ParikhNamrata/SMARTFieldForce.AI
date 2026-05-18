@@ -14,7 +14,6 @@ import {
   Sparkles,
   BookOpen,
   Navigation,
-  HardDrive,
   UserCircle,
   Radar,
   Map
@@ -66,7 +65,6 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
     MapPin: <MapPin className="w-4 h-4" />,
     BookOpen: <BookOpen className="w-4 h-4" />,
     Navigation: <Navigation className="w-4 h-4" />,
-    HardDrive: <HardDrive className="w-4 h-4" />,
     UserCircle: <UserCircle className="w-4 h-4" />,
     Radar: <Radar className="w-4 h-4" />,
     Map: <Map className="w-4 h-4" />,
