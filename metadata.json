@@ -1,0 +1,15 @@
+{
+  "name": "SmartField Force Configurator",
+  "description": "A web portal for configuring and managing intelligent field force mobile applications with AI-driven task cycles and reporting.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "AI-driven task management",
+    "Real-time route optimization",
+    "Voice-to-text integration",
+    "Interactive reporting"
+  ]
+}
