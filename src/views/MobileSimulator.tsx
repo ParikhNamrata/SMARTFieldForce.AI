@@ -25,9 +25,16 @@ import {
   Activity,
   User,
   Settings as SettingsIcon,
-  Search
+  Search,
+  BookOpen,
+  Navigation,
+  HardDrive,
+  UserCircle,
+  Radar,
+  Map,
+  ChevronRight
 } from 'lucide-react';
-import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature } from '../types';
+import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
 import { answerFieldQuery } from '../services/gemini';
 import { dbService, InteractionLog } from '../services/db';
@@ -37,7 +44,7 @@ interface MobileSimulatorProps {
   config: AppConfig;
 }
 
-type Screen = 'home' | 'bot' | 'vision' | 'reports';
+type Screen = 'home' | 'bot' | 'vision' | 'reports' | 'training' | 'planner' | 'assets' | 'performance' | 'stock' | 'territory';
 type VisionStep = 
   | 'capture-board' 
   | 'fetching-skus' 
@@ -55,9 +62,24 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
   // Safeguard: Move to home if current screen is disabled
   useEffect(() => {
-    if (activeScreen === 'bot' && config.features.predictiveBot === false) setActiveScreen('home');
-    if (activeScreen === 'vision' && config.features.visionAutomation === false) setActiveScreen('home');
-    if (activeScreen === 'reports' && config.features.salesInsights === false) setActiveScreen('home');
+    const featureMap: Record<Screen, FeatureKey | null> = {
+      home: null,
+      bot: 'predictiveBot',
+      vision: 'visionAutomation',
+      reports: 'salesInsights',
+      training: 'trainingHub',
+      planner: 'routeOptimizer',
+      assets: 'assetTracker',
+      performance: 'userProfile',
+      stock: 'inventoryRadar',
+      territory: 'territoryMap'
+    };
+
+    const requiredFeature = featureMap[activeScreen];
+    if (requiredFeature && config.features[requiredFeature] === false) {
+      console.log(`Simulator: Feature ${requiredFeature} is disabled, redirecting to home`);
+      setActiveScreen('home');
+    }
   }, [config.features, activeScreen]);
 
   const toggleVoice = () => {
@@ -243,18 +265,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setChatMessages(prev => [...prev, { role: 'ai', text: `Deep analysis complete. ${finalReport.storeName} has ${finalReport.planogramStatus}. I've projected a shortage in Dove units. I recommend placing an immediate replenishment order.` }]);
   };
 
-  const predictiveChips = useMemo(() => {
-    const chips = [];
-    if (config.features.visionAutomation === true) {
-      chips.push({ label: 'Audit Check-in', icon: <MapPin className="w-3 h-3"/>, action: 'Start the store audit' });
-    }
-    if (config.features.orderManagement === true) {
-      chips.push({ label: 'Stock Levels', icon: <ShoppingCart className="w-3 h-3"/>, action: 'Show stock for Unilever Hub' });
-    }
-    chips.push({ label: 'Campaign Info', icon: <Zap className="w-3 h-3"/>, action: 'Tell me about the Monsoon campaign' });
-    return chips;
-  }, [config.features]);
-
   const iconMap: Record<string, React.ReactNode> = {
     Sparkles: <Sparkles />,
     Camera: <Camera />,
@@ -267,8 +277,26 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     Scan: <Scan />,
     FileText: <FileText />,
     LayoutGrid: <LayoutGrid />,
-    ClipboardList: <ClipboardList />
+    ClipboardList: <ClipboardList />,
+    BookOpen: <BookOpen />,
+    Navigation: <Navigation />,
+    HardDrive: <HardDrive />,
+    UserCircle: <UserCircle />,
+    Radar: <Radar />,
+    Map: <Map />
   };
+
+  const predictiveChips = useMemo(() => {
+    const enabledIds = config.botQuickActions || [];
+    return AVAILABLE_BOT_ACTIONS
+      .filter(action => enabledIds.includes(action.id))
+      .map(action => ({
+        label: action.label,
+        icon: iconMap[action.icon] ? React.cloneElement(iconMap[action.icon] as React.ReactElement, { className: "w-3 h-3" }) : <Zap className="w-3 h-3"/>,
+        action: action.prompt,
+        id: action.id
+      }));
+  }, [config.botQuickActions, iconMap]);
 
   const enabledFeatures = useMemo(() => {
     if (!config || !config.features || !config.featureOrder) return [];
@@ -282,9 +310,15 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   }, [config.features, config.featureOrder]);
 
   const topFeatures = useMemo(() => {
-    // Only bot, vision and reports screens exist for now
-    const screens = ['predictiveBot', 'visionAutomation', 'salesInsights'];
-    return enabledFeatures.filter(f => screens.includes(f.id)).slice(0, 3);
+    const screensWithUI = [
+      'predictiveBot', 
+      'visionAutomation', 
+      'salesInsights', 
+      'trainingHub', 
+      'routeOptimizer', 
+      'assetTracker'
+    ];
+    return enabledFeatures.filter(f => screensWithUI.includes(f.id)).slice(0, 3);
   }, [enabledFeatures]);
 
   return (
@@ -378,7 +412,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                         const screenMap: Record<string, Screen> = {
                           predictiveBot: 'bot',
                           visionAutomation: 'vision',
-                          salesInsights: 'reports'
+                          salesInsights: 'reports',
+                          trainingHub: 'training',
+                          routeOptimizer: 'planner',
+                          assetTracker: 'assets',
+                          userProfile: 'performance',
+                          inventoryRadar: 'stock',
+                          territoryMap: 'territory'
                         };
                         const targetScreen = screenMap[feature.id];
                         
@@ -452,6 +492,12 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               if (enabledFeatures[0].id === 'visionAutomation') setActiveScreen('vision');
                               else if (enabledFeatures[0].id === 'predictiveBot') setActiveScreen('bot');
                               else if (enabledFeatures[0].id === 'salesInsights') setActiveScreen('reports');
+                              else if (enabledFeatures[0].id === 'trainingHub') setActiveScreen('training');
+                              else if (enabledFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
+                              else if (enabledFeatures[0].id === 'assetTracker') setActiveScreen('assets');
+                              else if (enabledFeatures[0].id === 'userProfile') setActiveScreen('performance');
+                              else if (enabledFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
+                              else if (enabledFeatures[0].id === 'territoryMap') setActiveScreen('territory');
                             }}
                             className="mt-6 flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
                           >
@@ -491,6 +537,12 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             if (feature.id === 'visionAutomation') setActiveScreen('vision');
                             else if (feature.id === 'predictiveBot') setActiveScreen('bot');
                             else if (feature.id === 'salesInsights') setActiveScreen('reports');
+                            else if (feature.id === 'trainingHub') setActiveScreen('training');
+                            else if (feature.id === 'routeOptimizer') setActiveScreen('planner');
+                            else if (feature.id === 'assetTracker') setActiveScreen('assets');
+                            else if (feature.id === 'userProfile') setActiveScreen('performance');
+                            else if (feature.id === 'inventoryRadar') setActiveScreen('stock');
+                            else if (feature.id === 'territoryMap') setActiveScreen('territory');
                           }}
                           className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-3 active:scale-95 transition-all group"
                         >
@@ -982,6 +1034,261 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                    </div>
                 </motion.div>
               )}
+
+              {activeScreen === 'training' && (
+                <motion.div
+                  key="training"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="p-6 space-y-6"
+                >
+                   <div className="space-y-2">
+                      <h3 className="text-2xl font-black text-slate-800 tracking-tight">Training Hub</h3>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Master your field goals</p>
+                   </div>
+
+                   <div className="space-y-4">
+                      {[
+                        { title: 'New Product Launch', duration: '5 min', points: '+50 XP', category: 'Innovation' },
+                        { title: 'Safety Protocol 2024', duration: '12 min', points: '+100 XP', category: 'Compliance' },
+                        { title: 'Advanced Selling Tips', duration: '8 min', points: '+80 XP', category: 'Sales' }
+                      ].map((item, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group active:scale-95 transition-all">
+                           <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                              <BookOpen className="w-6 h-6" />
+                           </div>
+                           <div className="flex-1">
+                              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{item.category}</p>
+                              <p className="text-sm font-bold text-slate-800 leading-tight">{item.title}</p>
+                              <div className="flex items-center gap-3 mt-2">
+                                 <span className="text-[9px] font-bold text-slate-400">{item.duration}</span>
+                                 <span className="text-[9px] font-black text-emerald-500">{item.points}</span>
+                              </div>
+                           </div>
+                           <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                              <ChevronRight className="w-4 h-4 text-slate-300" />
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </motion.div>
+              )}
+
+              {activeScreen === 'planner' && (
+                <motion.div
+                  key="planner"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="p-4 space-y-6 h-full flex flex-col"
+                >
+                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                         <div className="p-2 rounded-xl bg-orange-50 text-orange-600">
+                            <Navigation className="w-5 h-5" />
+                         </div>
+                         <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase italic">Optimized Route</span>
+                      </div>
+                      <div>
+                         <h3 className="text-xl font-black text-slate-800 tracking-tight">Today's Journey</h3>
+                         <p className="text-xs font-bold text-slate-500 mt-1">4.2km saved today using AI Planner</p>
+                      </div>
+                   </div>
+
+                   <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+                      {[
+                        { time: '09:00 AM', location: 'Smollan HQ', status: 'completed' },
+                        { time: '10:30 AM', location: 'Unilever Hub', status: 'current' },
+                        { time: '01:00 PM', location: 'Spar Supermarket', status: 'pending' },
+                        { time: '03:15 PM', location: 'Checkers Metro', status: 'pending' }
+                      ].map((stop, idx) => (
+                        <div key={idx} className="flex gap-4">
+                           <div className="flex flex-col items-center">
+                              <div className={cn(
+                                "w-3 h-3 rounded-full border-2",
+                                stop.status === 'completed' ? "bg-blue-600 border-blue-600" :
+                                stop.status === 'current' ? "bg-white border-blue-600 animate-pulse" : "bg-white border-slate-200"
+                              )} />
+                              {idx < 3 && <div className="w-0.5 flex-1 bg-slate-100 my-1" />}
+                           </div>
+                           <div className="pb-6">
+                              <p className="text-[10px] font-black text-slate-400 mb-1">{stop.time}</p>
+                              <p className={cn(
+                                "text-sm font-bold tracking-tight",
+                                stop.status === 'current' ? "text-blue-600" : "text-slate-700"
+                              )}>{stop.location}</p>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </motion.div>
+              )}
+
+              {activeScreen === 'assets' && (
+                <motion.div
+                  key="assets"
+                  initial={{ rotate: -2, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  className="p-6 space-y-6"
+                >
+                   <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white text-center space-y-4">
+                      <div className="w-16 h-16 rounded-[2rem] bg-blue-500/20 text-blue-400 flex items-center justify-center mx-auto border border-blue-500/30">
+                         <HardDrive className="w-8 h-8" />
+                      </div>
+                      <div>
+                         <h3 className="text-xl font-black">Asset Guard</h3>
+                         <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-2">Active Maintenance Loop</p>
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Coolers Tracked</p>
+                         <p className="text-2xl font-black text-slate-800">42</p>
+                         <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
+                            <div className="w-3/4 h-full bg-emerald-500" />
+                         </div>
+                      </div>
+                      <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Health Score</p>
+                         <p className="text-2xl font-black text-slate-800">92%</p>
+                         <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
+                            <div className="w-[92%] h-full bg-blue-500" />
+                         </div>
+                      </div>
+                   </div>
+                   
+                </motion.div>
+              )}
+
+              {activeScreen === 'performance' && (
+                <motion.div
+                  key="performance"
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-6 space-y-6"
+                >
+                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white">
+                            <UserCircle className="w-6 h-6" />
+                         </div>
+                         <div>
+                            <h3 className="text-lg font-black text-slate-800 tracking-tight">Agent Performance</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Rank #42 Region South</p>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-4">
+                      <div className="bg-slate-900 rounded-[2rem] p-6 text-white space-y-4">
+                         <div className="flex justify-between items-end">
+                            <div>
+                               <p className="text-[8px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Target Progress</p>
+                               <p className="text-3xl font-black italic tracking-tighter">84.2%</p>
+                            </div>
+                            <div className="text-right">
+                               <p className="text-[8px] font-bold text-white/50 uppercase">Days Left</p>
+                               <p className="text-sm font-black">12</p>
+                            </div>
+                         </div>
+                         <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                               initial={{ width: 0 }}
+                               animate={{ width: "84.2%" }}
+                               className="h-full bg-blue-500 rounded-full" 
+                            />
+                         </div>
+                      </div>
+
+                      {[
+                        { label: 'Visits Today', val: '12/15', color: 'blue' },
+                        { label: 'Orders Value', val: '$4,280', color: 'emerald' },
+                        { label: 'Distance', val: '24.5km', color: 'orange' }
+                      ].map((stat, i) => (
+                        <div key={i} className="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between">
+                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                           <span className={cn("text-sm font-black italic", `text-${stat.color}-600`)}>{stat.val}</span>
+                        </div>
+                      ))}
+                   </div>
+                </motion.div>
+              )}
+
+              {activeScreen === 'stock' && (
+                <motion.div
+                  key="stock"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-6 space-y-6"
+                >
+                   <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-black text-slate-800 tracking-tight">Stock Radar</h3>
+                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 animate-pulse">
+                         <Radar className="w-4 h-4" />
+                      </div>
+                   </div>
+
+                   <div className="space-y-4">
+                      {[
+                        { item: 'Unilever Detergent 2kg', stock: 'Critical', distance: '0.4km', color: 'red' },
+                        { item: 'Hellmanns Mayo 400g', stock: 'Low', distance: '1.2km', color: 'orange' },
+                        { item: 'Knorr Soup Pack', stock: 'Optimal', distance: '2.5km', color: 'emerald' }
+                      ].map((prod, i) => (
+                        <div key={i} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                           <div className={cn("w-2 h-12 rounded-full", `bg-${prod.color}-500/20`)} />
+                           <div className="flex-1">
+                              <p className="text-xs font-bold text-slate-800 leading-tight">{prod.item}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                 <span className={cn("text-[8px] font-black uppercase text-white px-1.5 py-0.5 rounded-full", `bg-${prod.color}-500`)}>{prod.stock}</span>
+                                 <span className="text-[8px] font-bold text-slate-400">{prod.distance} away</span>
+                              </div>
+                           </div>
+                           <button className="p-2 rounded-xl bg-slate-50 text-slate-400">
+                              <Search className="w-4 h-4" />
+                           </button>
+                        </div>
+                      ))}
+                   </div>
+                </motion.div>
+              )}
+
+              {activeScreen === 'territory' && (
+                <motion.div
+                  key="territory"
+                  className="h-full flex flex-col"
+                >
+                   <div className="p-6 space-y-1 bg-white border-b border-slate-100">
+                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Territory Map</h3>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sector South-East A</p>
+                   </div>
+                   
+                   <div className="flex-1 bg-slate-50 relative overflow-hidden flex items-center justify-center">
+                      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                      <div className="relative text-center space-y-4">
+                         <div className="w-24 h-24 rounded-full bg-blue-100/50 flex items-center justify-center mx-auto border-2 border-blue-200 border-dashed animate-[spin_10s_linear_infinite]">
+                            <MapPin className="w-8 h-8 text-blue-600" />
+                         </div>
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Synchronizing Area Data...</p>
+                      </div>
+                      
+                      <div className="absolute bottom-6 inset-x-6">
+                         <div className="bg-white p-4 rounded-[2rem] shadow-xl border border-slate-100 space-y-3">
+                            <div className="flex items-center gap-3">
+                               <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                  <Map className="w-4 h-4" />
+                               </div>
+                               <div>
+                                  <p className="text-[10px] font-black text-slate-800 leading-none mb-1">Outlet Coverage</p>
+                                  <p className="text-[8px] font-bold text-slate-400 uppercase">92% of Sector A Mapped</p>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 
@@ -1009,7 +1316,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                const screenMap: Record<string, Screen> = {
                  predictiveBot: 'bot',
                  visionAutomation: 'vision',
-                 salesInsights: 'reports'
+                 salesInsights: 'reports',
+                 trainingHub: 'training',
+                 routeOptimizer: 'planner',
+                 assetTracker: 'assets',
+                 userProfile: 'performance',
+                 inventoryRadar: 'stock',
+                 territoryMap: 'territory'
                };
                const targetScreen = screenMap[feature.id];
                if (!targetScreen) return null;

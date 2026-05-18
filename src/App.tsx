@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppConfig, FeatureKey, AVAILABLE_FEATURES } from './types';
+import { AppConfig, FeatureKey, AVAILABLE_FEATURES, AVAILABLE_BOT_ACTIONS } from './types';
 import Login from './views/Login';
 import PortalDashboard from './views/PortalDashboard';
 import MobileSimulator from './views/MobileSimulator';
@@ -18,6 +18,7 @@ const INITIAL_FEATURES = AVAILABLE_FEATURES.reduce((acc, feature) => ({
 const INITIAL_CONFIG: AppConfig = {
   features: INITIAL_FEATURES,
   featureOrder: AVAILABLE_FEATURES.map(f => f.id),
+  botQuickActions: AVAILABLE_BOT_ACTIONS.map(a => a.id),
 };
 
 export default function App() {
@@ -38,12 +39,13 @@ export default function App() {
         if (parsed.features) {
           Object.keys(parsed.features).forEach(key => {
             const featureKey = key as FeatureKey;
-            // Only accept keys that actually exist in our app
             if (featureKey in features) {
-              features[featureKey] = !!parsed.features[featureKey];
+              features[featureKey] = parsed.features[featureKey] === true;
             }
           });
         }
+        
+        console.log('App: FinalMergedFeatures', features);
         
         // 2. Build feature order carefully
         const validKeys = AVAILABLE_FEATURES.map(f => f.id);
@@ -54,9 +56,16 @@ export default function App() {
         const missingKeys = validKeys.filter(key => !filteredOrder.includes(key));
         const finalOrder = [...filteredOrder, ...missingKeys];
 
+        // 3. Build bot quick actions
+        const savedBotActions = (parsed.botQuickActions || []) as string[];
+        const validBotActions = AVAILABLE_BOT_ACTIONS.map(a => a.id);
+        const finalBotActions = savedBotActions.filter(id => validBotActions.includes(id));
+        const botQuickActions = parsed.hasOwnProperty('botQuickActions') ? finalBotActions : INITIAL_CONFIG.botQuickActions;
+
         return {
           features,
-          featureOrder: finalOrder
+          featureOrder: finalOrder,
+          botQuickActions
         };
       } catch (e) {
         console.error('Failed to parse saved config', e);
