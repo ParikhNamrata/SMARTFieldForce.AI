@@ -44,12 +44,25 @@ export default function PortalDashboard({ config: deployedConfig, setConfig, onD
 
   // Real-time broadcast for live preview in other tabs/windows
   useEffect(() => {
-    const channel = new BroadcastChannel('smart_app_sync_channel');
-    // We only broadcast if we've initialized properly
-    if (draftConfig && draftConfig.features) {
-      channel.postMessage({ type: 'SYNC_CONFIG', config: draftConfig });
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('smart_app_sync_channel');
+      // We only broadcast if we've initialized properly
+      if (draftConfig && draftConfig.features) {
+        channel.postMessage({ type: 'SYNC_CONFIG', config: draftConfig });
+      }
+    } catch (e) {
+      console.warn('BroadcastChannel sync is restricted in this environment:', e);
     }
-    return () => channel.close();
+    return () => {
+      if (channel) {
+        try {
+          channel.close();
+        } catch (e) {
+          console.error('Failed to close BroadcastChannel in live preview:', e);
+        }
+      }
+    };
   }, [draftConfig]);
 
   const handleDeployWithFeedback = (config: AppConfig) => {

@@ -35,12 +35,12 @@ export interface Feature {
 }
 
 export const AVAILABLE_FEATURES: Feature[] = [
-  { id: 'predictiveBot', name: 'Predictive Bot', description: 'AI-driven task suggestions & quick completion', icon: 'Sparkles' },
-  { id: 'visionAutomation', name: 'Vision AI', description: 'Automatic SKU and stock extraction from photos', icon: 'Camera' },
+  { id: 'predictiveBot', name: 'Smart Bot', description: 'AI-driven task suggestions & quick completion', icon: 'Sparkles', mandatory: true },
+  { id: 'visionAutomation', name: 'Vision AI', description: 'Automatic SKU and stock extraction from photos', icon: 'Camera', mandatory: true },
   { id: 'voiceToText', name: 'Voice Command', description: 'Hands-free data entry and automation', icon: 'Mic' },
   { id: 'orderManagement', name: 'Order Pro', description: 'Restock and replenishment management', icon: 'ShoppingCart' },
   { id: 'quizModule', name: 'Field Quiz', description: 'On-site training and knowledge checks', icon: 'Zap' },
-  { id: 'salesInsights', name: 'Sales Tracker', description: 'Target vs achievement tracking', icon: 'BarChart' },
+  { id: 'salesInsights', name: 'Reports', description: 'Target vs achievement tracking', icon: 'BarChart', mandatory: true },
   { id: 'locationReporting', name: 'Smart Check-in', description: 'Geofenced location verification', icon: 'MapPin' },
   { id: 'trainingHub', name: 'Training Hub', description: 'Interactive learning and resource center', icon: 'BookOpen' },
   { id: 'routeOptimizer', name: 'Route Planner', description: 'AI-powered trip and distance optimization', icon: 'Navigation' },
@@ -50,10 +50,10 @@ export const AVAILABLE_FEATURES: Feature[] = [
 ];
 
 export const AVAILABLE_BOT_ACTIONS: BotQuickAction[] = [
-  { id: 'audit', label: 'Audit Check-in', icon: 'MapPin', prompt: 'Start the store audit' },
-  { id: 'stock', label: 'Stock Levels', icon: 'ShoppingCart', prompt: 'Show stock for Unilever Hub' },
-  { id: 'campaign', label: 'Campaign Info', icon: 'Zap', prompt: 'Tell me about the Monsoon campaign' },
-  { id: 'route', label: 'Next Stop', icon: 'Navigation', prompt: 'What is my next optimized stop?' },
-  { id: 'payout', label: 'Payout Status', icon: 'BarChart', prompt: 'Show my pending incentives' },
-  { id: 'learn', label: 'Product Manual', icon: 'BookOpen', prompt: 'Show manual for new Dove Soap' },
+  { id: 'audit', label: 'Store Check-in', icon: 'MapPin', prompt: 'Start the store check-in' },
+  { id: 'loc_checkin', label: 'Location Check-in', icon: 'MapPin', prompt: 'Location Check-in' },
+  { id: 'survey', label: 'Survey Question', icon: 'BookOpen', prompt: 'Survey Question' },
+  { id: 'promotion', label: 'Promotion', icon: 'Sparkles', prompt: 'Promotion' },
+  { id: 'ir_task', label: 'IR / Vision Audit', icon: 'Camera', prompt: 'IR Shelf Audit' },
+  { id: 'checkout', label: 'Location Checkout', icon: 'Zap', prompt: 'Location Checkout' },
 ];

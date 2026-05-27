@@ -31,7 +31,9 @@ import {
   UserCircle,
   Radar,
   Map,
-  ChevronRight
+  ChevronRight,
+  Check,
+  Lock
 } from 'lucide-react';
 import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
@@ -93,6 +95,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       }, 3000);
     }
   };
+  const [attendanceMarked, setAttendanceMarked] = useState(false);
+  const [checkInStep, setCheckInStep] = useState<'idle' | 'store_checked_in' | 'location_checked_in' | 'checked_out'>('idle');
+  const [completedStep2ActionIds, setCompletedStep2ActionIds] = useState<string[]>([]);
   const [visionStep, setVisionStep] = useState<VisionStep>('capture-board');
   const [skuCountInput, setSkuCountInput] = useState('');
   const [doveSkuCount, setDoveSkuCount] = useState<number | null>(null);
@@ -141,8 +146,72 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     // Initial bot sequence if it's the start
     let aiResponse = "";
-    if (userMsg.toLowerCase().includes('reporting') || userMsg.toLowerCase().includes('check-in')) {
-      aiResponse = "Welcome back! I'm ready for the store audit. First, please capture the Location/Shopboard photo to verify the hub details.";
+    const lowMsg = userMsg.toLowerCase().trim();
+
+    // Check if the message matches any of the Step 2 action prompts to mark it completed
+    const matchedStep2Id = (() => {
+      if (lowMsg.includes('location check-in') || lowMsg.includes('location checkin')) return 'loc_checkin';
+      if (lowMsg.includes('survey question') || lowMsg.includes('survey')) return 'survey';
+      if (lowMsg.includes('promotion check') || lowMsg.includes('promotion')) return 'promotion';
+      if (lowMsg.includes('ir shelf audit') || lowMsg.includes('ir task') || lowMsg.includes('vision audit') || lowMsg.includes('ir / vision') || lowMsg.includes('image recognition')) return 'ir_task';
+      return null;
+    })();
+
+    let currentCompleted = completedStep2ActionIds;
+    if (matchedStep2Id) {
+      if (!completedStep2ActionIds.includes(matchedStep2Id)) {
+        currentCompleted = [...completedStep2ActionIds, matchedStep2Id];
+        setCompletedStep2ActionIds(currentCompleted);
+      }
+    }
+    
+    if (lowMsg.includes('store check-in') || lowMsg.includes('store checkin') || lowMsg.includes('start the store check')) {
+      setAttendanceMarked(true);
+      setCheckInStep('store_checked_in');
+      setCompletedStep2ActionIds([]);
+      aiResponse = "✅ Attendance Marked! Store Check-in completed automatically for Unilever Elite Hub #442.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.";
+    } else if (lowMsg.includes('location check-in') || lowMsg.includes('location checkin')) {
+      setCheckInStep('location_checked_in');
+      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly.";
+    } else if (lowMsg.includes('survey question') || lowMsg.includes('survey')) {
+      aiResponse = "📋 [Survey Question] Store Display Audit: Are Unilever products placed prominently at eye-level on the main aisle?\n\n🤖 Recommendation: Yes, they are in primary slot. (Recorded: YES)";
+    } else if (lowMsg.includes('promotion check') || lowMsg.includes('promotion')) {
+      aiResponse = "🎁 [Promotion Status] Monsoon Buy-1-Get-1 offer display verified. The banner is active and correctly positioned at checkout counter.";
+    } else if (lowMsg.includes('ir shelf audit') || lowMsg.includes('ir task') || lowMsg.includes('vision audit') || lowMsg.includes('ir / vision') || lowMsg.includes('image recognition')) {
+      aiResponse = "🔍 Opening Vision AI / IR module to audit shelf photos...";
+      setTimeout(() => {
+        setActiveScreen('vision');
+        setVisionStep('capture-board');
+        setVisionResult(null);
+        setSkuCountInput('');
+        setContinuousCount(0);
+        setDoveSkuCount(null);
+      }, 1000);
+    } else if (lowMsg.includes('location checkout') || lowMsg.includes('checkout')) {
+      if (checkInStep === 'idle') {
+        aiResponse = "⚠️ Checkout is not available yet. Please complete Step 1: Store Check-in first to begin your visit.";
+      } else if (checkInStep === 'checked_out') {
+        aiResponse = "🚪 You have already completed your location checkout for this visit! If you would like to start a new visit, select the Store Check-in button.";
+      } else {
+        const activeStep2Ids = (config.botQuickActions || []).filter(id => id !== 'audit' && id !== 'checkout');
+        const uncompleted = activeStep2Ids.filter(id => !currentCompleted.includes(id));
+
+        if (uncompleted.length > 0) {
+          const remainingStr = uncompleted.map(id => {
+            const act = AVAILABLE_BOT_ACTIONS.find(a => a.id === id);
+            return `• ${act ? act.label : id}`;
+          }).join('\n');
+          aiResponse = `⚠️ Checkout Locked!\n\nPlease complete all Step 2 activities first before checking out.\n\nRemaining pending activities:\n${remainingStr}`;
+        } else {
+          setCheckInStep('checked_out');
+          aiResponse = "🚪 Location Checkout Complete! All survey and image recognition (IR) audit tasks have been synchronized. Thank you for finishing your visit at Unilever Elite Hub #442!";
+        }
+      }
+    } else if (userMsg.toLowerCase().includes('reporting') || userMsg.toLowerCase().includes('check-in')) {
+      setAttendanceMarked(true);
+      setCheckInStep('store_checked_in');
+      setCompletedStep2ActionIds([]);
+      aiResponse = "Welcome back! I'm ready for the store audit/check-in. First, click the Store Check-in button to mark your attendance and begin.";
     } else {
       aiResponse = await answerFieldQuery(userMsg);
     }
@@ -150,7 +219,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setChatMessages(prev => [...prev, { role: 'ai', text: aiResponse }]);
     
     // Check for audit-related patterns - Improved multi-brand detection
-    const lowMsg = userMsg.toLowerCase();
     const updates: any = {};
     const brands = ['dove', 'lux', 'lifebuoy', 'surf excel', 'pepsodent', 'ponds'];
     
@@ -181,16 +249,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   };
 
   const handleChipAction = (chip: { label: string, action: string }) => {
-    if (chip.label === 'Audit Check-in') {
-      setActiveScreen('vision');
-      setVisionStep('capture-board');
-      setVisionResult(null);
-      setSkuCountInput('');
-      setContinuousCount(0);
-      setDoveSkuCount(null);
-    } else {
-      handleSendMessage(chip.action);
-    }
+    handleSendMessage(chip.action);
   };
 
   const handleCaptureBoard = async () => {
@@ -250,6 +309,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setVisionResult(finalReport);
     setIsVisionProcessing(false);
     setVisionStep('result');
+    setCompletedStep2ActionIds(prev => prev.includes('ir_task') ? prev : [...prev, 'ir_task']);
 
     await dbService.saveInteraction({
       userId: 'field-user-1',
@@ -285,15 +345,73 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
   const predictiveChips = useMemo(() => {
     const enabledIds = config.botQuickActions || [];
-    return AVAILABLE_BOT_ACTIONS
-      .filter(action => enabledIds.includes(action.id))
-      .map(action => ({
-        label: action.label,
-        icon: iconMap[action.icon] ? React.cloneElement(iconMap[action.icon] as React.ReactElement, { className: "w-3 h-3" }) : <Zap className="w-3 h-3"/>,
-        action: action.prompt,
-        id: action.id
-      }));
-  }, [config.botQuickActions, iconMap]);
+
+    if (checkInStep === 'idle') {
+      // Force Store Check-in at the front if enabled
+      if (enabledIds.includes('audit')) {
+        return [{
+          label: 'Store Check-in',
+          icon: <MapPin className="w-3 h-3" />,
+          action: 'Start the store check-in',
+          id: 'audit',
+          isCompleted: false,
+          isDisabled: false
+        }];
+      }
+      return [];
+    }
+
+    if (checkInStep === 'checked_out') {
+      if (enabledIds.includes('audit')) {
+        return [{
+          label: 'Store Check-in',
+          icon: <MapPin className="w-3 h-3" />,
+          action: 'Start the store check-in',
+          id: 'audit',
+          isCompleted: false,
+          isDisabled: false
+        }];
+      }
+      return [];
+    }
+
+    // Checked in state (either 'store_checked_in' or 'location_checked_in')
+    // We want to list enabled step 2 actions.
+    const activeStep2Ids = enabledIds.filter(id => id !== 'audit' && id !== 'checkout');
+    
+    // Sort Step 2 items by original order in AVAILABLE_BOT_ACTIONS
+    const step2Chips = AVAILABLE_BOT_ACTIONS
+      .filter(action => activeStep2Ids.includes(action.id))
+      .map(action => {
+        const isCompleted = completedStep2ActionIds.includes(action.id);
+        return {
+          label: action.label,
+          icon: iconMap[action.icon] ? React.cloneElement(iconMap[action.icon] as React.ReactElement, { className: "w-3 h-3" }) : <Zap className="w-3 h-3" />,
+          action: action.prompt,
+          id: action.id,
+          isCompleted,
+          isDisabled: false
+        };
+      });
+
+    // Check if step 3 is enabled
+    const allStep2Completed = step2Chips.every(chip => chip.isCompleted);
+    const checkoutEnabled = step2Chips.length === 0 || allStep2Completed;
+
+    // Add checkout chip to the end if enabled in config
+    if (enabledIds.includes('checkout')) {
+      step2Chips.push({
+        label: 'Location Checkout',
+        icon: <X className="w-3 h-3" />,
+        action: 'Location Checkout',
+        id: 'checkout',
+        isCompleted: false,
+        isDisabled: !checkoutEnabled
+      });
+    }
+
+    return step2Chips;
+  }, [checkInStep, config.botQuickActions, completedStep2ActionIds, iconMap]);
 
   const enabledFeatures = useMemo(() => {
     if (!config || !config.features || !config.featureOrder) return [];
@@ -515,6 +633,32 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                      </div>
                   </div>
 
+                  {/* Attendance Verification Card */}
+                  <div className="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                        <div className={cn(
+                           "w-10 h-10 rounded-2xl flex items-center justify-center transition-all",
+                           attendanceMarked ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
+                        )}>
+                           <Activity className="w-5 h-5 animate-pulse" />
+                        </div>
+                        <div>
+                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Attendance Log</p>
+                           <p className={cn("text-xs font-black uppercase mt-1 leading-none text-slate-800")}>
+                              {attendanceMarked ? "Present / Active" : "Not Marked Yet"}
+                           </p>
+                        </div>
+                     </div>
+                     <span className={cn(
+                        "px-2.5 py-1 text-[8px] font-black uppercase tracking-wider rounded-full border transition-all",
+                        attendanceMarked 
+                          ? "bg-emerald-50/50 text-emerald-700 border-emerald-200" 
+                          : "bg-rose-50/50 text-rose-700 border-rose-200"
+                     )}>
+                        {attendanceMarked ? "Auto-verified" : "Tap Store Check-in"}
+                     </span>
+                  </div>
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between px-2">
                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quick Access</h4>
@@ -559,9 +703,77 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="flex flex-col h-full"
+                  className="flex flex-col h-full overflow-hidden"
                 >
-                  <div className="flex-1 p-4 space-y-4">
+                  {/* REAL-TIME VISIT STATUS PROGRESS INDICATOR */}
+                  {checkInStep !== 'idle' && (
+                    <div className="bg-white border-b border-slate-100 p-3 shrink-0 flex flex-col gap-2 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Visit Status Tracker</span>
+                        </div>
+                        <span className={cn(
+                          "text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider leading-none",
+                          checkInStep === 'checked_out' 
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+                            : "bg-blue-50 text-blue-700 border border-blue-200"
+                        )}>
+                          {checkInStep === 'checked_out' ? "Completed ✅" : "Active Visit 📍"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 text-[8px] font-black uppercase tracking-tight text-center">
+                        {/* Step 1 */}
+                        <div className="bg-slate-50 border border-slate-100/50 p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 text-slate-800">
+                          <span className="text-[7px] text-slate-400 font-bold border-b border-dashed border-slate-200 pb-0.5 mb-0.5 w-full">Step 1</span>
+                          <span className="flex items-center gap-0.5 text-emerald-600 font-black">
+                            Check-in <Check className="w-2.5 h-2.5 p-0" />
+                          </span>
+                        </div>
+
+                        {/* Step 2 (Tasks List) */}
+                        <div className="bg-slate-50 border border-slate-100/50 p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5">
+                          <span className="text-[7px] text-slate-400 font-bold border-b border-dashed border-slate-200 pb-0.5 mb-0.5 w-full">Step 2 (Tasks)</span>
+                          {(() => {
+                            const activeStep2Ids = (config.botQuickActions || []).filter(id => id !== 'audit' && id !== 'checkout');
+                            const totalCount = activeStep2Ids.length;
+                            if (totalCount === 0) {
+                              return <span className="text-slate-400 font-bold italic">No Tasks</span>;
+                            }
+                            const completedCount = activeStep2Ids.filter(id => completedStep2ActionIds.includes(id)).length;
+                            const isAllDone = completedCount === totalCount;
+                            return (
+                              <span className={cn("font-black flex items-center gap-0.5", isAllDone ? "text-emerald-600" : "text-blue-600")}>
+                                {completedCount}/{totalCount} Done {isAllDone && <Check className="w-2.5 h-2.5" />}
+                              </span>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Step 3 */}
+                        <div className="bg-slate-50 border border-slate-100/50 p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5">
+                          <span className="text-[7px] text-slate-400 font-bold border-b border-dashed border-slate-200 pb-0.5 mb-0.5 w-full">Step 3</span>
+                          {(() => {
+                            const activeStep2Ids = (config.botQuickActions || []).filter(id => id !== 'audit' && id !== 'checkout');
+                            const completedCount = activeStep2Ids.filter(id => completedStep2ActionIds.includes(id)).length;
+                            const isCheckoutReady = activeStep2Ids.length === 0 || completedCount === activeStep2Ids.length;
+                            
+                            if (checkInStep === 'checked_out') {
+                              return <span className="text-emerald-600 font-black flex items-center gap-0.5">Checked Out <Check className="w-2.5 h-2.5" /></span>;
+                            }
+                            return (
+                              <span className={cn("font-black flex items-center gap-0.5", isCheckoutReady ? "text-slate-700 animate-pulse" : "text-slate-350")}>
+                                {isCheckoutReady ? "Ready 🔓" : "Locked 🔒"}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex-1 p-4 space-y-4 overflow-y-auto no-scrollbar">
                     {chatMessages.length === 0 && (
                       <div className="py-10 flex flex-col items-center text-center space-y-4 opacity-40">
                          <div className="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center">
@@ -592,19 +804,47 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   </div>
 
                   {/* Quick Action Chips */}
-                  <div className="p-4 bg-white border-t border-slate-100/50">
+                  <div className="p-4 bg-white border-t border-slate-100/50 shrink-0">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Next Possible Actions</p>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                       {predictiveChips.map((chip) => (
-                         <button 
-                           key={chip.label}
-                           onClick={() => handleChipAction(chip)}
-                           className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5 whitespace-nowrap active:scale-95 transition-all"
-                         >
-                            <span className="text-blue-600">{chip.icon}</span>
-                            <span className="text-[10px] font-black text-slate-700">{chip.label}</span>
-                         </button>
-                       ))}
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                       {predictiveChips.map((chip) => {
+                         const isCompleted = (chip as any).isCompleted;
+                         const isDisabled = (chip as any).isDisabled;
+                         return (
+                           <button 
+                             key={chip.label}
+                             onClick={() => {
+                               if (isDisabled) {
+                                  handleSendMessage(chip.action); 
+                                  return;
+                               }
+                               handleChipAction(chip);
+                             }}
+                             className={cn(
+                               "flex items-center gap-1.5 rounded-full px-3 py-1.5 whitespace-nowrap transition-all border",
+                               isCompleted 
+                                 ? "bg-emerald-50 border-emerald-100 text-emerald-700 opacity-75" 
+                                 : isDisabled 
+                                   ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-50"
+                                   : "bg-slate-50 hover:bg-slate-100 border-slate-100 text-slate-700 active:scale-95"
+                             )}
+                           >
+                              {isCompleted ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : isDisabled ? (
+                                <Lock className="w-3 h-3 text-slate-400" />
+                              ) : (
+                                <span className="text-blue-600">{chip.icon}</span>
+                              )}
+                              <span className={cn(
+                                "text-[10px] font-black",
+                                isCompleted ? "text-emerald-800 line-through decoration-emerald-400" : isDisabled ? "text-slate-400" : "text-slate-700"
+                              )}>
+                                {chip.label}
+                              </span>
+                           </button>
+                         );
+                       })}
                     </div>
                   </div>
 

@@ -28,6 +28,7 @@ interface ConfiguratorProps {
 
 export default function Configurator({ config, setConfig, onDeploy }: ConfiguratorProps) {
   const toggleFeature = (feature: (typeof AVAILABLE_FEATURES)[0]) => {
+    if (feature.mandatory) return; // Prevent toggling mandatory features
     setConfig(prev => ({
       ...prev,
       features: {
@@ -42,8 +43,8 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
       const currentActions = prev.botQuickActions || [];
       const isCurrentlyEnabled = currentActions.includes(actionId);
       const newActions = isCurrentlyEnabled 
-        ? currentActions.filter(id => id !== actionId)
-        : [...currentActions, actionId];
+         ? currentActions.filter(id => id !== actionId)
+         : [...currentActions, actionId];
       return { ...prev, botQuickActions: newActions };
     });
   };
@@ -71,9 +72,10 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Configuration Controls */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Configuration Controls */}
+        <div className="lg:col-span-2 space-y-6">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -87,38 +89,56 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {AVAILABLE_FEATURES.map((feature) => (
-              <motion.button
-                key={feature.id}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => toggleFeature(feature)}
-                className={cn(
-                  "flex items-start gap-4 p-4 rounded-xl border text-left transition-all relative overflow-hidden",
-                  config.features[feature.id] 
-                    ? "bg-blue-50 border-blue-200 ring-2 ring-blue-500/10" 
-                    : "bg-white border-slate-200 hover:border-slate-300"
-                )}
-              >
-                <div className={cn(
-                  "p-2 rounded-lg shrink-0 transition-all",
-                  config.features[feature.id] ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-slate-100 text-slate-500"
-                )}>
-                  <div className="w-5 h-5 flex items-center justify-center font-bold">
-                    {iconMap[feature.icon] || <Zap className="w-4 h-4" />}
+            {AVAILABLE_FEATURES.map((feature) => {
+              const isMandatory = feature.mandatory;
+              return (
+                <motion.button
+                  key={feature.id}
+                  whileHover={{ scale: isMandatory ? 1 : 1.01 }}
+                  whileTap={{ scale: isMandatory ? 1 : 0.99 }}
+                  onClick={() => toggleFeature(feature)}
+                  className={cn(
+                    "flex items-start gap-4 p-4 rounded-xl border text-left transition-all relative overflow-hidden",
+                    config.features[feature.id] 
+                      ? "bg-blue-50 border-blue-200 ring-2 ring-blue-500/10" 
+                      : "bg-white border-slate-200 hover:border-slate-300",
+                    isMandatory && "cursor-default select-none border-blue-200 bg-slate-50/50"
+                  )}
+                >
+                  <div className={cn(
+                    "p-2 rounded-lg shrink-0 transition-all",
+                    config.features[feature.id] ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-slate-100 text-slate-500",
+                    isMandatory && "bg-slate-800 text-white shadow-none"
+                  )}>
+                    <div className="w-5 h-5 flex items-center justify-center font-bold">
+                      {iconMap[feature.icon] || <Zap className="w-4 h-4" />}
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-800 text-sm">{feature.name}</span>
-                    {config.features[feature.id] && <CheckCircle2 className="w-4 h-4 text-blue-600" />}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                        {feature.name}
+                        {isMandatory && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                            <Lock className="w-2.5 h-2.5 text-slate-500 inline-block" /> Fixed
+                          </span>
+                        )}
+                      </span>
+                      {config.features[feature.id] && (
+                        isMandatory ? (
+                          <Lock className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                        )
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1 leading-relaxed font-medium">
+                      {feature.description}
+                    </p>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-relaxed font-medium">
-                    {feature.description}
-                  </p>
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 
@@ -131,7 +151,7 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
             </div>
             <div className={cn(
               "px-3 py-1 text-[10px] font-black rounded-full border flex items-center gap-1 uppercase tracking-wider",
-              config.features.predictiveBot ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100"
+              config.features.predictiveBot ? "bg-emerald-50 text-emerald-800 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100"
             )}>
               <div className={cn("w-1.5 h-1.5 rounded-full", config.features.predictiveBot ? "bg-emerald-500" : "bg-slate-300")}></div>
               {config.features.predictiveBot ? "Module Active" : "Module Disabled"}
@@ -141,12 +161,25 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
           {!config.features.predictiveBot ? (
             <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <Zap className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Enable 'Predictive Bot' module to configure actions</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Enable 'Smart Bot' module to configure actions</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {AVAILABLE_BOT_ACTIONS.map((action) => {
                 const isEnabled = (config.botQuickActions || []).includes(action.id);
+                let stepBadge = "";
+                let stepColor = "";
+                if (action.id === 'audit') {
+                  stepBadge = "Step 1: Attendance";
+                  stepColor = "bg-emerald-50 text-emerald-800 border-emerald-100";
+                } else if (action.id === 'checkout') {
+                  stepBadge = "Step 3: Checkout";
+                  stepColor = "bg-rose-50 text-rose-800 border-rose-100";
+                } else {
+                  stepBadge = "Step 2: Activity";
+                  stepColor = "bg-blue-50 text-blue-800 border-blue-100";
+                }
+
                 return (
                   <motion.button
                     key={action.id}
@@ -154,14 +187,20 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
                     whileTap={{ scale: 0.98 }}
                     onClick={() => toggleBotAction(action.id)}
                     className={cn(
-                      "p-4 rounded-2xl border text-center transition-all flex flex-col items-center gap-2",
+                      "p-4 rounded-2xl border text-center transition-all flex flex-col items-center gap-2 relative pt-7",
                       isEnabled 
                         ? "bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-200" 
                         : "bg-white border-slate-200 text-slate-400 opacity-60 grayscale"
                     )}
                   >
+                    <span className={cn(
+                      "absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider border leading-none whitespace-nowrap",
+                      isEnabled ? "bg-white/10 text-white border-white/20" : stepColor
+                    )}>
+                      {stepBadge}
+                    </span>
                     <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                      "w-8 h-8 rounded-full flex items-center justify-center transition-colors mt-2",
                       isEnabled ? "bg-blue-500/20 text-blue-400" : "bg-slate-100 text-slate-400"
                     )}>
                       {iconMap[action.icon] || <Zap className="w-4 h-4" />}
@@ -218,16 +257,22 @@ export default function Configurator({ config, setConfig, onDeploy }: Configurat
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[2.5rem] shadow-xl shadow-blue-500/20 text-white">
-           <h4 className="font-black text-lg mb-1 uppercase tracking-widest opacity-80">Publish Changes</h4>
-           <p className="text-blue-100/80 text-[10px] mb-6 leading-relaxed font-semibold">Your modifications will be pushed live to all field agent apps globally.</p>
-           <button 
-             onClick={() => onDeploy(config)}
-             className="w-full py-4 bg-white text-blue-600 font-black rounded-xl text-xs uppercase tracking-[0.1em] hover:bg-blue-50 transition-all active:scale-[0.98] shadow-lg"
-           >
-              Deploy to Store
-           </button>
-        </div>
+      </div>
+
+    </div>
+
+      {/* Publish Changes Frame at Bottom */}
+      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[2rem] shadow-xl shadow-blue-500/20 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+         <div>
+            <h4 className="font-black text-lg mb-1 uppercase tracking-widest opacity-80">Publish Changes</h4>
+            <p className="text-blue-100/80 text-[10px] leading-relaxed font-semibold">Your modifications will be pushed live to all field agent apps globally.</p>
+         </div>
+         <button 
+           onClick={() => onDeploy(config)}
+           className="px-8 py-4 bg-white text-blue-600 font-black rounded-xl text-xs uppercase tracking-[0.1em] hover:bg-blue-50 transition-all active:scale-[0.98] shadow-lg shrink-0 w-full md:w-auto text-center"
+         >
+            Deploy to Store
+         </button>
       </div>
     </div>
   );

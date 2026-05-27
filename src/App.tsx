@@ -23,10 +23,20 @@ const INITIAL_CONFIG: AppConfig = {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('smartadmin_logged_in') === 'true';
+    try {
+      return localStorage.getItem('smartadmin_logged_in') === 'true';
+    } catch (e) {
+      console.warn('localStorage is restricted in this environment, defaulting to unauthenticated', e);
+      return false;
+    }
   });
   const [config, setConfig] = useState<AppConfig>(() => {
-    const savedConfig = localStorage.getItem('smart_app_config');
+    let savedConfig: string | null = null;
+    try {
+      savedConfig = localStorage.getItem('smart_app_config');
+    } catch (e) {
+      console.warn('localStorage is restricted in this environment, using INITIAL_CONFIG', e);
+    }
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
@@ -44,6 +54,13 @@ export default function App() {
             }
           });
         }
+
+        // Force mandatory features to be true
+        AVAILABLE_FEATURES.forEach(f => {
+          if (f.mandatory) {
+            features[f.id] = true;
+          }
+        });
         
         console.log('App: FinalMergedFeatures', features);
         
@@ -65,7 +82,7 @@ export default function App() {
         return {
           features,
           featureOrder: finalOrder,
-          botQuickActions
+          botQuickActions,
         };
       } catch (e) {
         console.error('Failed to parse saved config', e);
@@ -77,27 +94,32 @@ export default function App() {
 
   // Sync via BroadcastChannel (modern, reliable for same-tab iframes)
   useEffect(() => {
-    const channel = new BroadcastChannel('smart_app_sync_channel');
-    
-    const handleSync = (event: MessageEvent) => {
-      if (event.data.type === 'SYNC_CONFIG' && event.data.config) {
-        const newConfig = event.data.config;
-        
-        // Basic validation
-        if (newConfig.features && newConfig.featureOrder) {
-          setConfig(prev => {
-            // Prevent infinite broadcast loops by comparing strings
-            if (JSON.stringify(prev) !== JSON.stringify(newConfig)) {
-              console.log('App: Syncing config from broadcast', newConfig);
-              return { ...newConfig };
-            }
-            return prev;
-          });
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('smart_app_sync_channel');
+      
+      const handleSync = (event: MessageEvent) => {
+        if (event.data.type === 'SYNC_CONFIG' && event.data.config) {
+          const newConfig = event.data.config;
+          
+          // Basic validation
+          if (newConfig.features && newConfig.featureOrder) {
+            setConfig(prev => {
+              // Prevent infinite broadcast loops by comparing strings
+              if (JSON.stringify(prev) !== JSON.stringify(newConfig)) {
+                console.log('App: Syncing config from broadcast', newConfig);
+                return { ...newConfig };
+              }
+              return prev;
+            });
+          }
         }
-      }
-    };
+      };
 
-    channel.onmessage = handleSync;
+      channel.onmessage = handleSync;
+    } catch (e) {
+      console.warn('BroadcastChannel is restricted or unsupported in this environment:', e);
+    }
 
     // Standard storage listener for cross-tab sync
     const handleStorage = (e: StorageEvent) => {
@@ -123,16 +145,26 @@ export default function App() {
     window.addEventListener('storage', handleStorage);
     return () => {
       window.removeEventListener('storage', handleStorage);
-      channel.close();
+      if (channel) {
+        try {
+          channel.close();
+        } catch (e) {
+          console.error('Failed to close BroadcastChannel:', e);
+        }
+      }
     };
   }, []);
 
   const handleLogin = (status: boolean) => {
     setIsAuthenticated(status);
-    if (status) {
-      localStorage.setItem('smartadmin_logged_in', 'true');
-    } else {
-      localStorage.removeItem('smartadmin_logged_in');
+    try {
+      if (status) {
+        localStorage.setItem('smartadmin_logged_in', 'true');
+      } else {
+        localStorage.removeItem('smartadmin_logged_in');
+      }
+    } catch (e) {
+      console.warn('localStorage write/delete restricted during login/logout:', e);
     }
   };
 
@@ -141,14 +173,26 @@ export default function App() {
       console.log('App: Starting deployment...', newConfig);
       
       // 1. Persist to storage
-      localStorage.setItem('smart_app_config', JSON.stringify(newConfig));
+      try {
+        localStorage.setItem('smart_app_config', JSON.stringify(newConfig));
+      } catch (storageErr) {
+        console.warn('localStorage is restricted or full during deploy:', storageErr);
+      }
       
       // 2. Broadcast to other instances
-      const channel = new BroadcastChannel('smart_app_sync_channel');
-      channel.postMessage({ type: 'SYNC_CONFIG', config: newConfig });
-      
-      // Give a tiny moment for broadcast to go out before closing (though usually sync)
-      setTimeout(() => channel.close(), 100);
+      try {
+        const channel = new BroadcastChannel('smart_app_sync_channel');
+        channel.postMessage({ type: 'SYNC_CONFIG', config: newConfig });
+        
+        // Give a tiny moment for broadcast to go out before closing (though usually sync)
+        setTimeout(() => {
+          try {
+            channel.close();
+          } catch (e) {}
+        }, 100);
+      } catch (broadcastErr) {
+        console.warn('BroadcastChannel is restricted or failed during deploy:', broadcastErr);
+      }
 
       // 3. Update local state to trigger re-renders in current tab
       setConfig({ ...newConfig });
@@ -157,7 +201,7 @@ export default function App() {
       console.log('App: Deployment successful');
     } catch (error) {
       console.error('Deployment failed:', error);
-      alert('Failed to publish configuration. Please check the logs.');
+      // Removed alert() to prevent standard sandbox SecurityErrors
     }
   };
 

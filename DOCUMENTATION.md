@@ -27,7 +27,7 @@ AI-powered logistics to minimize travel distance and maximize visit frequency.
 *   **Optimized Routing**: Calculates the most efficient path between assigned outlets.
 *   **Smart Stops**: Real-time status tracking of scheduled visits.
 
-### 4. Sales Insights & Reporting
+### 4. Reports & Sales Insights
 Interactive data visualization for field performance.
 *   **Real-time Charts**: Tracks sales targets, visit completion rates, and market trends.
 *   **Customizable KPIs**: Admins can define which metrics are most critical for their team.
