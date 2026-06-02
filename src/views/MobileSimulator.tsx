@@ -56,6 +56,10 @@ type VisionStep =
   | 'continuous-audit'
   | 'result';
 
+const UNILEVER_SHOPBOARD_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%23f0f9ff" /><rect x="0" y="180" width="600" height="270" fill="%23f1f5f9" /><rect x="80" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="360" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="250" y="240" width="100" height="210" fill="%2394a3b8" opacity="0.15" rx="4" /><line x1="300" y1="240" x2="300" y2="450" stroke="%23cbd5e1" stroke-width="2" /><path d="M0 210 H600 M0 260 H600 M0 310 H600 M0 360 H600" stroke="%23e2e8f0" stroke-width="1.5" /><g transform="translate(50, 40)"><rect x="4" y="6" width="500" height="152" rx="16" fill="%230f172a" opacity="0.15" /><rect x="0" y="0" width="500" height="150" rx="16" fill="%230c2340" stroke="%230284c7" stroke-width="4" /><path d="M400 -20 C450 30 420 100 520 170" fill="none" stroke="%231e3a8a" stroke-width="24" opacity="0.5" stroke-linecap="round" /><path d="M420 -25 C470 25 440 90 540 160" fill="none" stroke="%233b82f6" stroke-width="12" opacity="0.25" stroke-linecap="round" /><g transform="translate(35, 25)"><path d="M10 15 C10 5, 20 2, 30 2 C40 2, 50 5, 50 15 C50 30, 30 40, 30 48" fill="none" stroke="%2338bdf8" stroke-width="6" stroke-linecap="round" /><path d="M16 18 C16 10, 23 8, 30 8 C37 8, 44 10, 44 18 C44 28, 30 36, 30 42" fill="none" stroke="%23ffffff" stroke-width="4.5" stroke-linecap="round" /><circle cx="30" cy="18" r="3.5" fill="%23fbbf24" /><circle cx="20" cy="28" r="3" fill="%23f87171" /><circle cx="40" cy="28" r="2.5" fill="%2334d399" /></g><text x="110" y="52" font-family="'Inter', sans-serif" font-weight="900" font-size="22" fill="%23ffffff" letter-spacing="1">UNILEVER ELITE HUB</text><text x="110" y="75" font-family="'Inter', sans-serif" font-weight="800" font-size="10" fill="%2338bdf8" letter-spacing="4">SMOLLAN PREFERRED OUTLET</text><rect x="110" y="93" width="135" height="24" rx="6" fill="%231e3a8a" stroke="%230284c7" stroke-width="1.5" /><text x="122" y="109" font-family="'JetBrains Mono', monospace" font-weight="900" font-size="9.5" fill="%23bae6fd">STOREID: %23442-B</text><rect x="255" y="93" width="135" height="24" rx="6" fill="%23064e3b" stroke="%23059669" stroke-width="1.5" /><text x="267" y="109" font-family="'Inter', sans-serif" font-weight="900" font-size="8.5" fill="%23a7f3d0">GPS LOC: MATCHED</text><circle cx="445" cy="105" r="14" fill="%2310b981" /><path d="M439 105 L443 109 L451 101" fill="none" stroke="%23ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></g></svg>`;
+
+const UNILEVER_SKUS_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%230f172a" /><rect x="0" y="140" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="280" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="420" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="155" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><rect x="0" y="295" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><g transform="translate(30, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(115, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(200, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(280, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(365, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g transform="translate(30, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(120, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(210, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(300, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(30, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(115, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(200, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g opacity="0.85"><rect x="25" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 99%</text><rect x="110" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="113" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 98%</text><rect x="195" y="15" width="75" height="120" fill="none" stroke="%233b82f6" stroke-width="1.5" /><text x="198" y="11" font-family="'JetBrains Mono', monospace" font-size="6" fill="%233b82f6" font-weight="950">DOVE_SHMP: 97%</text><rect x="25" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 96%</text><rect x="115" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="118" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 95%</text><rect x="205" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="208" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 99%</text><rect x="295" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="298" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 97%</text></g></svg>`;
+
 export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeScreen, setActiveScreen] = useState<Screen>('home');
@@ -96,14 +100,46 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     }
   };
   const [attendanceMarked, setAttendanceMarked] = useState(false);
+  const [attendanceAutoMarkedAlert, setAttendanceAutoMarkedAlert] = useState(false);
   const [checkInStep, setCheckInStep] = useState<'idle' | 'store_checked_in' | 'location_checked_in' | 'checked_out'>('idle');
   const [completedStep2ActionIds, setCompletedStep2ActionIds] = useState<string[]>([]);
+
+  const ensureAttendanceMarked = (source: string) => {
+    if (!attendanceMarked) {
+      setAttendanceMarked(true);
+      setCheckInStep('store_checked_in');
+      setCompletedStep2ActionIds([]);
+      setAttendanceAutoMarkedAlert(true);
+      setTimeout(() => {
+        setAttendanceAutoMarkedAlert(false);
+      }, 5000);
+
+      dbService.saveInteraction({
+        userId: 'field-user-1',
+        type: 'chat',
+        content: { message: "[System Check-in]", response: `✅ Attendance Marked automatically via Vision AI photo of ${source}!` },
+        summary: `Attendance: Auto-marked via Vision AI`
+      });
+      setLogs(dbService.getLogs());
+
+      setChatMessages(prev => [...prev, {
+        role: 'ai',
+        text: `⚡ [Vision AI Auto-Check-in] Attendance marked automatically! Photo of ${source} verified. Your visit status is now ACTIVE.`,
+        imageUrl: UNILEVER_SHOPBOARD_SVG
+      }]);
+    }
+  };
   const [visionStep, setVisionStep] = useState<VisionStep>('capture-board');
   const [skuCountInput, setSkuCountInput] = useState('');
   const [doveSkuCount, setDoveSkuCount] = useState<number | null>(null);
   const [continuousCount, setContinuousCount] = useState(0);
   const [auditData, setAuditData] = useState<any>(null);
-  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'ai', text: string}[]>([]);
+  const [visionShopboardUrl, setVisionShopboardUrl] = useState<string | null>(null);
+  const [visionSkuImageUrl, setVisionSkuImageUrl] = useState<string | null>(null);
+  const [detectedSkuCount, setDetectedSkuCount] = useState<number | null>(null);
+  const [isCountingSku, setIsCountingSku] = useState(false);
+  const [isVerifyingShopboard, setIsVerifyingShopboard] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'ai', text: string, imageUrl?: string}[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -111,10 +147,29 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [visionResult, setVisionResult] = useState<any>(null);
   const [logs, setLogs] = useState<InteractionLog[]>([]);
 
+  // Interactive Camera verification flow states
+  const [isBotCameraOpen, setIsBotCameraOpen] = useState(false);
+  const [isVisionCameraActive, setIsVisionCameraActive] = useState(false);
+  const [cameraPurpose, setCameraPurpose] = useState<'bot-loc' | 'vision-loc' | null>(null);
+  const [cameraState, setCameraState] = useState<'idle' | 'snapping' | 'verifying'>('idle');
+  const [cameraWatermarkOpacity, setCameraWatermarkOpacity] = useState<number>(0.3);
+  const [cameraStep, setCameraStep] = useState<'shopboard' | 'allSkus'>('shopboard');
+
+  const openCamera = (purpose: 'bot-loc' | 'vision-loc', step: 'shopboard' | 'allSkus' = 'shopboard') => {
+    setCameraPurpose(purpose);
+    setCameraStep(step);
+    setCameraState('idle');
+    if (purpose === 'bot-loc') {
+      setIsBotCameraOpen(true);
+    } else {
+      setIsVisionCameraActive(true);
+    }
+  };
+
   // Field Specific Imagery
   const FIELD_IMAGES = {
-    shopboard: "https://images.unsplash.com/photo-1542310503-705ca612e96d?auto=format&fit=crop&q=80&w=600", // Store front/board
-    allSkus: "https://images.unsplash.com/photo-1540340334550-80151c76171b?auto=format&fit=crop&q=80&w=600", // Grocery shelf
+    shopboard: UNILEVER_SHOPBOARD_SVG, // Store front/board
+    allSkus: "/src/assets/images/unilever_sku_shelf_1779994527047.png", // Grocery shelf
     doveShelf: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600", // Beauty/Dove-like shelf
     planogram: "https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80&w=600" // Organized retail
   };
@@ -146,6 +201,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     // Initial bot sequence if it's the start
     let aiResponse = "";
+    let aiImageUrl: string | undefined = undefined;
     const lowMsg = userMsg.toLowerCase().trim();
 
     // Check if the message matches any of the Step 2 action prompts to mark it completed
@@ -171,8 +227,14 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setCompletedStep2ActionIds([]);
       aiResponse = "✅ Attendance Marked! Store Check-in completed automatically for Unilever Elite Hub #442.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.";
     } else if (lowMsg.includes('location check-in') || lowMsg.includes('location checkin')) {
+      if (!isBotCameraOpen && checkInStep !== 'location_checked_in' && cameraPurpose !== 'bot-loc') {
+        openCamera('bot-loc');
+        setIsAiLoading(false);
+        return;
+      }
       setCheckInStep('location_checked_in');
-      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly.";
+      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly. Verified store board photo below:";
+      aiImageUrl = UNILEVER_SHOPBOARD_SVG;
     } else if (lowMsg.includes('survey question') || lowMsg.includes('survey')) {
       aiResponse = "📋 [Survey Question] Store Display Audit: Are Unilever products placed prominently at eye-level on the main aisle?\n\n🤖 Recommendation: Yes, they are in primary slot. (Recorded: YES)";
     } else if (lowMsg.includes('promotion check') || lowMsg.includes('promotion')) {
@@ -216,7 +278,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       aiResponse = await answerFieldQuery(userMsg);
     }
 
-    setChatMessages(prev => [...prev, { role: 'ai', text: aiResponse }]);
+    setChatMessages(prev => [...prev, { role: 'ai', text: aiResponse, imageUrl: aiImageUrl }]);
     
     // Check for audit-related patterns - Improved multi-brand detection
     const updates: any = {};
@@ -248,11 +310,105 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setLogs(dbService.getLogs());
   };
 
-  const handleChipAction = (chip: { label: string, action: string }) => {
+  const handleChipAction = (chip: { label: string, action: string, id?: string }) => {
+    if (chip.id === 'loc_checkin') {
+      openCamera('bot-loc');
+      return;
+    }
     handleSendMessage(chip.action);
   };
 
+  const handleShutterClick = async () => {
+    setCameraState('snapping');
+    await new Promise(r => setTimeout(r, 250));
+    setCameraState('verifying');
+    await new Promise(r => setTimeout(r, 2200));
+
+    if (cameraPurpose === 'bot-loc') {
+      if (cameraStep === 'shopboard') {
+        setCameraStep('allSkus');
+        setCameraState('idle');
+        return;
+      }
+
+      setIsBotCameraOpen(false);
+      setCheckInStep('location_checked_in');
+      setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
+      
+      setChatMessages(prev => [
+        ...prev,
+        {
+          role: 'user',
+          text: '📍 Completed Location Check-in & Shelf SKU audit!'
+        },
+        {
+          role: 'ai',
+          text: "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly. Verified store board photo below:",
+          imageUrl: FIELD_IMAGES.shopboard
+        },
+        {
+          role: 'ai',
+          text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf! Verification 100% complete.`,
+          imageUrl: FIELD_IMAGES.allSkus
+        }
+      ]);
+
+      dbService.saveInteraction({
+        userId: 'field-user-1',
+        type: 'chat',
+        content: { 
+          message: 'Location Check-in via Camera & SKU Count', 
+          response: `📍 Location Check-in completed. GPS coordinates matches. Checked storefront and counted ${sampleVisionData.skus} display SKUs.` 
+        },
+        summary: 'Check-in: Storefront & SKU Verified'
+      });
+      setLogs(dbService.getLogs());
+
+    } else if (cameraPurpose === 'vision-loc') {
+      setIsVisionCameraActive(false);
+      ensureAttendanceMarked("Shop board SKU");
+      
+      if (cameraStep === 'shopboard') {
+        setVisionShopboardUrl(FIELD_IMAGES.shopboard);
+        setChatMessages(prev => [
+          ...prev, 
+          { 
+            role: 'ai', 
+            text: `Shopboard verified: ${sampleVisionData.storeName} at ${sampleVisionData.location}. Storefront board photo matched successfully.` 
+          }
+        ]);
+      } else if (cameraStep === 'allSkus') {
+        setVisionSkuImageUrl(FIELD_IMAGES.allSkus);
+        setDetectedSkuCount(sampleVisionData.skus);
+        
+        setChatMessages(prev => [
+          ...prev, 
+          { 
+            role: 'ai', 
+            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf! Verification 100% complete.` 
+          }
+        ]);
+        
+        dbService.saveInteraction({
+          userId: 'field-user-1',
+          type: 'chat',
+          content: { 
+            message: 'Camera SKU Count', 
+            response: `Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf during IR audit.` 
+          },
+          summary: 'SKU Count Output'
+        });
+        setLogs(dbService.getLogs());
+      }
+    }
+
+    setCameraPurpose(null);
+    setCameraState('idle');
+    setCameraStep('shopboard');
+  };
+
   const handleCaptureBoard = async () => {
+    ensureAttendanceMarked("Shop board SKU");
     setVisionStep('fetching-skus');
     await new Promise(r => setTimeout(r, 2000));
     setSkuCountInput(sampleVisionData.skus.toString());
@@ -264,7 +420,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     }]);
   };
 
+  const handleAnalyzeAllSkus = () => {
+    ensureAttendanceMarked("Actual Store Shelf SKUs");
+    setVisionStep('capture-dove');
+  };
+
   const handleCaptureDove = async () => {
+    ensureAttendanceMarked("Dove Shelf SKU");
     setVisionStep('fetching-dove');
     await new Promise(r => setTimeout(r, 2000));
     setDoveSkuCount(24);
@@ -277,6 +439,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   };
 
   const handleContinuousPhoto = async () => {
+    ensureAttendanceMarked("Deep Scan Shelf SKU");
     setContinuousCount(prev => prev + 1);
     if (continuousCount >= 2) {
        handleProcessVision();
@@ -450,6 +613,26 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
         {/* Dynamic Content Area */}
         <div className="flex-1 overflow-hidden relative bg-slate-50 flex flex-col">
+          {/* Attendance Auto-Marked Alert Toast */}
+          <AnimatePresence>
+            {attendanceAutoMarkedAlert && (
+              <motion.div 
+                 initial={{ opacity: 0, y: -50, scale: 0.95 }}
+                 animate={{ opacity: 1, y: 12, scale: 1 }}
+                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                 className="absolute top-0 inset-x-3 bg-emerald-600 text-white p-3 rounded-2xl z-[1000] shadow-xl flex items-center gap-2.5 border border-emerald-500"
+              >
+                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4 text-white" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-wider leading-none">Auto Checked In 📍</p>
+                    <p className="text-[8px] font-bold text-emerald-100 mt-0.5 leading-tight">Attendance marked automatically via SKU Recognition!</p>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Header */}
           <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 justify-between shrink-0">
              <div className="flex items-center gap-3">
@@ -787,12 +970,28 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     )}
                     {chatMessages.map((msg, i) => (
                       <div key={i} className={cn(
-                        "max-w-[85%] p-3 rounded-2xl text-[11px] font-bold leading-relaxed shadow-sm",
+                        "max-w-[85%] p-3 rounded-2xl text-[11px] font-bold leading-relaxed shadow-sm space-y-2",
                         msg.role === 'user' 
                           ? "bg-blue-600 text-white ml-auto rounded-tr-none" 
                           : "bg-white text-slate-700 border border-slate-100 mr-auto rounded-tl-none"
                       )}>
-                        {msg.text}
+                        <div>{msg.text}</div>
+                        {msg.imageUrl && (
+                          <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 relative group">
+                            <img 
+                              src={msg.imageUrl} 
+                              alt="Verified Check-in Photo" 
+                              className="w-full h-28 object-cover object-center"
+                              referrerPolicy="no-referrer"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-slate-950/70 p-1.5 flex items-center justify-between text-[8px] text-white">
+                              <span className="font-extrabold uppercase tracking-widest flex items-center gap-1">
+                                <MapPin className="w-2.5 h-2.5 text-blue-400" /> Bandra, Mumbai
+                              </span>
+                              <span className="bg-emerald-500 px-1.5 py-0.5 rounded text-[7px] font-black uppercase">Verified 100%</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                     {isAiLoading && (
@@ -890,311 +1089,219 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full flex flex-col pt-4 px-4 space-y-4"
+                  className="h-full flex flex-col pt-3 px-4 pb-20 overflow-y-auto no-scrollbar space-y-5"
                 >
-                   {/* Step progress */}
-                   <div className="flex gap-1">
-                      {['capture-board', 'fetching-skus', 'sku-question', 'capture-skus', 'capture-dove', 'continuous-audit', 'result'].map((s, i) => (
-                        <div key={s} className={cn(
-                          "h-1 flex-1 rounded-full transition-colors",
-                          visionStep === s || (visionStep === 'fetching-dove' && s === 'capture-dove') || (['fetching-skus', 'sku-question', 'capture-skus', 'capture-dove', 'fetching-dove', 'continuous-audit', 'result'].includes(visionStep) && i < ['capture-board', 'fetching-skus', 'sku-question', 'capture-skus', 'capture-dove', 'continuous-audit', 'result'].indexOf(visionStep))
-                            ? "bg-blue-600" 
-                            : "bg-slate-200"
-                        )} />
-                      ))}
-                   </div>
+                  <div className="text-center space-y-1">
+                    <h2 className="text-sm font-black uppercase text-slate-800 tracking-wider flex items-center justify-center gap-1.5 leading-none">
+                      <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
+                      Vision AI Retail Audit
+                    </h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                      Real-time IR Recognition & SKU Verification
+                    </p>
+                  </div>
 
-                   {visionStep === 'capture-board' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <img 
-                              src={FIELD_IMAGES.shopboard} 
-                              alt="Store Front" 
-                              className="w-full h-full object-cover opacity-70"
-                           />
-                           <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-slate-950 text-white">
-                              <p className="text-xs font-black uppercase tracking-widest">Step 1: Location Check-in</p>
-                              <p className="text-[10px] font-bold text-white/60">Capture shop board for store details</p>
-                           </div>
-                        </div>
-                        <button 
-                          onClick={handleCaptureBoard}
-                          className="w-full py-4 bg-blue-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
-                        >
-                           <Camera className="w-4 h-4" />
-                           Take Shop Board Photo
-                        </button>
-                     </div>
-                   )}
+                  {/* STEP 1: Storefront Check-in Viewfinder & Shop Board Photo */}
+                  <div className="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">1</span>
+                        <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Storefront Check-in</h3>
+                      </div>
+                      {visionShopboardUrl ? (
+                        <span className="bg-emerald-500/10 text-emerald-600 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1 border border-emerald-500/15">
+                          <Check className="w-2.5 h-2.5" /> GEOFENCE MATCHED
+                        </span>
+                      ) : (
+                        <span className="bg-blue-50/50 text-blue-500 px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border border-blue-100">
+                          PENDING CAPTURE
+                        </span>
+                      )}
+                    </div>
 
-                   {visionStep === 'fetching-skus' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <img 
-                              src={FIELD_IMAGES.shopboard} 
-                              alt="Store Front" 
-                              className="w-full h-full object-cover opacity-30"
-                           />
-                           <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-4">
-                              <motion.div 
-                                animate={{ rotate: 360 }}
-                                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                                className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full flex items-center justify-center"
-                              />
-                              <div className="text-center">
-                                 <p className="text-[10px] font-black uppercase tracking-[0.2em]">Store Recognition</p>
-                                 <p className="text-[8px] font-bold opacity-50 uppercase">Identifying Smollan Hub...</p>
-                              </div>
-                           </div>
-                        </div>
-                        <div className="w-full py-4 bg-slate-800 text-white/50 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-                           <Loader2 className="w-4 h-4 animate-spin" />
-                           Analyzing Location...
-                        </div>
-                     </div>
-                   )}
+                    {/* Viewfinder Cam Feed */}
+                    <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 group shadow-inner">
+                      <img 
+                        src={FIELD_IMAGES.shopboard} 
+                        alt="Unilever Shop Board Live Feed" 
+                        className={cn(
+                          "w-full h-full object-cover transition-all duration-305",
+                          visionShopboardUrl ? "opacity-100 scale-100" : "opacity-40 scale-105"
+                        )}
+                        referrerPolicy="no-referrer"
+                      />
+                      
+                      {/* Scan / Align Grid Overlay */}
+                      {!visionShopboardUrl && (
+                        <>
+                          <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
+                          <div className="absolute inset-2 border border-white/10 rounded-xl pointer-events-none flex items-center justify-center">
+                            <div className="w-6 h-0.5 bg-blue-500/50" />
+                            <div className="h-6 w-0.5 bg-blue-500/50 absolute" />
+                            <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-blue-500/60" />
+                            <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-blue-500/60" />
+                            <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-blue-500/60" />
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-blue-500/60" />
+                          </div>
+                          {/* Active sweeping laser */}
+                          <motion.div 
+                            animate={{ y: ['0%', '100%', '0%'] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                            className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500/80 to-transparent shadow-[0_0_8px_#3b82f6] opacity-70"
+                          />
+                        </>
+                      )}
+                      
+                      <div className="absolute bottom-3 left-3 bg-slate-900/90 text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-white/10 text-white leading-none">
+                        {visionShopboardUrl ? "Captured Storefront" : "Camera Viewfinder"}
+                      </div>
+                    </div>
 
-                   {visionStep === 'sku-question' && (
-                     <div className="flex flex-col space-y-6 pt-10">
-                        <div className="w-16 h-16 rounded-[2rem] bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                           <ClipboardList className="w-8 h-8 text-blue-600" />
-                        </div>
-                        <div className="text-center space-y-2">
-                           <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">AI Bot Suggestion</h3>
-                           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">How many SKUs are available in shelf category A?</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                           <input 
-                             type="number" 
-                             value={skuCountInput}
-                             onChange={(e) => setSkuCountInput(e.target.value)}
-                             placeholder="Detected SKUs: 142"
-                             className="w-full bg-slate-50 border-none outline-none p-4 rounded-2xl text-center text-xl font-black text-slate-800"
-                           />
-                        </div>
-                        <button 
-                          onClick={() => setVisionStep('capture-skus')}
-                          disabled={!skuCountInput}
-                          className="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all disabled:opacity-50"
-                        >
-                           Next: All SKUs Photo
-                        </button>
-                     </div>
-                   )}
+                    {/* Shop Board Capture Button */}
+                    <button 
+                      onClick={() => openCamera('vision-loc', 'shopboard')}
+                      className={cn(
+                        "w-full py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white",
+                        visionShopboardUrl ? "bg-slate-800" : "bg-blue-600"
+                      )}
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      {visionShopboardUrl ? "Re-take Shop Board Photo" : "Take Shop Board Photo"}
+                    </button>
 
-                   {visionStep === 'capture-skus' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <img 
-                              src={FIELD_IMAGES.allSkus} 
-                              alt="Store Shelves" 
-                              className="w-full h-full object-cover opacity-70"
-                           />
-                           <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-slate-950 text-white">
-                              <p className="text-xs font-black uppercase tracking-widest">Step 3: SKU Analysis</p>
-                              <p className="text-[10px] font-bold text-white/60">Bot: Capture all units on display</p>
-                           </div>
-                        </div>
-                        <button 
-                          onClick={() => setVisionStep('capture-dove')}
-                          className="w-full py-4 bg-blue-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
-                        >
-                           <Camera className="w-4 h-4" />
-                           Analyze All SKUs
-                        </button>
-                     </div>
-                   )}
+                    {visionShopboardUrl && (
+                      <div className="bg-slate-50 border border-slate-100 p-2.5 rounded-xl space-y-1 text-slate-600 font-mono text-[8px]">
+                        <p className="flex items-center gap-1.5"><span className="text-emerald-500">✔</span> Store Name: <b>{sampleVisionData.storeName}</b></p>
+                        <p className="flex items-center gap-1.5"><span className="text-emerald-500">✔</span> Coordinates Match: <b>100% Verified (Bandra West)</b></p>
+                      </div>
+                    )}
+                  </div>
 
-                   {visionStep === 'capture-dove' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <img 
-                              src={FIELD_IMAGES.doveShelf} 
-                              alt="Dove Shelf" 
-                              className="w-full h-full object-cover opacity-70"
-                           />
-                           <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-slate-950 text-white">
-                              <p className="text-xs font-black uppercase tracking-widest">Step 4: Priority Display</p>
-                              <p className="text-[10px] font-bold text-white/60">Bot: Analyze Dove Shelf specifically</p>
-                           </div>
-                        </div>
-                        <button 
-                          onClick={handleCaptureDove}
-                          className="w-full py-4 bg-blue-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
-                        >
-                           <Camera className="w-4 h-4" />
-                           Check Dove Priority
-                        </button>
-                     </div>
-                   )}
+                  {/* STEP 2: Unilever SKU Audit and SKU photo */}
+                  <div className={cn(
+                    "bg-white rounded-[2rem] p-4 border shadow-sm space-y-3 transition-opacity duration-300",
+                    visionShopboardUrl ? "opacity-100 border-slate-100" : "opacity-50 border-slate-100 pointer-events-none"
+                  )}>
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">2</span>
+                        <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Unilever SKU Image</h3>
+                      </div>
+                      {detectedSkuCount !== null ? (
+                        <span className="bg-emerald-500/10 text-emerald-600 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1 border border-emerald-500/15">
+                          <Check className="w-2.5 h-2.5" /> AUDITED
+                        </span>
+                      ) : (
+                        <span className="bg-slate-50 text-slate-400 px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border border-slate-100">
+                          {visionShopboardUrl ? "WAITING FOR SNAP" : "LOCKED"}
+                        </span>
+                      )}
+                    </div>
 
-                   {visionStep === 'fetching-dove' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-4">
-                              <motion.div 
-                                animate={{ rotate: 360 }}
-                                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                                className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full flex items-center justify-center"
-                              />
-                              <div className="text-center">
-                                 <p className="text-[10px] font-black uppercase tracking-[0.2em]">Dove Analysis</p>
-                                 <p className="text-[8px] font-bold opacity-50 uppercase">Detecting Dove SKUs...</p>
-                              </div>
-                           </div>
-                        </div>
-                        <div className="w-full py-4 bg-slate-800 text-white/50 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-                           <Loader2 className="w-4 h-4 animate-spin" />
-                           Processing Dove Shelf...
-                        </div>
-                     </div>
-                   )}
+                    {/* Viewfinder Sku Feed */}
+                    <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 shadow-inner">
+                      <img 
+                        src={FIELD_IMAGES.allSkus} 
+                        alt="Unilever SKUs Shelf" 
+                        className={cn(
+                          "w-full h-full object-cover transition-all duration-305",
+                          visionSkuImageUrl ? "opacity-100 scale-100" : "opacity-35 scale-105"
+                        )}
+                        referrerPolicy="no-referrer"
+                      />
+                      
+                      {!visionSkuImageUrl && (
+                        <>
+                          <div className="absolute inset-0 bg-black/15" />
+                          <div className="absolute inset-2 border border-white/10 rounded-xl pointer-events-none flex items-center justify-center">
+                            <div className="w-6 h-0.5 bg-blue-500/40" />
+                            <div className="h-6 w-0.5 bg-blue-500/40 absolute" />
+                          </div>
+                        </>
+                      )}
 
-                   {visionStep === 'continuous-audit' && (
-                     <div className="flex flex-col space-y-4">
-                        <div className="aspect-square bg-slate-900 rounded-[2.5rem] relative overflow-hidden border-4 border-white shadow-2xl">
-                           <img 
-                             src={FIELD_IMAGES.planogram} 
-                             alt="Planogram View" 
-                             className="w-full h-full object-cover opacity-40"
-                           />
-                           <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-10 text-center">
-                              <div className="w-16 h-16 rounded-[2rem] bg-white/20 flex items-center justify-center mb-4">
-                                 <Scan className="w-8 h-8" />
-                              </div>
-                              <p className="text-xs font-black uppercase tracking-[0.2em]">Deep Vision Audit</p>
-                              <p className="text-[10px] font-bold text-white/60">Scan entire shelf for Planogram Compliance & Future Prediction.</p>
-                              <div className="flex gap-2 mt-6">
-                                 {[1, 2, 3].map(i => (
-                                   <div key={i} className={cn(
-                                     "w-3 h-3 rounded-full border-2 border-white/30",
-                                     continuousCount >= i ? "bg-emerald-500 border-emerald-500" : ""
-                                   )} />
-                                 ))}
-                              </div>
-                           </div>
-                        </div>
-                        <button 
-                          onClick={handleContinuousPhoto}
-                          className="w-full py-4 bg-emerald-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
-                        >
-                           <Camera className="w-4 h-4" />
-                           Deep Scan ({continuousCount}/3)
-                        </button>
-                     </div>
-                   )}
+                      <div className="absolute bottom-3 left-3 bg-slate-900/90 text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-white/10 text-white leading-none">
+                        Unilever Shelf Image
+                      </div>
+                    </div>
 
-                   {visionStep === 'result' && visionResult && (
-                     <div className="flex flex-col h-full overflow-y-auto no-scrollbar space-y-4 pb-10">
-                        <div className="aspect-video bg-slate-900 rounded-[2rem] relative overflow-hidden border-4 border-white shadow-xl shrink-0">
-                           <img 
-                             src={FIELD_IMAGES.allSkus} 
-                             alt="Analyzed"
-                             className="w-full h-full object-cover"
-                           />
-                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent p-4 flex flex-col justify-end">
-                              <div className="flex gap-2">
-                                 <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tight">Dove Detected: {visionResult.doveCount}</span>
-                                 <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tight">Total SKUs: {visionResult.skus}</span>
-                              </div>
-                           </div>
-                        </div>
-                        
-                        <motion.div 
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          className="space-y-4"
-                        >
-                           <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm space-y-4">
-                              <div className="flex items-center justify-between border-b border-slate-50 pb-2">
-                                 <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Audit Analytics</h4>
-                                 <span className="text-[8px] font-bold text-blue-600 uppercase">AI High Confidence</span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                 <div className="space-y-1">
-                                    <p className="text-[7px] font-black text-slate-400 uppercase">Input Count</p>
-                                    <p className="text-lg font-black text-slate-800">{skuCountInput}</p>
-                                 </div>
-                                 <div className="space-y-1">
-                                    <p className="text-[7px] font-black text-slate-400 uppercase">AI Detected</p>
-                                    <p className="text-lg font-black text-blue-600">{visionResult.skus}</p>
-                                 </div>
-                              </div>
-                              <div className="pt-2">
-                                 <p className="text-[7px] font-black text-slate-400 uppercase mb-2">Detailed Observations</p>
-                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-[9px] font-bold text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-100">
-                                       <X className="w-3 h-3" />
-                                       {visionResult.planogramStatus}
-                                    </div>
-                                    <div className="bg-slate-50 p-3 rounded-xl space-y-2">
-                                       <p className="text-[8px] font-black text-slate-400 uppercase">Detection Summary</p>
-                                       <div className="grid grid-cols-2 gap-2">
-                                          {Object.entries(visionResult.brands || {}).map(([name, count]) => (
-                                            <div key={name} className="bg-white p-2 rounded-lg border border-slate-100 flex justify-between items-center">
-                                               <span className="text-[8px] font-bold text-slate-500 uppercase">{name}</span>
-                                               <span className="text-[10px] font-black text-slate-800">{count as any}</span>
-                                            </div>
-                                          ))}
-                                       </div>
-                                       <div className="pt-2">
-                                          <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Missing SKUs</p>
-                                          <div className="flex flex-wrap gap-1">
-                                             {visionResult.missingSkus.map((s: string) => (
-                                               <span key={s} className="bg-white px-1.5 py-0.5 rounded text-[8px] font-bold text-slate-600 border border-slate-100">{s}</span>
-                                             ))}
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
+                    {/* Sku Image Capture Button */}
+                    <button 
+                      onClick={() => openCamera('vision-loc', 'allSkus')}
+                      className={cn(
+                        "w-full py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white",
+                        detectedSkuCount !== null ? "bg-slate-800" : "bg-blue-600"
+                      )}
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      {detectedSkuCount !== null ? "Re-take SKU Image" : "Take SKU Image"}
+                    </button>
 
-                           <div className="bg-slate-900 rounded-[2rem] p-5 text-white shadow-xl">
-                              <div className="flex items-center gap-2 mb-2">
-                                 <Sparkles className="w-3 h-3 text-blue-400" />
-                                 <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">AI Future Prediction</span>
-                              </div>
-                              <p className="text-[10px] font-bold leading-relaxed">{visionResult.prediction}</p>
-                           </div>
-
-                           <button 
-                             onClick={() => {
-                               setVisionStep('capture-board');
-                               setSkuCountInput('');
-                               setVisionResult(null);
-                               setContinuousCount(0);
-                             }}
-                             className="w-full py-4 bg-slate-50 border border-slate-100 text-slate-400 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all"
-                           >
-                              Reset & New Audit
-                           </button>
-                        </motion.div>
-                     </div>
-                   )}
-
-                   {isVisionProcessing && visionStep === 'continuous-audit' && (
-                     <div className="absolute inset-0 bg-blue-600/90 backdrop-blur-xl flex flex-col items-center justify-center text-white space-y-6 z-[60]">
-                        <div className="relative">
-                           <motion.div 
-                             animate={{ rotate: 360 }}
-                             transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                             className="w-24 h-24 border-4 border-white/20 border-t-white rounded-full flex items-center justify-center"
-                           />
-                           <Scan className="w-10 h-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    {/* DISPLAY SKU COUNT RESULTS WHEN TAKEN */}
+                    {detectedSkuCount !== null && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-2xl space-y-4"
+                      >
+                        <div className="text-center space-y-1">
+                          <p className="text-[8px] font-black uppercase tracking-wider text-blue-500">Live Item recognition output</p>
+                          <div className="inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white rounded-full px-5 py-2 shadow-md">
+                            <Sparkles className="w-3.5 h-3.5 text-blue-200 animate-pulse" />
+                            <span className="text-sm font-black tracking-tight">{detectedSkuCount} Unilever SKUs</span>
+                          </div>
+                          <p className="text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest pt-1">
+                            Accuracy rating: <b>{sampleVisionData.compliance}%</b> (Optimal Display Density)
+                          </p>
                         </div>
-                        <div className="text-center">
-                           <p className="font-black text-sm uppercase tracking-[0.2em] mb-1">Deep Learning Scan</p>
-                           <p className="text-[10px] font-bold opacity-60 uppercase">Aggregating multiple views...</p>
+
+                        {/* Brand Distribution Graph / Badges */}
+                        <div className="space-y-2 pt-1 border-t border-blue-100/40">
+                          <p className="text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest">Brand Distributions</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
+                              <p className="text-[7px] font-black text-slate-400 uppercase">Dove</p>
+                              <p className="text-xs font-black text-blue-600">24 SKUs</p>
+                            </div>
+                            <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
+                              <p className="text-[7px] font-black text-slate-400 uppercase">Lux</p>
+                              <p className="text-xs font-black text-blue-600">12 SKUs</p>
+                            </div>
+                            <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
+                              <p className="text-[7px] font-black text-slate-400 uppercase">Lifebuoy</p>
+                              <p className="text-xs font-black text-blue-600">8 SKUs</p>
+                            </div>
+                          </div>
                         </div>
-                        <motion.div 
-                           initial={{ top: 0 }}
-                           animate={{ top: "100%" }}
-                           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                           className="absolute inset-x-0 h-0.5 bg-white/50 shadow-[0_0_15px_white] z-10"
-                        />
-                     </div>
-                   )}
+
+                        {/* Inventory Warnings */}
+                        <div className="bg-rose-50 border border-rose-100 p-2.5 rounded-xl">
+                          <p className="text-[7.5px] font-black text-rose-600 uppercase tracking-wider mb-2">⚠️ OUT-OF-STOCK VERIFICATIONS</p>
+                          <div className="flex flex-wrap gap-1">
+                            {sampleVisionData.outOfStock.map(s => (
+                              <span key={s} className="bg-white text-rose-700 px-2 py-0.5 rounded text-[7px] font-extrabold border border-rose-100/50 leading-tight">
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Reset Audit and Continue Button */}
+                  {(visionShopboardUrl || detectedSkuCount !== null) && (
+                    <button 
+                      onClick={() => {
+                        setVisionShopboardUrl(null);
+                        setVisionSkuImageUrl(null);
+                        setDetectedSkuCount(null);
+                      }}
+                      className="w-full py-3.5 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] active:scale-95 transition-all text-center"
+                    >
+                      Reset Audit
+                    </button>
+                  )}
                 </motion.div>
               )}
 
@@ -1560,6 +1667,230 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
              )}
           </nav>
         </div>
+
+        {/* INTERACTIVE CAMERA OVERLAY */}
+        <AnimatePresence>
+          {(isBotCameraOpen || isVisionCameraActive) && (
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              className="absolute inset-0 bg-slate-950 z-[1000] flex flex-col overflow-hidden text-white font-sans"
+            >
+              {/* Header */}
+              <div className="p-4 flex items-center justify-between border-b border-white/10 shrink-0 bg-slate-900/80 backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+                    <Camera className="w-3.5 h-3.5 text-white animate-pulse" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider leading-none">
+                      {cameraStep === 'shopboard' ? 'Vision AI Alignment' : 'Precision SKU Audit'}
+                    </p>
+                    <p className="text-[8px] font-bold text-blue-400 uppercase tracking-widest mt-0.5">
+                      {cameraStep === 'shopboard' ? 'Location Check-in Lock' : 'Real-time Object Count'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setIsBotCameraOpen(false);
+                    setIsVisionCameraActive(false);
+                    setCameraPurpose(null);
+                    setCameraState('idle');
+                    setCameraStep('shopboard');
+                  }}
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 active:scale-95 transition-all text-slate-300"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Viewfinder Frame */}
+              <div className="flex-1 relative bg-slate-950 flex flex-col items-center justify-center p-4 overflow-hidden">
+                <div className="w-full aspect-[3/4] rounded-[2rem] overflow-hidden bg-slate-900 relative border-2 border-white/15 shadow-2xl">
+                  
+                  {/* Backdrop Simulator Feed */}
+                  <img 
+                    src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus}
+                    alt="Camera feed simulation"
+                    className="w-full h-full object-cover opacity-60 brightness-90 saturate-75 transition-all duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  
+                  {/* Adjustable Watermark Alignment Template Overlay */}
+                  <img 
+                    src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus} 
+                    alt="Alignment overlay outline template"
+                    style={{ opacity: cameraWatermarkOpacity }}
+                    className="absolute inset-0 w-full h-full object-cover mix-blend-screen pointer-events-none transition-all duration-350"
+                    referrerPolicy="no-referrer"
+                  />
+                  
+                  {/* Grid overlay & indicator brackets */}
+                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-30">
+                    <div className="border-r border-b border-white/10" />
+                    <div className="border-r border-b border-white/10" />
+                    <div className="border-b border-white/10" />
+                    <div className="border-r border-b border-white/10" />
+                    <div className="border-r border-b border-white/10" />
+                    <div className="border-b border-white/10" />
+                    <div className="border-r border-white/10" />
+                    <div className="border-r border-white/10" />
+                    <div className="bg-transparent" />
+                  </div>
+
+                  {/* High precision crosshair centering guide */}
+                  <div className="absolute inset-10 border border-white/10 rounded-xl pointer-events-none flex items-center justify-center">
+                    <div className="w-6 h-0.5 bg-blue-500/70" />
+                    <div className="h-6 w-0.5 bg-blue-500/70 absolute" />
+                    
+                    {/* Glowing active green corners */}
+                    <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-blue-500/80" />
+                    <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-blue-500/80" />
+                    <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-blue-500/80" />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-blue-500/80" />
+                  </div>
+
+                  {/* Horizontal laser sweeps for vision audit style feedback */}
+                  {cameraState === 'idle' && (
+                    <motion.div 
+                      animate={{ y: ['0%', '100%', '0%'] }}
+                      transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                      className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent shadow-[0_0_12px_#3b82f6] opacity-75 pointer-events-none"
+                    />
+                  )}
+
+                  {/* Picture-in-picture reference card floating in viewfinder */}
+                  <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-white/10 max-w-[110px] shadow-xl pointer-events-none">
+                    <p className="text-[6.5px] font-black text-blue-400 uppercase tracking-widest leading-none mb-1">📢 SAMPLE TEMPLATE</p>
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border border-white/20">
+                      <img 
+                        src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus} 
+                        alt="Unilever template reference" 
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Floating transparency slider controller inside viewfinder */}
+                  <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg flex flex-col gap-1">
+                    <p className="text-[6px] font-black text-slate-400 uppercase leading-none tracking-wider text-center">Overlay Match</p>
+                    <div className="flex gap-1 items-center justify-center">
+                      {[
+                        { val: 0, label: 'OFF' },
+                        { val: 0.3, label: '30%' },
+                        { val: 0.6, label: '60%' }
+                      ].map(opt => (
+                        <button 
+                          key={opt.label}
+                          onClick={() => setCameraWatermarkOpacity(opt.val)}
+                          className={cn(
+                            "px-1.5 py-0.5 rounded text-[6px] font-black uppercase transition-all",
+                            cameraWatermarkOpacity === opt.val 
+                              ? "bg-blue-600 text-white" 
+                              : "bg-white/10 text-slate-300 hover:bg-white/20"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Photo snap-shot flash overlay */}
+                  <AnimatePresence>
+                    {cameraState === 'snapping' && (
+                      <motion.div 
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-white z-50 flex items-center justify-center"
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Analyzing coordinates & Vision model log overlay */}
+                  <AnimatePresence>
+                    {cameraState === 'verifying' && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-5 text-center space-y-4"
+                      >
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                          className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full"
+                        />
+                        <div className="space-y-1.5 w-full max-w-[210px]">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                            {cameraStep === 'shopboard' ? 'Verifying Storefront...' : 'Counting Unilever SKUs...'}
+                          </p>
+                          <div className="bg-slate-900 border border-white/5 p-2 rounded-xl text-left font-mono space-y-1 text-[7px] text-slate-400">
+                            {cameraStep === 'shopboard' ? (
+                              <>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">📡</span> API: Smollan geofence connection active</p>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">🛰️</span> GPS: Coordinates locked within 5 meters</p>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">👁️</span> SIFT: Running layout alignment score...</p>
+                                <p className="font-extrabold text-emerald-400 flex items-center gap-1 mt-1 border-t border-white/5 pt-1">✅ MATCH DETECTED (98.4% Confidence)</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">📊</span> IR: Initializing YOLO display mesh model</p>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">🔍</span> SCAN: Running local density sweep...</p>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">🏷️</span> BRAND: Segmenting Unilever product bounds</p>
+                                <p className="font-extrabold text-emerald-400 flex items-center gap-1 mt-1 border-t border-white/5 pt-1">✅ COUNTED (156 SKUs Detected, 94% Compliant)</p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Shutter Controls */}
+              <div className="p-4 bg-slate-900 border-t border-white/10 shrink-0 flex items-center justify-between">
+                <div className="flex flex-col items-center w-12 text-center text-slate-400 leading-none">
+                  <span className="text-[6.5px] font-bold uppercase tracking-wider text-slate-500 leading-none">Gps LOCK</span>
+                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tight flex items-center gap-0.5 mt-1">
+                    <Check className="w-2.5 h-2.5 p-0" /> Geofence
+                  </span>
+                </div>
+
+                <div className="relative flex items-center justify-center">
+                  <button 
+                    disabled={cameraState !== 'idle'}
+                    onClick={handleShutterClick}
+                    className="w-14 h-14 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all disabled:opacity-40 shadow-xl"
+                  >
+                    <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white" />
+                  </button>
+                </div>
+
+                <div className="flex flex-col items-center w-12 text-center text-slate-400 leading-none">
+                  <span className="text-[6.5px] font-bold uppercase tracking-wider text-slate-500 leading-none">Match status</span>
+                  <span className="text-[8px] font-black text-blue-400 uppercase tracking-tight mt-1 flex items-center gap-0.5">
+                    HIGH CONFIDENCE
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottom Guideline prompt */}
+              <div className="bg-slate-950 text-slate-400 text-center py-2 px-6 border-t border-white/10 shrink-0">
+                <p className="text-[7.5px] font-extrabold text-blue-300 uppercase tracking-widest leading-tight">
+                  {cameraStep === 'shopboard' 
+                    ? 'Line up store layout with alignment match overlays to verify outlet details in one tap'
+                    : 'Fit Unilever display stock rack inside the viewfinder to auto-detect and count total SKUs'}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Home Indicator */}
         <div className="h-8 bg-slate-900 flex items-center justify-center shrink-0">
