@@ -38,7 +38,7 @@ export const AVAILABLE_FEATURES: Feature[] = [
   { id: 'predictiveBot', name: 'Smart Bot', description: 'AI-driven task suggestions & quick completion', icon: 'Sparkles', mandatory: true },
   { id: 'visionAutomation', name: 'Vision AI', description: 'Automatic SKU and stock extraction from photos', icon: 'Camera', mandatory: true },
   { id: 'voiceToText', name: 'Voice Command', description: 'Hands-free data entry and automation', icon: 'Mic' },
-  { id: 'orderManagement', name: 'Order Pro', description: 'Restock and replenishment management', icon: 'ShoppingCart' },
+  { id: 'orderManagement', name: 'Book Order', description: 'Restock and replenishment management', icon: 'ShoppingCart' },
   { id: 'quizModule', name: 'Field Quiz', description: 'On-site training and knowledge checks', icon: 'Zap' },
   { id: 'salesInsights', name: 'Reports', description: 'Target vs achievement tracking', icon: 'BarChart', mandatory: true },
   { id: 'locationReporting', name: 'Smart Check-in', description: 'Geofenced location verification', icon: 'MapPin' },

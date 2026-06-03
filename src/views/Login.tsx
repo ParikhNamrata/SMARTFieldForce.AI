@@ -13,7 +13,9 @@ export default function Login({ onLogin }: LoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (id === 'smartadmin' && password === '1234') {
+    const cleanId = id.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    if (cleanId === 'smartadmin' && cleanPassword === '1234') {
       onLogin();
     } else {
       setError('Invalid credentials. Hint: smartadmin / 1234');

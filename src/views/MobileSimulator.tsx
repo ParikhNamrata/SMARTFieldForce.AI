@@ -33,7 +33,15 @@ import {
   Map,
   ChevronRight,
   Check,
-  Lock
+  Lock,
+  Plus,
+  Minus,
+  AlertCircle,
+  PiggyBank,
+  Percent,
+  Calendar,
+  Gift,
+  TrendingUp
 } from 'lucide-react';
 import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
@@ -45,7 +53,7 @@ interface MobileSimulatorProps {
   config: AppConfig;
 }
 
-type Screen = 'home' | 'bot' | 'vision' | 'reports' | 'training' | 'planner' | 'performance' | 'stock' | 'territory';
+type Screen = 'home' | 'bot' | 'vision' | 'reports' | 'training' | 'planner' | 'performance' | 'stock' | 'territory' | 'order' | 'quiz';
 type VisionStep = 
   | 'capture-board' 
   | 'fetching-skus' 
@@ -56,14 +64,46 @@ type VisionStep =
   | 'continuous-audit'
   | 'result';
 
-const UNILEVER_SHOPBOARD_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%23f0f9ff" /><rect x="0" y="180" width="600" height="270" fill="%23f1f5f9" /><rect x="80" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="360" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="250" y="240" width="100" height="210" fill="%2394a3b8" opacity="0.15" rx="4" /><line x1="300" y1="240" x2="300" y2="450" stroke="%23cbd5e1" stroke-width="2" /><path d="M0 210 H600 M0 260 H600 M0 310 H600 M0 360 H600" stroke="%23e2e8f0" stroke-width="1.5" /><g transform="translate(50, 40)"><rect x="4" y="6" width="500" height="152" rx="16" fill="%230f172a" opacity="0.15" /><rect x="0" y="0" width="500" height="150" rx="16" fill="%230c2340" stroke="%230284c7" stroke-width="4" /><path d="M400 -20 C450 30 420 100 520 170" fill="none" stroke="%231e3a8a" stroke-width="24" opacity="0.5" stroke-linecap="round" /><path d="M420 -25 C470 25 440 90 540 160" fill="none" stroke="%233b82f6" stroke-width="12" opacity="0.25" stroke-linecap="round" /><g transform="translate(35, 25)"><path d="M10 15 C10 5, 20 2, 30 2 C40 2, 50 5, 50 15 C50 30, 30 40, 30 48" fill="none" stroke="%2338bdf8" stroke-width="6" stroke-linecap="round" /><path d="M16 18 C16 10, 23 8, 30 8 C37 8, 44 10, 44 18 C44 28, 30 36, 30 42" fill="none" stroke="%23ffffff" stroke-width="4.5" stroke-linecap="round" /><circle cx="30" cy="18" r="3.5" fill="%23fbbf24" /><circle cx="20" cy="28" r="3" fill="%23f87171" /><circle cx="40" cy="28" r="2.5" fill="%2334d399" /></g><text x="110" y="52" font-family="'Inter', sans-serif" font-weight="900" font-size="22" fill="%23ffffff" letter-spacing="1">UNILEVER ELITE HUB</text><text x="110" y="75" font-family="'Inter', sans-serif" font-weight="800" font-size="10" fill="%2338bdf8" letter-spacing="4">SMOLLAN PREFERRED OUTLET</text><rect x="110" y="93" width="135" height="24" rx="6" fill="%231e3a8a" stroke="%230284c7" stroke-width="1.5" /><text x="122" y="109" font-family="'JetBrains Mono', monospace" font-weight="900" font-size="9.5" fill="%23bae6fd">STOREID: %23442-B</text><rect x="255" y="93" width="135" height="24" rx="6" fill="%23064e3b" stroke="%23059669" stroke-width="1.5" /><text x="267" y="109" font-family="'Inter', sans-serif" font-weight="900" font-size="8.5" fill="%23a7f3d0">GPS LOC: MATCHED</text><circle cx="445" cy="105" r="14" fill="%2310b981" /><path d="M439 105 L443 109 L451 101" fill="none" stroke="%23ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></g></svg>`;
+const UNILEVER_SHOPBOARD_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%23f0f9ff" /><rect x="0" y="180" width="600" height="270" fill="%23f1f5f9" /><rect x="80" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="360" y="240" width="160" height="210" fill="%23cbd5e1" opacity="0.4" rx="8" /><rect x="250" y="240" width="100" height="210" fill="%2394a3b8" opacity="0.15" rx="4" /><line x1="300" y1="240" x2="300" y2="450" stroke="%23cbd5e1" stroke-width="2" /><path d="M0 210 H600 M0 260 H600 M0 310 H600 M0 360 H600" stroke="%23e2e8f0" stroke-width="1.5" /><g transform="translate(50, 40)"><rect x="4" y="6" width="500" height="152" rx="16" fill="%230f172a" opacity="0.15" /><rect x="0" y="0" width="500" height="150" rx="16" fill="%230c2340" stroke="%230284c7" stroke-width="4" /><path d="M400 -20 C450 30 420 100 520 170" fill="none" stroke="%231e3a8a" stroke-width="24" opacity="0.5" stroke-linecap="round" /><path d="M420 -25 C470 25 440 90 540 160" fill="none" stroke="%233b82f6" stroke-width="12" opacity="0.25" stroke-linecap="round" /><g transform="translate(35, 25)"><path d="M10 15 C10 5, 20 2, 30 2 C40 2, 50 5, 50 15 C50 30, 30 40, 30 48" fill="none" stroke="%2338bdf8" stroke-width="6" stroke-linecap="round" /><path d="M16 18 C16 10, 23 8, 30 8 C37 8, 44 10, 44 18 C44 28, 30 36, 30 42" fill="none" stroke="%23ffffff" stroke-width="4.5" stroke-linecap="round" /><circle cx="30" cy="18" r="3.5" fill="%23fbbf24" /><circle cx="20" cy="28" r="3" fill="%23f87171" /><circle cx="40" cy="28" r="2.5" fill="%2334d399" /></g><text x="110" y="52" font-family="'Inter', sans-serif" font-weight="900" font-size="22" fill="%23ffffff" letter-spacing="1">SMOLLAN ELITE HUB</text><text x="110" y="75" font-family="'Inter', sans-serif" font-weight="800" font-size="10" fill="%2338bdf8" letter-spacing="4">SMOLLAN PREFERRED OUTLET</text><rect x="110" y="93" width="135" height="24" rx="6" fill="%231e3a8a" stroke="%230284c7" stroke-width="1.5" /><text x="122" y="109" font-family="'JetBrains Mono', monospace" font-weight="900" font-size="9.5" fill="%23bae6fd">STOREID: %23442-B</text><rect x="255" y="93" width="135" height="24" rx="6" fill="%23064e3b" stroke="%23059669" stroke-width="1.5" /><text x="267" y="109" font-family="'Inter', sans-serif" font-weight="900" font-size="8.5" fill="%23a7f3d0">GPS LOC: MATCHED</text><circle cx="445" cy="105" r="14" fill="%2310b981" /><path d="M439 105 L443 109 L451 101" fill="none" stroke="%23ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></g></svg>`;
 
-const UNILEVER_SKUS_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%230f172a" /><rect x="0" y="140" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="280" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="420" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="155" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><rect x="0" y="295" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><g transform="translate(30, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(115, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(200, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(280, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(365, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g transform="translate(30, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(120, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(210, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(300, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(30, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(115, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(200, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g opacity="0.85"><rect x="25" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 99%</text><rect x="110" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="113" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 98%</text><rect x="195" y="15" width="75" height="120" fill="none" stroke="%233b82f6" stroke-width="1.5" /><text x="198" y="11" font-family="'JetBrains Mono', monospace" font-size="6" fill="%233b82f6" font-weight="950">DOVE_SHMP: 97%</text><rect x="25" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 96%</text><rect x="115" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="118" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 95%</text><rect x="205" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="208" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 99%</text><rect x="295" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="298" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 97%</text></g></svg>`;
+const UNILEVER_SKUS_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%230f172a" /><rect x="0" y="140" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="280" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="420" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="155" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><rect x="0" y="295" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><g transform="translate(30, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(115, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(200, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(280, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(365, 25)"><rect x="0" y="0" width="70" height="100" rx="18" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g transform="translate(30, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(120, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(210, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(300, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(30, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(115, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(200, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g opacity="0.85"><rect x="25" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 99%</text><rect x="110" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="113" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 98%</text><rect x="195" y="15" width="75" height="120" fill="none" stroke="%233b82f6" stroke-width="1.5" /><text x="198" y="11" font-family="'JetBrains Mono', monospace" font-size="6" fill="%233b82f6" font-weight="950">DOVE_SHMP: 97%</text><rect x="25" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 96%</text><rect x="115" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="118" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 95%</text><rect x="205" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="208" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 99%</text><rect x="295" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="298" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 97%</text></g></svg>`;
 
 export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeScreen, setActiveScreen] = useState<Screen>('home');
   const [isVoiceActive, setIsVoiceActive] = useState(false);
+
+  // --- AI Field Quiz States ---
+  const [quizState, setQuizState] = useState<'idle' | 'generating' | 'active' | 'completed'>('idle');
+  const [quizQuestions, setQuizQuestions] = useState<Array<{
+    question: string;
+    options: string[];
+    correctAnswerIndex: number;
+    explanation: string;
+  }>>([]);
+  const [quizCurrentIndex, setQuizCurrentIndex] = useState(0);
+  const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
+  const [quizScore, setQuizScore] = useState(0);
+
+  // --- Voice Assistant States ---
+  const [isVoiceSheetOpen, setIsVoiceSheetOpen] = useState(false);
+  const [voiceSpeechText, setVoiceSpeechText] = useState('');
+  const [voiceSpeechTranscript, setVoiceSpeechTranscript] = useState('');
+  const [customVoiceInputText, setCustomVoiceInputText] = useState('');
+  const [shelfSkuCounts, setShelfSkuCounts] = useState<{ [key: string]: number }>({
+    'dove-soap': 12,
+    'dove-shampoo': 8,
+    'lux-soap': 24,
+    'lifebuoy-wash': 15
+  });
+  const [voiceLog, setVoiceLog] = useState<Array<{ id: string; time: string; text: string; details: string; type: 'success' | 'info' | 'warn' }>>([
+    { id: '1', time: '14:40', text: 'Hands-Free Engine Configured', details: 'Telemetry sync, audio parsing, and text-to-speech feedback operational.', type: 'info' }
+  ]);
+
+  // --- Gallery Photo Upload States ---
+  const [customUploadedImageUrl, setCustomUploadedImageUrl] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const recognitionRef = React.useRef<any>(null);
 
   // Safeguard: Move to home if current screen is disabled
   useEffect(() => {
@@ -76,7 +116,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       planner: 'routeOptimizer',
       performance: 'userProfile',
       stock: 'inventoryRadar',
-      territory: 'territoryMap'
+      territory: 'territoryMap',
+      order: 'orderManagement',
+      quiz: 'quizModule'
     };
 
     const requiredFeature = featureMap[activeScreen];
@@ -86,19 +128,537 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     }
   }, [config.features, activeScreen]);
 
-  const toggleVoice = () => {
-    setIsVoiceActive(!isVoiceActive);
-    if (!isVoiceActive) {
-      setIsVoiceRecording(true);
-      // Simulate voice capture
-      setTimeout(() => {
-        const voiceMsg = "Dove sku count is 24 and Lux is 5";
-        handleSendMessage(voiceMsg);
-        setIsVoiceActive(false);
-        setIsVoiceRecording(false);
-      }, 3000);
+  // Command Parser & Executor for Voice command input
+  const executeCommand = (commandText: string) => {
+    const text = commandText.toLowerCase();
+    
+    // Create matching user chat message
+    setChatMessages(prev => [...prev, { role: 'user', text: `🗣️ Voice Command: "${commandText}"` }]);
+    
+    if (text.includes('attendance') || text.includes('check') || text.includes('login') || text.includes('present')) {
+      setActiveScreen('home');
+      ensureAttendanceMarked("Voice commands check-in");
+      setChatMessages(prev => [...prev, { role: 'ai', text: "✅ Check-in complete! I've marked your attendance automatically using voice authorization." }]);
+    } 
+    else if (text.includes('order') || text.includes('replenish') || text.includes('dove') || text.includes('restock') || text.includes('book')) {
+      setOrderProducts(prev => prev.map(p => {
+        if (p.id === 'dove-soap') {
+          return { ...p, qty: 15 };
+        }
+        return p;
+      }));
+      setActiveScreen('order');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "🛒 Done! I've added 15 Dove Cream Beauty Bars to your Order Form and switched to the Book Order screen." }]);
+    }
+    else if (text.includes('vision') || text.includes('shelf') || text.includes('scan') || text.includes('audit')) {
+      setActiveScreen('vision');
+      openCamera('vision-loc', 'allSkus');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "📸 Understood. Opening the Shelf SKU Audit camera context for automated stock tracking..." }]);
+    }
+    else if (text.includes('quiz') || text.includes('test') || text.includes('question') || text.includes('terminology')) {
+      setActiveScreen('quiz');
+      setQuizState('idle');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "🧠 Opening your personalized AI Knowledge Field Quiz. Practice your sales & audit math!" }]);
+    }
+    else if (text.includes('traffic') || text.includes('route') || text.includes('plan') || text.includes('optimizer')) {
+      setActiveScreen('planner');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "📍 Switching to your AI Route Planner screen with optimized route sequencing." }]);
+    }
+    else if (text.includes('report') || text.includes('sales') || text.includes('target')) {
+      setActiveScreen('reports');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "📈 Displaying target vs achievement dashboards and active field force compliance analysis." }]);
+    }
+    else if (text.includes('performance') || text.includes('coaching') || text.includes('rank')) {
+      setActiveScreen('performance');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "🏆 Switched to Performance Hub. Checking agent achievements and AI coaching feedback." }]);
+    }
+    else if (text.includes('training') || text.includes('study') || text.includes('hub')) {
+      setActiveScreen('training');
+      setChatMessages(prev => [...prev, { role: 'ai', text: "📚 Switched to your Training Hub. Browse available compliance, innovations, and safety courses." }]);
+    }
+    else {
+      // General Gemini query
+      setIsAiLoading(true);
+      answerFieldQuery(commandText).then(response => {
+        setChatMessages(prev => [...prev, { role: 'ai', text: `🗣️ Voice Assistant: ${response}` }]);
+        setIsAiLoading(false);
+      }).catch(e => {
+        setIsAiLoading(false);
+        setChatMessages(prev => [...prev, { role: 'ai', text: `🗣️ Voice Assistant: I noticed you spoke: "${commandText}"` }]);
+      });
     }
   };
+
+  const speakText = (txt: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(txt.substring(0, 160));
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        synth.speak(utterance);
+      } catch (err) {
+        console.warn("speechSynthesis error:", err);
+      }
+    }
+  };
+
+  const parseVoiceCommand = (rawText: string) => {
+    const text = rawText.toLowerCase();
+    let feedback = "";
+    let updatedSomething = false;
+
+    let newShelfCounts = { ...shelfSkuCounts };
+    let newOrderProducts = [...orderProducts];
+
+    // Check check-in/attendance
+    if (text.includes("check-in") || text.includes("check in") || text.includes("attendance") || text.includes("login")) {
+      ensureAttendanceMarked("Voice check-in complete");
+      feedback += "Checked in to Bandra Retail outlet. ";
+      updatedSomething = true;
+    }
+
+    // Dove Soap count
+    if (text.includes("dove") && (text.includes("soap") || text.includes("beauty") || text.includes("bar") || text.includes("cream"))) {
+      const match = text.match(/(?:soap|beauty|bar|cream)\D*(\d+)/);
+      if (match) {
+        const val = parseInt(match[1]);
+        newShelfCounts['dove-soap'] = val;
+        feedback += `Counted ${val} Dove Soap. `;
+        updatedSomething = true;
+      } else if (text.includes("out of stock") || text.includes("oos") || text.includes("zero")) {
+        newShelfCounts['dove-soap'] = 0;
+        feedback += "Dove Soap out of stock. ";
+        updatedSomething = true;
+      }
+    }
+
+    // Dove Shampoo count
+    if (text.includes("dove") && text.includes("shampoo")) {
+      const match = text.match(/shampoo\D*(\d+)/);
+      if (match) {
+        const val = parseInt(match[1]);
+        newShelfCounts['dove-shampoo'] = val;
+        feedback += `Counted ${val} Dove Shampoo. `;
+        updatedSomething = true;
+      } else if (text.includes("out of stock") || text.includes("oos") || text.includes("zero")) {
+        newShelfCounts['dove-shampoo'] = 0;
+        feedback += "Dove Shampoo out of stock. ";
+        updatedSomething = true;
+      }
+    } else if (text.includes("shampoo")) {
+      const match = text.match(/shampoo\D*(\d+)/);
+      if (match) {
+        const val = parseInt(match[1]);
+        newShelfCounts['dove-shampoo'] = val;
+        feedback += `Counted ${val} Shampoo. `;
+        updatedSomething = true;
+      } else if (text.includes("out of stock") || text.includes("oos") || text.includes("zero")) {
+        newShelfCounts['dove-shampoo'] = 0;
+        feedback += "Shampoo out of stock. ";
+        updatedSomething = true;
+      }
+    }
+
+    // Lux Soap count
+    if (text.includes("lux")) {
+      const match = text.match(/lux\D*(\d+)/);
+      if (match) {
+        const val = parseInt(match[1]);
+        newShelfCounts['lux-soap'] = val;
+        feedback += `Counted ${val} Lux. `;
+        updatedSomething = true;
+      } else if (text.includes("out of stock") || text.includes("oos") || text.includes("zero")) {
+        newShelfCounts['lux-soap'] = 0;
+        feedback += "Lux out of stock. ";
+        updatedSomething = true;
+      }
+    }
+
+    // Lifebuoy Handwash
+    if (text.includes("lifebuoy") || text.includes("handwash") || text.includes("wash")) {
+      const match = text.match(/(?:lifebuoy|handwash|wash)\D*(\d+)/);
+      if (match) {
+        const val = parseInt(match[1]);
+        newShelfCounts['lifebuoy-wash'] = val;
+        feedback += `Counted ${val} Lifebuoy. `;
+        updatedSomething = true;
+      } else if (text.includes("out of stock") || text.includes("oos") || text.includes("zero")) {
+        newShelfCounts['lifebuoy-wash'] = 0;
+        feedback += "Lifebuoy out of stock. ";
+        updatedSomething = true;
+      }
+    }
+
+    // Multi-item matching on numbers if not matched by product words
+    if (!updatedSomething) {
+      if (text.includes("order") || text.includes("book") || text.includes("replenish")) {
+        const numMatch = text.match(/\d+/);
+        if (numMatch) {
+          const qty = parseInt(numMatch[0]);
+          if (text.includes("dove")) {
+            newOrderProducts = newOrderProducts.map(p => p.id === 'dove-soap' ? { ...p, qty } : p);
+            feedback += `Added ${qty} cases of Dove Soap. `;
+            updatedSomething = true;
+          } else if (text.includes("shampoo")) {
+            newOrderProducts = newOrderProducts.map(p => p.id === 'dove-shampoo' ? { ...p, qty } : p);
+            feedback += `Added ${qty} cases of Dove Shampoo. `;
+            updatedSomething = true;
+          } else if (text.includes("lux")) {
+            newOrderProducts = newOrderProducts.map(p => p.id === 'lux-soap' ? { ...p, qty } : p);
+            feedback += `Added ${qty} cases of Lux Soap. `;
+            updatedSomething = true;
+          } else {
+            newOrderProducts = newOrderProducts.map(p => p.id === 'dove-soap' ? { ...p, qty } : p);
+            feedback += `Added ${qty} cases to Order. `;
+            updatedSomething = true;
+          }
+        }
+      }
+    }
+
+    // Reset counts command
+    if (text.includes("clear") || text.includes("reset") || text.includes("empty")) {
+      newShelfCounts = {
+        'dove-soap': 0,
+        'dove-shampoo': 0,
+        'lux-soap': 0,
+        'lifebuoy-wash': 0
+      };
+      feedback += "Reset all values to 0. ";
+      updatedSomething = true;
+    }
+
+    if (updatedSomething) {
+      setShelfSkuCounts(newShelfCounts);
+      setOrderProducts(newOrderProducts);
+      speakText(feedback);
+      return {
+        success: true,
+        summary: feedback
+      };
+    } else {
+      speakText("Voice registered, but could not identify specific SKU counts. Try saying Dove 22 or Lux 10!");
+      return {
+        success: false,
+        summary: "Could not identify product names or counts. Ensure you mention 'Dove, Lux, Lifebuoy, or Shampoo' followed by a number."
+      };
+    }
+  };
+
+  const toggleVoice = (forChat = false) => {
+    // If already active, stop/abort and reset
+    if (isVoiceActive) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {
+          console.warn("Error aborting recognition:", e);
+        }
+      }
+      setIsVoiceActive(false);
+      setIsVoiceRecording(false);
+      return;
+    }
+
+    if (!forChat) {
+      setIsVoiceSheetOpen(true);
+    }
+    
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        const rec = new SpeechRecognition();
+        recognitionRef.current = rec;
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.lang = 'en-US';
+        
+        setIsVoiceActive(true);
+        setIsVoiceRecording(true);
+        if (forChat) {
+          setInputMessage('Listening...');
+        } else {
+          setVoiceSpeechText('Listening now... Speak shelf counts like "Count Dove Soap 24" or "Reset all values"!');
+        }
+        
+        rec.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setIsVoiceActive(false);
+          setIsVoiceRecording(false);
+          
+          if (forChat) {
+            setInputMessage(transcript);
+            // Auto-submit text to general voice command parser / Gemini bot
+            setChatMessages(prev => [...prev, { role: 'user', text: `🗣️ Voice Command: "${transcript}"` }]);
+            setIsAiLoading(true);
+            answerFieldQuery(transcript).then(response => {
+              setChatMessages(prev => [...prev, { role: 'ai', text: response }]);
+              setIsAiLoading(false);
+            }).catch(e => {
+              setIsAiLoading(false);
+              setChatMessages(prev => [...prev, { role: 'ai', text: `I noticed you spoke: "${transcript}"` }]);
+            });
+          } else {
+            setVoiceSpeechTranscript(transcript);
+            setVoiceSpeechText(`Heard: "${transcript}"`);
+            setIsVoiceActive(false);
+            
+            // Parse and run!
+            setTimeout(() => {
+              const parsed = parseVoiceCommand(transcript);
+              setVoiceLog(prev => [
+                {
+                  id: Date.now().toString(),
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  text: `Voice: "${transcript}"`,
+                  details: parsed.summary,
+                  type: parsed.success ? 'success' : 'warn' as any
+                },
+                ...prev
+              ]);
+            }, 1200);
+          }
+        };
+        
+        rec.onerror = (e: any) => {
+          console.error("Speech Recognition Error", e);
+          setIsVoiceActive(false);
+          setIsVoiceRecording(false);
+          if (forChat) {
+            setInputMessage('');
+            setChatMessages(prev => [...prev, { role: 'ai', text: "⚠️ Microphone didn't register or is sandboxed inside the iframe. Please type your query!" }]);
+          } else {
+            setVoiceSpeechText("Microphone input didn't register. Please type your command or click a simulated shortcut card below!");
+          }
+        };
+        
+        rec.onend = () => {
+          setIsVoiceActive(false);
+          setIsVoiceRecording(false);
+        };
+        
+        rec.start();
+      } catch (err) {
+        console.warn("Could not start Speech Recognition:", err);
+        setIsVoiceActive(false);
+        setIsVoiceRecording(false);
+        if (forChat) {
+          setInputMessage('');
+        } else {
+          setVoiceSpeechText("Microphone permission denied or running inside sandboxed environment. Please use simulated tools below!");
+        }
+      }
+    } else {
+      setIsVoiceActive(false);
+      setIsVoiceRecording(false);
+      if (forChat) {
+        setChatMessages(prev => [...prev, { role: 'ai', text: "⚠️ Web Speech Recognition is not supported in this browser. Please type directly." }]);
+      } else {
+        setVoiceSpeechText("Your browser sandbox blocks microphone hardware. Click any simulated voice command below to execute actions!");
+      }
+    }
+  };
+
+  const handleCustomVoiceSubmit = () => {
+    if (!customVoiceInputText.trim()) return;
+    const command = customVoiceInputText.trim();
+    setCustomVoiceInputText('');
+    setVoiceSpeechText(`Simulating: "${command}"`);
+    setIsVoiceActive(true);
+    
+    setTimeout(() => {
+      setIsVoiceActive(false);
+      const parsed = parseVoiceCommand(command);
+      setVoiceSpeechText(`Recognized: "${command}"`);
+      
+      setVoiceLog(prev => [
+        {
+          id: Date.now().toString(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          text: `Voice: "${command}"`,
+          details: parsed.summary,
+          type: parsed.success ? 'success' : 'warn' as any
+        },
+        ...prev
+      ]);
+    }, 1000);
+  };
+
+  const generateCustomQuestions = (pastLogs: any[]) => {
+    const questionsList = [];
+    
+    const totalOrders = pastLogs.filter(l => l.type === 'order');
+    const totalVisits = pastLogs.filter(l => l.type === 'vision');
+    
+    if (totalOrders.length > 0) {
+      questionsList.push({
+        question: `🧠 Learning Pattern: You recently booked order units totaling substantial value. To trigger maximum Benefit Schemes (such as Unilever Scheme A), what is the minimum unit threshold?`,
+        options: ["10 Case Units", "15 Units", "25 Units or higher", "50 Case Units"],
+        correctAnswerIndex: 2,
+        explanation: "Case schemes (such as Scheme A) are pre-configured to automatically activate at 25 or more units to unlock wholesale benefits."
+      });
+      questionsList.push({
+        question: `📈 Inventory Math: Since you booked orders on Dove Beauty Bars, which of the following is the optimal safety stock holding if weekly sales average 6 units?`,
+        options: ["Maintain 0 items to save space", "Maintain 25-30 units of stock to secure against Out-of-Stock (OOS)", "Order 1 item every Monday", "Wait for complete shelf depletion before ordering"],
+        correctAnswerIndex: 1,
+        explanation: "Replenishing 25-30 units ensures 4-5 weeks of safety protection against unexpected Out-of-Stock instances."
+      });
+    }
+    
+    if (totalVisits.length > 0) {
+      questionsList.push({
+        question: `🔍 Compliance Review: You executed a Shelf SKU Audit. If the automated scanner detects an empty shelf spot (Out-of-Stock), how is your SIFT compliance scoring affected?`,
+        options: ["Decreases compliance scoring and highlights shelf-share warnings", "Increases GPS signal accuracy and geolocks automatically", "Sends an invoice directly to the regional distributor", "OOS does not impact score"],
+        correctAnswerIndex: 0,
+        explanation: "Visual anomalies and empty slots automatically lower planogram alignment and flag active warnings."
+      });
+    }
+
+    // Fallback / standard field terms
+    questionsList.push({
+      question: "🏷️ Planogram Compliance: In Unilever/Smollan merchandising, where is the ideal eye-level placement zone for high-margin products?",
+      options: ["The highest shelf unreachable by average customers", "The 'Golden Zone' (shoulder to waist levels)", "Scattered randomly on bottom-row shelves", "Hidden in the back storage room to avoid dust"],
+      correctAnswerIndex: 1,
+      explanation: "The 'Golden Zone' represents high-traffic, easy-access shelving that drives 60% of impulse buying."
+    });
+    
+    questionsList.push({
+      question: "🔋 SIFT Layout Matching: When aligning the Smollan check-in camera with a storefront board, what is the target confidence match score?",
+      options: ["Minimum 25% alignment", "Minimum 50% alignment", "Over 80% with green GPS alignment lock", "Over 98.4% perfect coordinate match"],
+      correctAnswerIndex: 2,
+      explanation: "A high SIFT alignment of over 80% matches storefront descriptors to authenticate attendance records."
+    });
+
+    return questionsList.slice(0, 3);
+  };
+
+  const handleTriggerQuizGeneration = () => {
+    setQuizState('generating');
+    setTimeout(() => {
+      const pastLogs = dbService.getLogs();
+      const generated = generateCustomQuestions(pastLogs);
+      setQuizQuestions(generated);
+      setQuizState('active');
+    }, 2000);
+  };
+
+  const handleNextQuizQuestion = () => {
+    setQuizSelectedOption(null);
+    if (quizCurrentIndex < quizQuestions.length - 1) {
+      setQuizCurrentIndex(prev => prev + 1);
+    } else {
+      // Complete! Save interaction to log and transition to complete state
+      dbService.saveInteraction({
+        userId: 'field-user-1',
+        type: 'quiz',
+        content: {
+          score: quizScore,
+          total: quizQuestions.length,
+          questionsCount: quizQuestions.length
+        },
+        summary: `Quiz Training Completed (${quizScore}/${quizQuestions.length})`
+      });
+      setLogs(dbService.getLogs());
+      setQuizState('completed');
+    }
+  };
+
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      setCustomUploadedImageUrl(dataUrl);
+      
+      setCameraState('snapping');
+      await new Promise(r => setTimeout(r, 600));
+      setCameraState('verifying');
+      await new Promise(r => setTimeout(r, 2200));
+
+      if (cameraPurpose === 'bot-loc') {
+        if (cameraStep === 'shopboard') {
+          setCameraStep('allSkus');
+          setCameraState('idle');
+          return;
+        }
+
+        setIsBotCameraOpen(false);
+        setCheckInStep('location_checked_in');
+        setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
+        
+        setChatMessages(prev => [
+          ...prev,
+          {
+            role: 'user',
+            text: '📍 Completed Geolocation check-in & SKU shelf audit via Gallery Upload!'
+          },
+          {
+            role: 'ai',
+            text: "✅ Gallery photo of storefront received and verified under geolocation match! GPS: locked.",
+            imageUrl: dataUrl
+          },
+          {
+            role: 'ai',
+            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf from gallery upload! Verification 100% complete.`,
+            imageUrl: FIELD_IMAGES.allSkus
+          }
+        ]);
+
+        dbService.saveInteraction({
+          userId: 'field-user-1',
+          type: 'chat',
+          content: { 
+            message: 'Location Check-in via Gallery Upload', 
+            response: `📍 Check-in verified via custom uploaded photo. Counted ${sampleVisionData.skus} display SKUs.` 
+          },
+          summary: 'Check-in: Custom Photo Verified'
+        });
+        setLogs(dbService.getLogs());
+
+      } else if (cameraPurpose === 'vision-loc') {
+        setIsVisionCameraActive(false);
+        ensureAttendanceMarked("Uploaded storefront board");
+        
+        if (cameraStep === 'shopboard') {
+          setVisionShopboardUrl(dataUrl);
+          setChatMessages(prev => [
+            ...prev, 
+            { 
+              role: 'ai', 
+              text: `Storefront verified! Custom gallery photo matched successfully at ${sampleVisionData.location}.` 
+            }
+          ]);
+        } else if (cameraStep === 'allSkus') {
+          setVisionSkuImageUrl(dataUrl);
+          setDetectedSkuCount(sampleVisionData.skus);
+          setShelfSkuCounts({
+            'dove-soap': 45,
+            'dove-shampoo': 30,
+            'lux-soap': 45,
+            'lifebuoy-wash': 36
+          });
+          
+          setChatMessages(prev => [
+            ...prev, 
+            { 
+              role: 'ai', 
+              text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf from custom uploaded image! Compliance 100% complete.` 
+            }
+          ]);
+        }
+      }
+      
+      setCameraPurpose(null);
+      setCameraState('idle');
+      setCameraStep('shopboard');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const [attendanceMarked, setAttendanceMarked] = useState(false);
   const [attendanceAutoMarkedAlert, setAttendanceAutoMarkedAlert] = useState(false);
   const [checkInStep, setCheckInStep] = useState<'idle' | 'store_checked_in' | 'location_checked_in' | 'checked_out'>('idle');
@@ -147,6 +707,113 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [visionResult, setVisionResult] = useState<any>(null);
   const [logs, setLogs] = useState<InteractionLog[]>([]);
 
+  // --- Order Pro States ---
+  const [orderProducts, setOrderProducts] = useState<Array<{
+    id: string;
+    name: string;
+    price: number;
+    lastMonthOos: boolean;
+    stockStatus: 'In Stock' | 'Critical OOS' | 'Low';
+    lastOrderQty: number;
+    qty: number;
+    suggestedQty: number;
+    selectedSchemeId: string | null;
+    schemes: Array<{
+      id: string;
+      name: string;
+      benefitPercent: number;
+      description: string;
+    }>;
+  }>>([
+    {
+      id: 'dove-soap',
+      name: 'Dove Cream Beauty Bar 100g',
+      price: 1.80,
+      lastMonthOos: true,
+      stockStatus: 'Critical OOS',
+      lastOrderQty: 20,
+      qty: 0,
+      suggestedQty: 25,
+      selectedSchemeId: 'scheme-dove-1', // Pre-select best scheme
+      schemes: [
+        { id: 'scheme-dove-1', name: 'Scheme A (Best Offer)', benefitPercent: 15, description: '15% Off Case Discount' },
+        { id: 'scheme-dove-2', name: 'Scheme B', benefitPercent: 10, description: 'Buy 10 Get 1 Free (10% Value)' },
+        { id: 'scheme-dove-3', name: 'Scheme C', benefitPercent: 5, description: 'Free 24h Express Shipping' }
+      ]
+    },
+    {
+      id: 'dove-shampoo',
+      name: 'Dove Daily Moisture Shampoo 200ml',
+      price: 4.50,
+      lastMonthOos: true,
+      stockStatus: 'Low',
+      lastOrderQty: 12,
+      qty: 0,
+      suggestedQty: 15,
+      selectedSchemeId: 'scheme-shamp-2', // Pre-select best
+      schemes: [
+        { id: 'scheme-shamp-1', name: 'Standard Promo', benefitPercent: 8, description: 'Buy 12 Get 1 Free (8% Value)' },
+        { id: 'scheme-shamp-2', name: 'Super Saver (Best Offer)', benefitPercent: 18, description: '18% Case Pack Coupon' }
+      ]
+    },
+    {
+      id: 'lux-soap',
+      name: 'Lux Scarlet Glow Soap 100g',
+      price: 1.25,
+      lastMonthOos: false,
+      stockStatus: 'In Stock',
+      lastOrderQty: 15,
+      qty: 0,
+      suggestedQty: 0,
+      selectedSchemeId: 'scheme-lux-1',
+      schemes: [
+        { id: 'scheme-lux-1', name: 'Volume Deal (Best Offer)', benefitPercent: 10, description: '10% volume discount' },
+        { id: 'scheme-lux-2', name: 'Standard Deal', benefitPercent: 5, description: '5% generic discount' }
+      ]
+    },
+    {
+      id: 'lifebuoy-wash',
+      name: 'Lifebuoy Total 10 Handwash 200ml',
+      price: 2.60,
+      lastMonthOos: false,
+      stockStatus: 'In Stock',
+      lastOrderQty: 30,
+      qty: 0,
+      suggestedQty: 0,
+      selectedSchemeId: null,
+      schemes: []
+    }
+  ]);
+
+  const [isOrderBookingConfirmOpen, setIsOrderBookingConfirmOpen] = useState(false);
+  const [bookedReceipt, setBookedReceipt] = useState<{
+    orderId: string;
+    totalAmount: number;
+    totalUnits: number;
+    totalBenefitPercent: number;
+    timestamp: string;
+    summary: string;
+  } | null>(null);
+
+  // Auto-fill suggested OOS quantities on click or init
+  const handleApplySuggestions = () => {
+    setOrderProducts(prev => prev.map(prod => {
+      if (prod.suggestedQty > 0) {
+        // Auto select best scheme if multiple exist
+        let bestSchemeId = prod.selectedSchemeId;
+        if (prod.schemes.length > 0) {
+          bestSchemeId = [...prod.schemes].sort((a, b) => b.benefitPercent - a.benefitPercent)[0].id;
+        }
+        return {
+          ...prod,
+          qty: prod.suggestedQty,
+          selectedSchemeId: bestSchemeId
+        };
+      }
+      return prod;
+    }));
+  };
+
   // Interactive Camera verification flow states
   const [isBotCameraOpen, setIsBotCameraOpen] = useState(false);
   const [isVisionCameraActive, setIsVisionCameraActive] = useState(false);
@@ -176,7 +843,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
   // Sample Vision Data
   const sampleVisionData = {
-    storeName: "Smollan Unilever Elite Hub #442",
+    storeName: "Smollan Elite Hub #442",
     location: "Bandra West, Mumbai",
     stockCount: 284,
     skus: 156,
@@ -225,7 +892,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setAttendanceMarked(true);
       setCheckInStep('store_checked_in');
       setCompletedStep2ActionIds([]);
-      aiResponse = "✅ Attendance Marked! Store Check-in completed automatically for Unilever Elite Hub #442.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.";
+      aiResponse = "✅ Attendance Marked! Store Check-in completed automatically for Smollan Elite Hub #442.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.";
     } else if (lowMsg.includes('location check-in') || lowMsg.includes('location checkin')) {
       if (!isBotCameraOpen && checkInStep !== 'location_checked_in' && cameraPurpose !== 'bot-loc') {
         openCamera('bot-loc');
@@ -233,10 +900,10 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         return;
       }
       setCheckInStep('location_checked_in');
-      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly. Verified store board photo below:";
+      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Elite Hub #442 perfectly. Verified store board photo below:";
       aiImageUrl = UNILEVER_SHOPBOARD_SVG;
     } else if (lowMsg.includes('survey question') || lowMsg.includes('survey')) {
-      aiResponse = "📋 [Survey Question] Store Display Audit: Are Unilever products placed prominently at eye-level on the main aisle?\n\n🤖 Recommendation: Yes, they are in primary slot. (Recorded: YES)";
+      aiResponse = "📋 [Survey Question] Store Display Audit: Are products placed prominently at eye-level on the main aisle?\n\n🤖 Recommendation: Yes, they are in primary slot. (Recorded: YES)";
     } else if (lowMsg.includes('promotion check') || lowMsg.includes('promotion')) {
       aiResponse = "🎁 [Promotion Status] Monsoon Buy-1-Get-1 offer display verified. The banner is active and correctly positioned at checkout counter.";
     } else if (lowMsg.includes('ir shelf audit') || lowMsg.includes('ir task') || lowMsg.includes('vision audit') || lowMsg.includes('ir / vision') || lowMsg.includes('image recognition')) {
@@ -266,7 +933,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           aiResponse = `⚠️ Checkout Locked!\n\nPlease complete all Step 2 activities first before checking out.\n\nRemaining pending activities:\n${remainingStr}`;
         } else {
           setCheckInStep('checked_out');
-          aiResponse = "🚪 Location Checkout Complete! All survey and image recognition (IR) audit tasks have been synchronized. Thank you for finishing your visit at Unilever Elite Hub #442!";
+          aiResponse = "🚪 Location Checkout Complete! All survey and image recognition (IR) audit tasks have been synchronized. Thank you for finishing your visit at Smollan Elite Hub #442!";
         }
       }
     } else if (userMsg.toLowerCase().includes('reporting') || userMsg.toLowerCase().includes('check-in')) {
@@ -343,12 +1010,12 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         },
         {
           role: 'ai',
-          text: "📍 Location Check-in completed. GPS coordinates matches with Smollan Unilever Elite Hub #442 perfectly. Verified store board photo below:",
+          text: "📍 Location Check-in completed. GPS coordinates matches with Smollan Elite Hub #442 perfectly. Verified store board photo below:",
           imageUrl: FIELD_IMAGES.shopboard
         },
         {
           role: 'ai',
-          text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf! Verification 100% complete.`,
+          text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf! Verification 100% complete.`,
           imageUrl: FIELD_IMAGES.allSkus
         }
       ]);
@@ -380,12 +1047,18 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       } else if (cameraStep === 'allSkus') {
         setVisionSkuImageUrl(FIELD_IMAGES.allSkus);
         setDetectedSkuCount(sampleVisionData.skus);
+        setShelfSkuCounts({
+          'dove-soap': 45,
+          'dove-shampoo': 30,
+          'lux-soap': 45,
+          'lifebuoy-wash': 36
+        });
         
         setChatMessages(prev => [
           ...prev, 
           { 
             role: 'ai', 
-            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf! Verification 100% complete.` 
+            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf! Verification 100% complete.` 
           }
         ]);
         
@@ -394,7 +1067,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           type: 'chat',
           content: { 
             message: 'Camera SKU Count', 
-            response: `Counted exactly ${sampleVisionData.skus} Unilever SKUs on display shelf during IR audit.` 
+            response: `Counted exactly ${sampleVisionData.skus} SKUs on display shelf during IR audit.` 
           },
           summary: 'SKU Count Output'
         });
@@ -593,7 +1266,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       'visionAutomation', 
       'salesInsights', 
       'trainingHub', 
-      'routeOptimizer'
+      'routeOptimizer',
+      'orderManagement',
+      'quizModule'
     ];
     return enabledFeatures.filter(f => screensWithUI.includes(f.id)).slice(0, 3);
   }, [enabledFeatures]);
@@ -707,15 +1382,17 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                       {enabledFeatures.map((feature) => {
                         // Map our few specific screens back to IDs
                         const screenMap: Record<string, Screen> = {
-                          predictiveBot: 'bot',
-                          visionAutomation: 'vision',
-                          salesInsights: 'reports',
-                          trainingHub: 'training',
-                          routeOptimizer: 'planner',
-                          userProfile: 'performance',
-                          inventoryRadar: 'stock',
-                          territoryMap: 'territory'
-                        };
+                           predictiveBot: 'bot',
+                           visionAutomation: 'vision',
+                           salesInsights: 'reports',
+                           trainingHub: 'training',
+                           routeOptimizer: 'planner',
+                           userProfile: 'performance',
+                           inventoryRadar: 'stock',
+                           territoryMap: 'territory',
+                           orderManagement: 'order',
+                           quizModule: 'quiz'
+                         };
                         const targetScreen = screenMap[feature.id];
                         
                         return (
@@ -748,7 +1425,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             <div className="w-2 h-2 bg-emerald-500 rounded-full" />
                          </div>
                          <p className="text-xs font-black text-slate-800">Field User #5021</p>
-                         <p className="text-[10px] font-bold text-slate-400">UNILEVER SECTOR A</p>
+                         <p className="text-[10px] font-bold text-slate-400">SOUTHERN SECTOR A</p>
                       </div>
                    </div>
                 </motion.div>
@@ -787,12 +1464,15 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             onClick={() => {
                               if (enabledFeatures[0].id === 'visionAutomation') setActiveScreen('vision');
                               else if (enabledFeatures[0].id === 'predictiveBot') setActiveScreen('bot');
+                              else if (enabledFeatures[0].id === 'voiceToText') toggleVoice(false);
                               else if (enabledFeatures[0].id === 'salesInsights') setActiveScreen('reports');
                               else if (enabledFeatures[0].id === 'trainingHub') setActiveScreen('training');
                               else if (enabledFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
                               else if (enabledFeatures[0].id === 'userProfile') setActiveScreen('performance');
                               else if (enabledFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
                               else if (enabledFeatures[0].id === 'territoryMap') setActiveScreen('territory');
+                              else if (enabledFeatures[0].id === 'orderManagement') setActiveScreen('order');
+                              else if (enabledFeatures[0].id === 'quizModule') setActiveScreen('quiz');
                             }}
                             className="mt-6 flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
                           >
@@ -857,12 +1537,15 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           onClick={() => {
                             if (feature.id === 'visionAutomation') setActiveScreen('vision');
                             else if (feature.id === 'predictiveBot') setActiveScreen('bot');
+                            else if (feature.id === 'voiceToText') toggleVoice(false);
                             else if (feature.id === 'salesInsights') setActiveScreen('reports');
                             else if (feature.id === 'trainingHub') setActiveScreen('training');
                             else if (feature.id === 'routeOptimizer') setActiveScreen('planner');
                             else if (feature.id === 'userProfile') setActiveScreen('performance');
                             else if (feature.id === 'inventoryRadar') setActiveScreen('stock');
                             else if (feature.id === 'territoryMap') setActiveScreen('territory');
+                            else if (feature.id === 'orderManagement') setActiveScreen('order');
+                            else if (feature.id === 'quizModule') setActiveScreen('quiz');
                           }}
                           className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-3 active:scale-95 transition-all group"
                         >
@@ -1062,7 +1745,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                         />
                         {config.features.voiceToText === true && (
                           <button 
-                            onClick={toggleVoice}
+                            onClick={() => toggleVoice(true)}
                             className={cn(
                               "w-8 h-8 rounded-xl flex items-center justify-center transition-all ml-2",
                               isVoiceActive ? "bg-rose-500 text-white animate-pulse" : "bg-slate-100 text-slate-400"
@@ -1123,7 +1806,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 group shadow-inner">
                       <img 
                         src={FIELD_IMAGES.shopboard} 
-                        alt="Unilever Shop Board Live Feed" 
+                        alt="Shop Board Live Feed" 
                         className={cn(
                           "w-full h-full object-cover transition-all duration-305",
                           visionShopboardUrl ? "opacity-100 scale-100" : "opacity-40 scale-105"
@@ -1158,16 +1841,30 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     </div>
 
                     {/* Shop Board Capture Button */}
-                    <button 
-                      onClick={() => openCamera('vision-loc', 'shopboard')}
-                      className={cn(
-                        "w-full py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white",
-                        visionShopboardUrl ? "bg-slate-800" : "bg-blue-600"
-                      )}
-                    >
-                      <Camera className="w-3.5 h-3.5" />
-                      {visionShopboardUrl ? "Re-take Shop Board Photo" : "Take Shop Board Photo"}
-                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => openCamera('vision-loc', 'shopboard')}
+                        className={cn(
+                          "flex-1 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white cursor-pointer",
+                          visionShopboardUrl ? "bg-slate-800" : "bg-blue-600"
+                        )}
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        {visionShopboardUrl ? "Re-take" : "Take Photo"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCameraPurpose('vision-loc');
+                          setCameraStep('shopboard');
+                          fileInputRef.current?.click();
+                        }}
+                        className="py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-slate-500" />
+                        Upload
+                      </button>
+                    </div>
 
                     {visionShopboardUrl && (
                       <div className="bg-slate-50 border border-slate-100 p-2.5 rounded-xl space-y-1 text-slate-600 font-mono text-[8px]">
@@ -1177,7 +1874,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     )}
                   </div>
 
-                  {/* STEP 2: Unilever SKU Audit and SKU photo */}
+                  {/* STEP 2: SKU Audit and SKU photo */}
                   <div className={cn(
                     "bg-white rounded-[2rem] p-4 border shadow-sm space-y-3 transition-opacity duration-300",
                     visionShopboardUrl ? "opacity-100 border-slate-100" : "opacity-50 border-slate-100 pointer-events-none"
@@ -1185,7 +1882,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     <div className="flex items-center justify-between border-b border-slate-50 pb-2">
                       <div className="flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">2</span>
-                        <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Unilever SKU Image</h3>
+                        <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">SKU Display Image</h3>
                       </div>
                       {detectedSkuCount !== null ? (
                         <span className="bg-emerald-500/10 text-emerald-600 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1 border border-emerald-500/15">
@@ -1202,7 +1899,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 shadow-inner">
                       <img 
                         src={FIELD_IMAGES.allSkus} 
-                        alt="Unilever SKUs Shelf" 
+                        alt="SKUs Shelf" 
                         className={cn(
                           "w-full h-full object-cover transition-all duration-305",
                           visionSkuImageUrl ? "opacity-100 scale-100" : "opacity-35 scale-105"
@@ -1221,21 +1918,35 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                       )}
 
                       <div className="absolute bottom-3 left-3 bg-slate-900/90 text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-white/10 text-white leading-none">
-                        Unilever Shelf Image
+                        Shelf Image
                       </div>
                     </div>
 
                     {/* Sku Image Capture Button */}
-                    <button 
-                      onClick={() => openCamera('vision-loc', 'allSkus')}
-                      className={cn(
-                        "w-full py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white",
-                        detectedSkuCount !== null ? "bg-slate-800" : "bg-blue-600"
-                      )}
-                    >
-                      <Camera className="w-3.5 h-3.5" />
-                      {detectedSkuCount !== null ? "Re-take SKU Image" : "Take SKU Image"}
-                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => openCamera('vision-loc', 'allSkus')}
+                        className={cn(
+                          "flex-1 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all text-white cursor-pointer",
+                          detectedSkuCount !== null ? "bg-slate-800" : "bg-blue-600"
+                        )}
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        {detectedSkuCount !== null ? "Re-take SKU Image" : "Take SKU Image"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCameraPurpose('vision-loc');
+                          setCameraStep('allSkus');
+                          fileInputRef.current?.click();
+                        }}
+                        className="py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-slate-500" />
+                        Upload
+                      </button>
+                    </div>
 
                     {/* DISPLAY SKU COUNT RESULTS WHEN TAKEN */}
                     {detectedSkuCount !== null && (
@@ -1248,7 +1959,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           <p className="text-[8px] font-black uppercase tracking-wider text-blue-500">Live Item recognition output</p>
                           <div className="inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white rounded-full px-5 py-2 shadow-md">
                             <Sparkles className="w-3.5 h-3.5 text-blue-200 animate-pulse" />
-                            <span className="text-sm font-black tracking-tight">{detectedSkuCount} Unilever SKUs</span>
+                            <span className="text-sm font-black tracking-tight">
+                              {shelfSkuCounts['dove-soap'] + shelfSkuCounts['dove-shampoo'] + shelfSkuCounts['lux-soap'] + shelfSkuCounts['lifebuoy-wash']} Total SKUs
+                            </span>
                           </div>
                           <p className="text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest pt-1">
                             Accuracy rating: <b>{sampleVisionData.compliance}%</b> (Optimal Display Density)
@@ -1261,15 +1974,15 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           <div className="grid grid-cols-3 gap-2">
                             <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
                               <p className="text-[7px] font-black text-slate-400 uppercase">Dove</p>
-                              <p className="text-xs font-black text-blue-600">24 SKUs</p>
+                              <p className="text-xs font-black text-blue-600">{shelfSkuCounts['dove-soap'] + shelfSkuCounts['dove-shampoo']} SKUs</p>
                             </div>
                             <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
                               <p className="text-[7px] font-black text-slate-400 uppercase">Lux</p>
-                              <p className="text-xs font-black text-blue-600">12 SKUs</p>
+                              <p className="text-xs font-black text-blue-600">{shelfSkuCounts['lux-soap']} SKUs</p>
                             </div>
                             <div className="bg-white p-2 rounded-xl border border-blue-50/60 text-center">
                               <p className="text-[7px] font-black text-slate-400 uppercase">Lifebuoy</p>
-                              <p className="text-xs font-black text-blue-600">8 SKUs</p>
+                              <p className="text-xs font-black text-blue-600">{shelfSkuCounts['lifebuoy-wash']} SKUs</p>
                             </div>
                           </div>
                         </div>
@@ -1439,7 +2152,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                    <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
                       {[
                         { time: '09:00 AM', location: 'Smollan HQ', status: 'completed' },
-                        { time: '10:30 AM', location: 'Unilever Hub', status: 'current' },
+                        { time: '10:30 AM', location: 'Distribution Hub', status: 'current' },
                         { time: '01:00 PM', location: 'Spar Supermarket', status: 'pending' },
                         { time: '03:15 PM', location: 'Checkers Metro', status: 'pending' }
                       ].map((stop, idx) => (
@@ -1535,7 +2248,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
                    <div className="space-y-4">
                       {[
-                        { item: 'Unilever Detergent 2kg', stock: 'Critical', distance: '0.4km', color: 'red' },
+                        { item: 'Premium Detergent 2kg', stock: 'Critical', distance: '0.4km', color: 'red' },
                         { item: 'Hellmanns Mayo 400g', stock: 'Low', distance: '1.2km', color: 'orange' },
                         { item: 'Knorr Soup Pack', stock: 'Optimal', distance: '2.5km', color: 'emerald' }
                       ].map((prod, i) => (
@@ -1554,6 +2267,728 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                         </div>
                       ))}
                    </div>
+                </motion.div>
+              )}
+
+              {activeScreen === 'quiz' && (
+                <motion.div
+                  key="quiz"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="p-5 space-y-5 flex flex-col h-full overflow-y-auto no-scrollbar pb-24 font-sans text-slate-800"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                          <span className="text-blue-600 font-extrabold uppercase animate-pulse">AI Field Quiz</span>
+                        </h3>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Adaptable Cognitive Check</p>
+                     </div>
+                     <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
+                        <Brain className="w-5 h-5 animate-pulse" />
+                     </div>
+                  </div>
+
+                  {/* Dynamic UI based on state */}
+                  {quizState === 'idle' && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-5 flex-1 flex flex-col justify-between"
+                    >
+                      <div className="space-y-4">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600">
+                          <Zap className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-base font-black text-slate-800 tracking-tight">Adaptive Testing Engine</h4>
+                          <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                            Our AI scans your recent on-site operations to construct custom test cases based on your actual work history!
+                          </p>
+                        </div>
+
+                        {/* Summary of User Profile History */}
+                        <div className="bg-slate-50 p-4 rounded-2xl space-y-2 border border-slate-100">
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Identified learning patterns</p>
+                          <div className="space-y-1 text-[10px] text-slate-600 font-bold">
+                            {logs.length > 0 ? (
+                              <>
+                                <p className="flex items-center gap-1.5"><span className="text-blue-500">✔</span> Active logs detected ({logs.length} operations)</p>
+                                <p className="flex items-center gap-1.5"><span className="text-blue-500">✔</span> Focus Area: Order compliance & stock math</p>
+                                <p className="flex items-center gap-1.5"><span className="text-emerald-500">✔</span> Pattern: Visual shelf accuracy</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="flex items-center gap-1.5 text-slate-400"><span className="text-slate-300">●</span> No past logs: Merchandising rookie profile activated</p>
+                                <p className="flex items-center gap-1.5"><span className="text-blue-500">✔</span> Recommended: Core field force terminology quiz</p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleTriggerQuizGeneration}
+                        className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2 mt-4"
+                      >
+                        <Brain className="w-4 h-4 text-blue-400" />
+                        Generate Quiz Scenarios
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {quizState === 'generating' && (
+                    <motion.div 
+                      className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm h-[320px] flex flex-col items-center justify-center space-y-6 text-center"
+                    >
+                      <motion.div
+                        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        className="w-14 h-14 rounded-full border-4 border-blue-500/10 border-t-blue-600 flex items-center justify-center"
+                      >
+                        <Brain className="w-6 h-6 text-blue-600" />
+                      </motion.div>
+                      
+                      <div className="space-y-2 max-w-[220px]">
+                        <p className="text-xs font-black uppercase tracking-widest text-slate-800 animate-pulse">Personalizing questions...</p>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                          Scanning local logs, stock levels, and SIFT display accuracy coefficients
+                        </p>
+                      </div>
+
+                      <div className="w-full max-w-[180px] h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1.8 }}
+                          className="h-full bg-blue-600"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {quizState === 'active' && quizQuestions.length > 0 && (
+                    <motion.div 
+                      className="space-y-4"
+                    >
+                      {/* Progress bar */}
+                      <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+                        <span className="text-[10px] font-black text-blue-600 italic">Question {quizCurrentIndex + 1} of {quizQuestions.length}</span>
+                        <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden ml-3">
+                          <div 
+                            style={{ width: `${((quizCurrentIndex + 1) / quizQuestions.length) * 100}%` }}
+                            className="h-full bg-blue-600 rounded-full transition-all duration-300" 
+                          />
+                        </div>
+                      </div>
+
+                      {/* Question Frame */}
+                      <div className="bg-slate-900 text-white p-5 rounded-[2rem] shadow-xl border border-white/5 space-y-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 text-[7px] font-black bg-blue-50/20 text-blue-400 rounded-full uppercase">AI Segment match</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
+                        <h4 className="text-xs font-bold leading-relaxed tracking-tight text-slate-100">
+                          {quizQuestions[quizCurrentIndex].question}
+                        </h4>
+                      </div>
+
+                      {/* Options */}
+                      <div className="space-y-2.5">
+                        {quizQuestions[quizCurrentIndex].options.map((option, isIdx) => {
+                          const isSelected = quizSelectedOption === isIdx;
+                          const isCorrect = quizQuestions[quizCurrentIndex].correctAnswerIndex === isIdx;
+                          const hasAnswered = quizSelectedOption !== null;
+                          
+                          let cardStyle = "bg-white border-slate-100 text-slate-700 hover:bg-slate-50";
+                          if (hasAnswered) {
+                            if (isCorrect) {
+                              cardStyle = "bg-emerald-50 border-emerald-300 text-emerald-800 ring-2 ring-emerald-100";
+                            } else if (isSelected) {
+                              cardStyle = "bg-rose-50 border-rose-300 text-rose-800 ring-2 ring-rose-100";
+                            } else {
+                              cardStyle = "bg-slate-50 border-slate-100/50 text-slate-400 opacity-60";
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={isIdx}
+                              disabled={hasAnswered}
+                              onClick={() => {
+                                setQuizSelectedOption(isIdx);
+                                if (isCorrect) {
+                                  setQuizScore(prev => prev + 1);
+                                }
+                              }}
+                              className={cn(
+                                "w-full p-4 rounded-2xl border text-left text-[11px] font-bold leading-tight transition-all active:scale-98 flex items-center justify-between",
+                                cardStyle
+                              )}
+                            >
+                              <span>{option}</span>
+                              {hasAnswered && isCorrect && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                              {hasAnswered && isSelected && !isCorrect && <X className="w-4 h-4 text-rose-600 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* AI Explainer Box (Displays post selection) */}
+                      {quizSelectedOption !== null && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50 space-y-1.5 text-slate-800"
+                        >
+                          <div className="flex items-center gap-1.5 text-blue-800">
+                            <Brain className="w-3.5 h-3.5 text-blue-600 animate-pulse shrink-0" />
+                            <span className="text-[8px] font-black uppercase tracking-widest">AI Feedback</span>
+                          </div>
+                          <p className="text-[10px] font-semibold text-slate-600 leading-normal">
+                            {quizQuestions[quizCurrentIndex].explanation}
+                          </p>
+
+                          <button
+                            onClick={handleNextQuizQuestion}
+                            className="mt-3 w-full py-2.5 bg-blue-600 text-white rounded-xl text-[9px] font-black tracking-widest uppercase active:scale-95 transition-all text-center"
+                          >
+                            {quizCurrentIndex < quizQuestions.length - 1 ? "Next Question" : "Complete Quiz"}
+                          </button>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {quizState === 'completed' && (
+                    <motion.div 
+                      className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6 text-center"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 m-auto flex items-center justify-center border border-emerald-100 shadow-sm">
+                        <Check className="w-8 h-8 font-black" />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <h4 className="text-lg font-black text-slate-800 tracking-tight">Quiz Complete!</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Custom learning loop success</p>
+                      </div>
+
+                      {/* Score metrics */}
+                      <div className="grid grid-cols-2 gap-3 py-1 text-left">
+                        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Accuracy score</p>
+                          <p className="text-lg font-black text-slate-800">{quizScore} <span className="text-slate-400">/ {quizQuestions.length}</span></p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Awarded reward</p>
+                          <p className="text-lg font-black text-emerald-500 italic font-mono">+150 XP</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100/50 text-left space-y-1">
+                        <p className="text-[8px] font-black text-blue-800 uppercase tracking-widest">Coaching Diagnosis</p>
+                        <p className="text-[9.5px] font-semibold text-slate-600 leading-normal">
+                          {quizScore === quizQuestions.length 
+                            ? "Excellent performance! Your planogram compliance math and share-of-shelf principles are top notch. Check performance rank boosts!" 
+                            : "Solid progress. We recommend keeping an eye on OOS stock thresholds and using the order optimizer suggest feature to eliminate inventory holes."}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setQuizState('idle');
+                            setQuizCurrentIndex(0);
+                            setQuizScore(0);
+                            setQuizSelectedOption(null);
+                          }}
+                          className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all font-sans"
+                        >
+                          Retake
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveScreen('home');
+                          }}
+                          className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-blue-500/10 font-sans"
+                        >
+                          Return Home
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
+              {activeScreen === 'order' && (
+                <motion.div
+                  key="order"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="p-4 space-y-5 flex flex-col h-full overflow-y-auto no-scrollbar pb-24"
+                >
+                  {/* Module Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Book Order</h3>
+                      <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest leading-none mt-1">AI Automated Suggested Replenishment</p>
+                    </div>
+                    <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-md shadow-blue-500/10">
+                      <ShoppingCart className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  {bookedReceipt ? (
+                    /* Receipt / Confirmed Order Success View */
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white rounded-[2rem] p-6 border border-emerald-100 shadow-xl space-y-6 text-center relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                        <Check className="w-32 h-32 text-emerald-600" />
+                      </div>
+                      
+                      <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border-2 border-emerald-100">
+                        <Check className="w-8 h-8 stroke-[3]" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="text-base font-black text-slate-800 tracking-tight">Order Placed Successfully!</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Receipt reference: {bookedReceipt.orderId}</p>
+                      </div>
+
+                      <div className="bg-slate-50 rounded-2xl p-4 text-left space-y-3 border border-slate-100">
+                        <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                          <span>Total Quantities booked:</span>
+                          <span className="text-slate-800">{bookedReceipt.totalUnits} Units</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                          <span>Best Scheme Savings:</span>
+                          <span className="text-emerald-600">Saved {bookedReceipt.totalBenefitPercent}%</span>
+                        </div>
+                        <div className="h-px bg-slate-200 border-dashed" />
+                        <div className="flex justify-between items-center font-black">
+                          <span className="text-xs text-slate-800">Total Order Value:</span>
+                          <span className="text-sm text-blue-600">${bookedReceipt.totalAmount.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50/50 border border-emerald-100 rounded-2xl text-left">
+                        <AlertCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-[9px] font-extrabold text-emerald-800 uppercase tracking-tight leading-snug">
+                          SENT TO SOUTH DISTRIBUTOR FOR EXPRESS DISPATCH
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setBookedReceipt(null);
+                          setOrderProducts(prev => prev.map(p => ({ ...p, qty: 0 })));
+                        }}
+                        className="w-full bg-slate-900 text-white py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-md shadow-slate-950/10"
+                      >
+                        🛒 Start New Booking
+                      </button>
+                    </motion.div>
+                  ) : (
+                    /* Booking Form and Suggestions */
+                    <>
+                      {/* Top Insights Panel */}
+                      <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/5 border border-emerald-500/15 rounded-[2rem] p-5 space-y-3.5 shadow-sm">
+                        <div className="flex items-center gap-1.5">
+                          <TrendingUp className="w-4 h-4 text-emerald-600 animate-pulse" />
+                          <h4 className="text-[10px] font-black uppercase text-emerald-800 tracking-wider">Replenishment insights</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-emerald-500/15 flex flex-col justify-between">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Warnings</span>
+                            <div className="mt-1.5 flex items-baseline gap-1">
+                              <span className="text-base font-black text-red-600 leading-none">1</span>
+                              <span className="text-[8px] font-black text-slate-500 uppercase">SKU Out-Of-Stock</span>
+                            </div>
+                            <span className="text-[7.5px] font-bold text-slate-400 mt-1">Dove Beauty Bar is OOS</span>
+                          </div>
+                          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-emerald-500/15 flex flex-col justify-between">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Suggested Order</span>
+                            <div className="mt-1.5 flex items-baseline gap-1">
+                              <span className="text-base font-black text-blue-600 leading-none">40</span>
+                              <span className="text-[8px] font-black text-slate-500 uppercase">Total Units</span>
+                            </div>
+                            <span className="text-[7.5px] font-bold text-slate-400 mt-1">Ready for auto-fill below</span>
+                          </div>
+                        </div>
+                        <p className="text-[8.5px] font-black text-slate-500 leading-normal flex items-start gap-1">
+                          <span className="text-emerald-500">💡</span>
+                          <span>Fill OOS items now to unlock up to <b>18% in Scheme Discounts</b> instantly. This store has <b>94% Compliance potential</b>.</span>
+                        </p>
+                      </div>
+
+                      {/* Suggesion Box based on History (OOS Last Month) */}
+                      <div className="bg-slate-900 rounded-[2rem] p-5 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute -top-4 -right-4 opacity-5 rotate-12">
+                          <Calendar className="w-24 h-24" />
+                        </div>
+                        
+                        <div className="relative z-10 space-y-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg bg-blue-500 flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Past History Insight</span>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-black italic tracking-tight">"Last month order went Out of Stock..."</h4>
+                            <p className="text-[10px] font-bold text-slate-400 leading-relaxed max-w-[280px]">
+                              Dove Soap and Dove Shampoo were <span className="text-red-400 font-black uppercase">OOS</span> last month. It is now time for the monthly replenishment. We suggest ordering replenishment units.
+                            </p>
+                          </div>
+
+                          <div className="flex gap-2.5 pt-1">
+                            <button
+                              onClick={handleApplySuggestions}
+                              className="flex-1 bg-blue-600 hover:bg-blue-500 font-extrabold text-[9px] text-white uppercase tracking-widest py-2.5 px-3 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5"
+                            >
+                              💡 Apply Suggestions ({orderProducts.filter(p => p.suggestedQty > 0).length} SKUs)
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Products Ordering List */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center px-1">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Available Catalog</h4>
+                          <span className="text-[9px] font-bold text-slate-500">{orderProducts.length} SKUs</span>
+                        </div>
+
+                        {orderProducts.map((product) => {
+                          // Find best scheme (highest benefit value)
+                          const bestScheme = product.schemes.length > 0 
+                            ? [...product.schemes].sort((a, b) => b.benefitPercent - a.benefitPercent)[0]
+                            : null;
+                          
+                          return (
+                            <div 
+                              key={product.id} 
+                              className={cn(
+                                "bg-white p-4 rounded-3xl border transition-all shadow-sm flex flex-col gap-3",
+                                product.qty > 0 ? "border-blue-200 ring-2 ring-blue-500/5 bg-blue-50/10" : "border-slate-100"
+                              )}
+                            >
+                              {/* Product Meta Info Header */}
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <span className={cn(
+                                      "px-2 py-0.5 text-[8px] font-black uppercase rounded-full tracking-wide",
+                                      product.stockStatus === 'Critical OOS' ? "bg-red-50 text-red-600 border border-red-100" :
+                                      product.stockStatus === 'Low' ? "bg-orange-50 text-orange-600 border border-orange-100" :
+                                      "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                    )}>
+                                      {product.stockStatus === 'Critical OOS' ? '🚫 Out-of-stock' : product.stockStatus}
+                                    </span>
+                                    
+                                    {product.lastMonthOos && (
+                                      <span className="px-2 py-0.5 text-[8px] font-black uppercase rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                        📅 Re-order alert
+                                      </span>
+                                    )}
+                                  </div>
+                                  <h5 className="text-xs font-black text-slate-800 tracking-tight leading-tight">{product.name}</h5>
+                                  <p className="text-[9px] font-bold text-slate-400 mt-1">Price per unit: <b className="text-slate-700">${product.price.toFixed(2)}</b> • Last month Qty: {product.lastOrderQty} units</p>
+                                </div>
+
+                                {/* Quantity Adjuster Widget */}
+                                <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl shrink-0 border border-slate-100">
+                                  <button
+                                    onClick={() => {
+                                      setOrderProducts(prev => prev.map(p => {
+                                        if (p.id === product.id) {
+                                          return { ...p, qty: Math.max(0, p.qty - 1) };
+                                        }
+                                        return p;
+                                      }));
+                                    }}
+                                    className="w-6 h-6 rounded-xl bg-white flex items-center justify-center text-slate-600 border border-slate-100 hover:bg-slate-100 hover:text-slate-800 active:scale-90 transition-all font-bold text-xs"
+                                  >
+                                    <Minus className="w-3 h-3" />
+                                  </button>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={product.qty <= 0 ? "" : product.qty}
+                                    placeholder="0"
+                                    onChange={(e) => {
+                                      const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                                      const num = cleaned === '' ? 0 : parseInt(cleaned, 10);
+                                      setOrderProducts(prev => prev.map(p => {
+                                        if (p.id === product.id) {
+                                          return { ...p, qty: isNaN(num) ? 0 : Math.max(0, num) };
+                                        }
+                                        return p;
+                                      }));
+                                    }}
+                                    className="text-[11px] font-extrabold text-slate-800 w-8 bg-white border border-slate-200 rounded-lg text-center focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-0.5"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      setOrderProducts(prev => prev.map(p => {
+                                        if (p.id === product.id) {
+                                          return { ...p, qty: p.qty + 1 };
+                                        }
+                                        return p;
+                                      }));
+                                    }}
+                                    className="w-6 h-6 rounded-xl bg-white flex items-center justify-center text-slate-600 border border-slate-100 hover:bg-slate-100 hover:text-slate-800 active:scale-90 transition-all font-bold text-xs"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Schemes list container */}
+                              {product.schemes.length > 0 && product.qty > 0 && (
+                                <div className="space-y-1.5 mt-1 pt-2.5 border-t border-slate-100/80">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Available Schemes (Best Auto-Selected)</span>
+                                    {bestScheme && (
+                                      <span className="text-[8px] font-black text-emerald-600 flex items-center gap-0.5">
+                                        ⭐ Best option: {bestScheme.benefitPercent}% value
+                                      </span>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 gap-1.5">
+                                    {product.schemes.map((sch) => {
+                                      const isBestScheme = bestScheme?.id === sch.id;
+                                      const isSelected = product.selectedSchemeId === sch.id;
+                                      
+                                      return (
+                                        <button
+                                          key={sch.id}
+                                          onClick={() => {
+                                            setOrderProducts(prev => prev.map(p => {
+                                              if (p.id === product.id) {
+                                                return { ...p, selectedSchemeId: sch.id };
+                                              }
+                                              return p;
+                                            }));
+                                          }}
+                                          className={cn(
+                                            "flex items-center justify-between p-2 rounded-xl text-left border text-[9px] transition-all",
+                                            isSelected 
+                                              ? "bg-slate-900 border-slate-900 text-white shadow-sm" 
+                                              : "bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100"
+                                          )}
+                                        >
+                                          <div className="flex items-center gap-1.5">
+                                             <div className={cn(
+                                               "w-4 h-4 rounded-full border flex items-center justify-center text-[7px] font-bold shrink-0",
+                                               isSelected 
+                                                 ? "bg-blue-500 border-blue-500 text-white" 
+                                                 : "border-slate-300"
+                                             )}>
+                                               {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                             </div>
+                                             <div>
+                                               <span className="font-extrabold">{sch.name}</span>
+                                               <p className={cn("text-[7px] font-medium leading-none mt-0.5", isSelected ? "text-slate-300" : "text-slate-400")}>{sch.description}</p>
+                                             </div>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                             {isBestScheme && (
+                                               <span className="bg-emerald-500 text-white font-black uppercase text-[6px] tracking-wider px-1.5 py-0.5 rounded-full">
+                                                 Best Scheme
+                                               </span>
+                                             )}
+                                             <span className={cn("font-black text-[9px]", isSelected ? "text-blue-400" : "text-slate-700")}>
+                                               -{sch.benefitPercent}%
+                                             </span>
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Checkout/Booking total section */}
+                      {orderProducts.some(p => p.qty > 0) && (
+                        <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-xl space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Summary</span>
+                            <span className="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-2.5 py-0.5 rounded-full">
+                              {orderProducts.reduce((acc, curr) => acc + curr.qty, 0)} Items Added
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 text-xs font-bold text-slate-500">
+                            <div className="flex justify-between">
+                              <span>Subtotal:</span>
+                              <span className="text-slate-800">
+                                ${orderProducts.reduce((acc, curr) => acc + (curr.price * curr.qty), 0).toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Scheme Benefits (Weighted):</span>
+                              <span className="text-emerald-600">
+                                -${orderProducts.reduce((acc, curr) => {
+                                  if (curr.qty === 0 || !curr.selectedSchemeId) return acc;
+                                  const selected = curr.schemes.find(s => s.id === curr.selectedSchemeId);
+                                  if (!selected) return acc;
+                                  return acc + (curr.price * curr.qty * selected.benefitPercent / 100);
+                                }, 0).toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="h-px bg-slate-100" />
+                            <div className="flex justify-between items-center font-black text-slate-800 pt-1">
+                              <span>Estimated Payable:</span>
+                              <span className="text-base text-blue-600">
+                                ${orderProducts.reduce((acc, curr) => {
+                                  const sub = curr.price * curr.qty;
+                                  if (curr.qty === 0 || !curr.selectedSchemeId) return acc + sub;
+                                  const selected = curr.schemes.find(s => s.id === curr.selectedSchemeId);
+                                  if (!selected) return acc + sub;
+                                  return acc + (sub - (sub * selected.benefitPercent / 100));
+                                }, 0).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setIsOrderBookingConfirmOpen(true)}
+                            className="w-full bg-blue-600 text-white font-black uppercase text-[10px] tracking-widest py-3.5 rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-2"
+                          >
+                            <ShoppingCart className="w-4 h-4 fill-white" /> Book Order
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* YES / NO Dialog confirm Overlay */}
+                  <AnimatePresence>
+                    {isOrderBookingConfirmOpen && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          onClick={() => setIsOrderBookingConfirmOpen(false)}
+                          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[2000]"
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[310px] bg-white rounded-[2.5rem] p-6 shadow-2xl z-[2001] border border-slate-100 flex flex-col space-y-5"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                                <ShoppingCart className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-black text-slate-800 leading-none">Confirm Booking?</h4>
+                                <p className="text-[7px] font-extrabold text-blue-500 uppercase tracking-widest leading-none mt-1">Elite Hub #442</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setIsOrderBookingConfirmOpen(false)}
+                              className="p-1 hover:bg-slate-50 rounded-lg transition-colors text-slate-400"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-bold text-slate-500 leading-relaxed">
+                              Do you want to book this replenishment order with the **Auto-Selected Best Schemes**? 
+                            </p>
+                            
+                            <div className="bg-slate-50 p-3 rounded-2xl text-[9px] font-black uppercase text-slate-600 border border-slate-100 space-y-1.5">
+                              <div className="flex justify-between">
+                                <span>Total SKUs:</span>
+                                <span className="text-slate-800">{orderProducts.filter(p => p.qty > 0).length} Lines</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Total Items:</span>
+                                <span className="text-slate-800">{orderProducts.reduce((acc, curr) => acc + curr.qty, 0)} Units</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Estimate Payable:</span>
+                                <span className="text-blue-600">${orderProducts.reduce((acc, curr) => {
+                                  const sub = curr.price * curr.qty;
+                                  if (curr.qty === 0 || !curr.selectedSchemeId) return acc + sub;
+                                  const selected = curr.schemes.find(s => s.id === curr.selectedSchemeId);
+                                  if (!selected) return acc + sub;
+                                  return acc + (sub - (sub * selected.benefitPercent / 100));
+                                }, 0).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Confirm buttons dialog ask user yes or no */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              onClick={() => setIsOrderBookingConfirmOpen(false)}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all text-center"
+                            >
+                              ❌ No, Cancel
+                            </button>
+                            <button
+                              onClick={() => {
+                                const finalAmount = orderProducts.reduce((acc, curr) => {
+                                  const sub = curr.price * curr.qty;
+                                  if (curr.qty === 0 || !curr.selectedSchemeId) return acc + sub;
+                                  const selected = curr.schemes.find(s => s.id === curr.selectedSchemeId);
+                                  if (!selected) return acc + sub;
+                                  return acc + (sub - (sub * selected.benefitPercent / 100));
+                                }, 0);
+                                const totalUnits = orderProducts.reduce((acc, curr) => acc + curr.qty, 0);
+                                const totalBenefitPercent = 15; // Average saves
+                                const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+                                setBookedReceipt({
+                                  orderId,
+                                  totalAmount: finalAmount,
+                                  totalUnits,
+                                  totalBenefitPercent,
+                                  timestamp: new Date().toISOString(),
+                                  summary: `Order booked: ${totalUnits} units, value $${finalAmount.toFixed(2)}`
+                                });
+
+                                dbService.saveInteraction({
+                                  userId: 'field-user-1',
+                                  type: 'order',
+                                  content: { orderId, finalAmount, totalUnits, originalSubtotal: orderProducts.reduce((acc, curr) => acc + (curr.price * curr.qty), 0) },
+                                  summary: `Booked Order ${orderId}: ${totalUnits} units ($${finalAmount.toFixed(2)})`
+                                });
+
+                                // Refresh stats logs
+                                setLogs(dbService.getLogs());
+                                setIsOrderBookingConfirmOpen(false);
+                              }}
+                              className="bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all text-center shadow-lg shadow-blue-500/15"
+                            >
+                              ✅ Yes, Order
+                            </button>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
 
@@ -1593,6 +3028,271 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* FLOATING HANDS-FREE VOICE ASSISTANT TRIGGER */}
+            {!isVoiceSheetOpen && (
+              <div className="absolute bottom-6 right-6 z-[90]">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={toggleVoice}
+                  className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xl hover:shadow-indigo-500/30 transition-all border border-indigo-400/20 cursor-pointer"
+                >
+                  <Mic className="w-5 h-5 animate-pulse" />
+                </motion.button>
+              </div>
+            )}
+
+            {/* HANDS-FREE VOICE OVERLAY DRAWERS */}
+            <AnimatePresence>
+              {isVoiceSheetOpen && (
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 180 }}
+                  className="absolute inset-x-0 bottom-0 bg-slate-950 text-white z-[200] rounded-t-[2rem] shadow-2xl border-t border-white/10 h-[82%] flex flex-col font-sans overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="p-4 flex items-center justify-between border-b border-white/5 bg-slate-900/60 shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                        <Mic className="w-4 h-4 text-blue-400 animate-bounce" />
+                      </div>
+                      <div>
+                        <h3 className="text-[11px] font-black text-slate-100 tracking-wider uppercase leading-none">Voice Field Assistant</h3>
+                        <p className="text-[7.5px] font-black tracking-widest text-emerald-400 uppercase mt-0.5 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Hands-Free Capture Active
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsVoiceSheetOpen(false)}
+                      className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 active:scale-95 transition-all text-slate-300 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Sheet Body - scrollable */}
+                  <div className="flex-1 p-4 overflow-y-auto space-y-4 no-scrollbar pb-16">
+                    {/* Voice sound wave visualizer */}
+                    <div className="bg-slate-900 border border-white/5 p-4 rounded-3xl flex flex-col items-center justify-center text-center space-y-3.5">
+                      {isVoiceActive ? (
+                        <div className="flex items-end justify-center gap-1 h-10 py-0.5">
+                          {[0.3, 0.7, 1.0, 0.5, 0.9, 0.4, 0.8, 0.3, 0.6, 0.9, 0.5, 0.7, 0.4].map((h, idx) => (
+                            <motion.div
+                              key={idx}
+                              animate={{ height: [h * 10, h * 38, h * 10] }}
+                              transition={{ repeat: Infinity, duration: 0.8 + (idx % 3) * 0.2, ease: "easeInOut" }}
+                              className="w-1 bg-gradient-to-t from-blue-500 via-teal-400 to-emerald-400 rounded-full"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-end justify-center gap-1 h-10 py-0.5 opacity-30">
+                          {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, idx) => (
+                            <div key={idx} className="w-1 h-1.5 bg-slate-500 rounded-full" />
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-wider leading-none">
+                          {isVoiceActive ? "Listening for SKU and Task Commands..." : "Voice Engine Standby"}
+                        </p>
+                        <p className="text-[9.5px] text-slate-400 font-semibold px-2 leading-relaxed">
+                          {voiceSpeechText || 'Speak or use voice presets below to record counts!'}
+                        </p>
+                      </div>
+
+                      {/* Microphone trigger button inside sheet */}
+                      <div className="w-full">
+                        <button
+                          onClick={() => toggleVoice(false)}
+                          className={cn(
+                            "w-full py-3 rounded-2xl text-[9px] uppercase font-black tracking-widest transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer",
+                            isVoiceActive ? "bg-rose-500/10 text-rose-300 border border-rose-500/25 animate-pulse" : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                          )}
+                        >
+                          <Mic className="w-3.5 h-3.5" />
+                          {isVoiceActive ? "Listening..." : "Tap to Speak"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Simulated Voice Command Typing Fallback */}
+                    <div className="bg-slate-900 border border-white/5 p-4 rounded-3xl space-y-3">
+                      <div className="flex items-center justify-between px-1">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Type Voice Command (Sandbox Iframe Fallback)</p>
+                        <span className="text-[7px] font-black bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Simulated dictation</span>
+                      </div>
+                      <div className="flex gap-2 bg-slate-950 p-2 rounded-2xl border border-white/5">
+                        <input
+                          type="text"
+                          value={customVoiceInputText}
+                          disabled={isVoiceActive}
+                          onChange={(e) => setCustomVoiceInputText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isVoiceActive && customVoiceInputText.trim()) {
+                              handleCustomVoiceSubmit();
+                            }
+                          }}
+                          placeholder={isVoiceActive ? "Processing command..." : "e.g., 'Count Dove Soap 30 and Shampoo 12'"}
+                          className="flex-1 bg-transparent border-none outline-none text-[10px] text-white px-2 placeholder-slate-600 font-bold disabled:opacity-50"
+                        />
+                        <button
+                          onClick={handleCustomVoiceSubmit}
+                          disabled={isVoiceActive || !customVoiceInputText.trim()}
+                          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Submit
+                        </button>
+                      </div>
+                      <p className="text-[7.5px] text-slate-500 px-1 font-semibold leading-normal">
+                        Since browser security blocks direct microphone hardware access inside sandboxed iframes, you can type any arbitrary voice counts or commands (e.g. <b>"Count Lux 45"</b>, <b>"Dove Soap 20"</b>, <b>"Dove Shampoo 15"</b>, <b>"Reset counts"</b>) above to trigger the exact same Voice parsing, database updates, and audio synthesis engine!
+                      </p>
+                    </div>
+
+                    {/* SKU Stock Live Count Board */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between px-1">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Active Shelf SKU Counts</p>
+                        <span className="text-[7.5px] font-black px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full uppercase tracking-wider animate-pulse border border-emerald-500/5">Database Live</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {orderProducts.map((p) => {
+                          const shelfCount = shelfSkuCounts[p.id] || 0;
+                          return (
+                            <div key={p.id} className="bg-slate-900 border border-white/5 p-3 rounded-2xl flex flex-col justify-between h-20">
+                              <div>
+                                <p className="text-[9px] font-black text-slate-200 tracking-tight leading-none line-clamp-1">{p.name}</p>
+                                <p className="text-[7.5px] text-slate-500 font-extrabold uppercase mt-1 leading-none">{p.id.split('-').join(' ')}</p>
+                              </div>
+                              
+                              <div className="flex items-center justify-between pt-1">
+                                <span className="text-[7px] font-black text-slate-650 uppercase tracking-widest font-mono">Counted</span>
+                                <div className="bg-slate-950 px-2 py-0.5 rounded-lg border border-white/5 flex items-center gap-1">
+                                  <span className="text-xs font-black text-emerald-400 font-mono leading-none">{shelfCount}</span>
+                                  <span className="text-[6px] text-slate-500 font-black tracking-widest uppercase leading-none font-mono">pcs</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Precompiled Simulators */}
+                    <div className="space-y-2">
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Field Voice Command Presets</p>
+
+                      <div className="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar pr-0.5">
+                        {[
+                          {
+                            label: 'Audit Count: Dove and Shampoo',
+                            transcript: 'Count Dove Soap 22 and Shampoo 14 for stock check',
+                            desc: 'Captures and applies 22 Dove and 14 Shampoo counts'
+                          },
+                          {
+                             label: 'Audit Count: Lux Soap status',
+                             transcript: 'Lux Soap is counted at 35 units',
+                             desc: 'Captures and sets Lux Soap physical count to 35'
+                          },
+                          {
+                            label: 'Audit Count: Out of Stock',
+                            transcript: 'Shelf notice: Lifebuoy Soap is out of stock',
+                            desc: 'Sets Lifebuoy physical stock to 0 (OOS)'
+                          },
+                          {
+                            label: 'Voice Store Check-in',
+                            transcript: 'Confirm team attendance and check-in to store',
+                            desc: 'Completes geo-location check-in using voice parameters'
+                          },
+                          {
+                            label: 'Voice Order Booking',
+                            transcript: 'Replenish and order 15 cases of Dove Soap',
+                            desc: 'Books 15 case units in active merchandiser Order screen'
+                          },
+                          {
+                            label: 'Reset Audit Shelf',
+                            transcript: 'Clear all stock counts to zero',
+                            desc: 'Restores initial clean zero slate'
+                          }
+                        ].map((sim, key) => (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              setVoiceSpeechText(`Simulating: "${sim.transcript}"`);
+                              setIsVoiceActive(true);
+                              
+                              setTimeout(() => {
+                                setIsVoiceActive(false);
+                                const parsed = parseVoiceCommand(sim.transcript);
+                                
+                                setVoiceSpeechText(`Recognized: "${sim.transcript}"`);
+                                
+                                setVoiceLog(prev => [
+                                  {
+                                    id: Date.now().toString(),
+                                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                    text: `Voice: "${sim.transcript}"`,
+                                    details: parsed.summary,
+                                    type: parsed.success ? 'success' : 'warn' as any
+                                  },
+                                  ...prev
+                                ]);
+                              }, 1000);
+                            }}
+                            className="w-full p-2.5 bg-white/5 hover:bg-white/10 active:bg-white/12 border border-white/5 rounded-2xl text-left transition-all active:scale-98 flex justify-between items-center group cursor-pointer"
+                          >
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] font-black text-slate-300 group-hover:text-blue-400 transition-colors">“{sim.transcript}”</p>
+                              <p className="text-[7.5px] text-slate-500 font-bold">{sim.desc}</p>
+                            </div>
+                            <div className="w-4.5 h-4.5 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                              <Plus className="w-3.5 h-3.5 text-blue-400" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Voice Telemetry log */}
+                    <div className="space-y-2">
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Voice Telemetry Journal</p>
+                      
+                      <div className="bg-slate-900/90 border border-white/5 p-3.5 rounded-3xl space-y-2.5">
+                        <div className="space-y-2 max-h-[120px] overflow-y-auto no-scrollbar">
+                          {voiceLog.length === 0 ? (
+                            <p className="text-[8.5px] text-slate-500 font-semibold italic text-center py-2">No voice interactions recorded yet</p>
+                          ) : (
+                            voiceLog.map((log) => (
+                              <div key={log.id} className="text-[9px] font-semibold border-b border-white/5 pb-2 last:border-0 last:pb-0 space-y-0.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[7.5px] font-black uppercase text-blue-400 tracking-wider flex items-center gap-1.5">
+                                    <span className={cn(
+                                      "w-1.5 h-1.5 rounded-full",
+                                      log.type === 'success' ? "bg-emerald-400 animate-pulse" : log.type === 'warn' ? "bg-amber-400" : "bg-slate-400"
+                                    )} />
+                                    {log.type === 'success' ? 'SKU PARSED' : log.type === 'warn' ? 'UNRECOGNIZED' : 'TELEMETRY'}
+                                  </span>
+                                  <span className="text-[7.5px] text-slate-650 font-mono font-bold">{log.time}</span>
+                                </div>
+                                <p className="text-white font-black leading-tight">{log.text}</p>
+                                <p className="text-[8.5px] text-slate-400 font-semibold leading-relaxed whitespace-pre-line">{log.details}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <nav className="h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-50 shadow-inner">
@@ -1617,15 +3317,17 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
              {topFeatures.map((feature) => {
                const screenMap: Record<string, Screen> = {
-                 predictiveBot: 'bot',
-                 visionAutomation: 'vision',
-                 salesInsights: 'reports',
-                 trainingHub: 'training',
-                 routeOptimizer: 'planner',
-                 userProfile: 'performance',
-                 inventoryRadar: 'stock',
-                 territoryMap: 'territory'
-               };
+                  predictiveBot: 'bot',
+                  visionAutomation: 'vision',
+                  salesInsights: 'reports',
+                  trainingHub: 'training',
+                  routeOptimizer: 'planner',
+                  userProfile: 'performance',
+                  inventoryRadar: 'stock',
+                  territoryMap: 'territory',
+                  orderManagement: 'order',
+                  quizModule: 'quiz'
+                };
                const targetScreen = screenMap[feature.id];
                if (!targetScreen) return null;
 
@@ -1768,7 +3470,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border border-white/20">
                       <img 
                         src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus} 
-                        alt="Unilever template reference" 
+                        alt="Template reference" 
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
@@ -1827,7 +3529,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                         />
                         <div className="space-y-1.5 w-full max-w-[210px]">
                           <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                            {cameraStep === 'shopboard' ? 'Verifying Storefront...' : 'Counting Unilever SKUs...'}
+                            {cameraStep === 'shopboard' ? 'Verifying Storefront...' : 'Counting SKUs...'}
                           </p>
                           <div className="bg-slate-900 border border-white/5 p-2 rounded-xl text-left font-mono space-y-1 text-[7px] text-slate-400">
                             {cameraStep === 'shopboard' ? (
@@ -1841,7 +3543,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               <>
                                 <p className="flex items-center gap-1"><span className="text-blue-400">📊</span> IR: Initializing YOLO display mesh model</p>
                                 <p className="flex items-center gap-1"><span className="text-blue-400">🔍</span> SCAN: Running local density sweep...</p>
-                                <p className="flex items-center gap-1"><span className="text-blue-400">🏷️</span> BRAND: Segmenting Unilever product bounds</p>
+                                <p className="flex items-center gap-1"><span className="text-blue-400">🏷️</span> BRAND: Segmenting product bounds</p>
                                 <p className="font-extrabold text-emerald-400 flex items-center gap-1 mt-1 border-t border-white/5 pt-1">✅ COUNTED (156 SKUs Detected, 94% Compliant)</p>
                               </>
                             )}
@@ -1855,9 +3557,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
               {/* Shutter Controls */}
               <div className="p-4 bg-slate-900 border-t border-white/10 shrink-0 flex items-center justify-between">
-                <div className="flex flex-col items-center w-12 text-center text-slate-400 leading-none">
+                <div className="flex flex-col items-center w-16 text-center text-slate-400 leading-none">
                   <span className="text-[6.5px] font-bold uppercase tracking-wider text-slate-500 leading-none">Gps LOCK</span>
-                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tight flex items-center gap-0.5 mt-1">
+                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tight flex items-center gap-0.5 mt-1 justify-center">
                     <Check className="w-2.5 h-2.5 p-0" /> Geofence
                   </span>
                 </div>
@@ -1866,18 +3568,22 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   <button 
                     disabled={cameraState !== 'idle'}
                     onClick={handleShutterClick}
-                    className="w-14 h-14 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all disabled:opacity-40 shadow-xl"
+                    className="w-14 h-14 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all disabled:opacity-40 shadow-xl cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white" />
                   </button>
                 </div>
 
-                <div className="flex flex-col items-center w-12 text-center text-slate-400 leading-none">
-                  <span className="text-[6.5px] font-bold uppercase tracking-wider text-slate-500 leading-none">Match status</span>
-                  <span className="text-[8px] font-black text-blue-400 uppercase tracking-tight mt-1 flex items-center gap-0.5">
-                    HIGH CONFIDENCE
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  disabled={cameraState !== 'idle'}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center w-16 text-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all py-1.5 px-1 rounded-xl border border-white/5 cursor-pointer disabled:opacity-40"
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-400 animate-pulse mb-1" />
+                  <span className="text-[7.5px] font-black uppercase tracking-wider leading-none">Upload</span>
+                  <span className="text-[5.5px] font-extrabold text-slate-500 uppercase mt-0.5 leading-none">Gallery</span>
+                </button>
               </div>
 
               {/* Bottom Guideline prompt */}
@@ -1885,12 +3591,21 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                 <p className="text-[7.5px] font-extrabold text-blue-300 uppercase tracking-widest leading-tight">
                   {cameraStep === 'shopboard' 
                     ? 'Line up store layout with alignment match overlays to verify outlet details in one tap'
-                    : 'Fit Unilever display stock rack inside the viewfinder to auto-detect and count total SKUs'}
+                    : 'Fit display stock rack inside the viewfinder to auto-detect and count total SKUs'}
                 </p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Hidden File Input for Gallery Upload */}
+        <input 
+          type="file"
+          ref={fileInputRef}
+          onChange={handleGalleryUpload}
+          className="hidden"
+          accept="image/*"
+        />
 
         {/* Home Indicator */}
         <div className="h-8 bg-slate-900 flex items-center justify-center shrink-0">
