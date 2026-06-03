@@ -1,0 +1,37 @@
+{
+  "systemTitle": "Hands-Free Voice Integration Engine",
+  "recognitionAPI": "webkitSpeechRecognition",
+  "feedbackSettings": {
+    "pitch": 1.0,
+    "rate": 1.05,
+    "autoMuteBeep": false
+  },
+  "grammars": [
+    {
+      "command": "check-in | attendance | login",
+      "action": "Trigger geolocated check-in immediately based on voice signature."
+    },
+    {
+      "command": "order | replenish [dove/lux/lifebuoy] [qty]",
+      "action": "Add specific units to active draft cart and proceed to Booking Screen."
+    },
+    {
+      "command": "vision | shelf | scan | audit",
+      "action": "Open viewfinder camera preview directly to lock planograms."
+    },
+    {
+      "command": "quiz | test | questionnaire",
+      "action": "Launch adaptive on-site quiz scenarios immediately."
+    },
+    {
+      "command": "traffic | route | navigation",
+      "action": "Switch to GPS Route Planner to check optimized traveling schedules."
+    }
+  ],
+  "sampleTranscripts": [
+    { "text": "Navigate to next shop", "intent": "SCREEN_TRANSITION", "target": "planner" },
+    { "text": "Book order 30 units Dove Soap", "intent": "ADD_TO_CART", "product": "dove-soap", "quantity": 30 },
+    { "text": "Verify shelf planogram", "intent": "SCREEN_TRANSITION", "target": "vision" },
+    { "text": "Record attendance present", "intent": "HANDSHAKE_ATTENDANCE", "action": "present" }
+  ]
+}

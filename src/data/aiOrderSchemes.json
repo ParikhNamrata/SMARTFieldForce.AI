@@ -1,0 +1,65 @@
+{
+  "currency": "$",
+  "minDeliveryThreshold": 75.0,
+  "distributor": "South Distributor Dispatch Center",
+  "products": [
+    {
+      "id": "dove-soap",
+      "name": "Dove Cream Beauty Bar 100g",
+      "price": 1.80,
+      "lastMonthOos": true,
+      "stockStatus": "Critical OOS",
+      "lastOrderQty": 20,
+      "qty": 0,
+      "suggestedQty": 25,
+      "selectedSchemeId": "scheme-dove-1",
+      "schemes": [
+        { "id": "scheme-dove-1", "name": "Scheme A (Best Offer)", "benefitPercent": 15, "description": "15% Off Case Discount" },
+        { "id": "scheme-dove-2", "name": "Scheme B", "benefitPercent": 10, "description": "Buy 10 Get 1 Free (10% Value)" },
+        { "id": "scheme-dove-3", "name": "Scheme C", "benefitPercent": 5, "description": "Free 24h Express Shipping" }
+      ]
+    },
+    {
+      "id": "dove-shampoo",
+      "name": "Dove Daily Moisture Shampoo 200ml",
+      "price": 4.50,
+      "lastMonthOos": true,
+      "stockStatus": "Low",
+      "lastOrderQty": 12,
+      "qty": 0,
+      "suggestedQty": 15,
+      "selectedSchemeId": "scheme-shamp-2",
+      "schemes": [
+        { "id": "scheme-shamp-1", "name": "Standard Promo", "benefitPercent": 8, "description": "Buy 12 Get 1 Free (8% Value)" },
+        { "id": "scheme-shamp-2", "name": "Super Saver (Best Offer)", "benefitPercent": 18, "description": "18% Case Pack Coupon" }
+      ]
+    },
+    {
+      "id": "lux-soap",
+      "name": "Lux Scarlet Glow Soap 100g",
+      "price": 1.25,
+      "lastMonthOos": false,
+      "stockStatus": "In Stock",
+      "lastOrderQty": 15,
+      "qty": 0,
+      "suggestedQty": 0,
+      "selectedSchemeId": "scheme-lux-1",
+      "schemes": [
+        { "id": "scheme-lux-1", "name": "Volume Deal (Best Offer)", "benefitPercent": 10, "description": "10% volume discount" },
+        { "id": "scheme-lux-2", "name": "Standard Deal", "benefitPercent": 5, "description": "5% generic discount" }
+      ]
+    },
+    {
+      "id": "lifebuoy-wash",
+      "name": "Lifebuoy Total 10 Handwash 200ml",
+      "price": 2.60,
+      "lastMonthOos": false,
+      "stockStatus": "In Stock",
+      "lastOrderQty": 30,
+      "qty": 0,
+      "suggestedQty": 0,
+      "selectedSchemeId": null,
+      "schemes": []
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "systemTitle": "SMARTFieldForce.AI Adaptive Quiz Suite",
+  "recommendedCategories": [
+    {
+      "profileType": "Rookie / Fresh Agent",
+      "curatedThemes": ["Planogram alignments", "Brand pricing standards", "Cold check-ins"]
+    },
+    {
+      "profileType": "Veteran Representative",
+      "curatedThemes": ["Wholesale pricing schemes", "Inventory safety math", "OOS recovery dispatch"]
+    }
+  ],
+  "faqScenarios": [
+    {
+      "question": "🏷️ Planogram Compliance: In Unilever/Smollan merchandising, where is the ideal eye-level placement zone for high-margin products?",
+      "options": [
+        "The highest shelf unreachable by average customers",
+        "The 'Golden Zone' (shoulder to waist levels)",
+        "Scattered randomly on bottom-row shelves",
+        "Hidden in the back storage room to avoid dust"
+      ],
+      "correctAnswerIndex": 1,
+      "explanation": "The 'Golden Zone' represents high-traffic, easy-access shelving that drives 60% of impulse buying."
+    },
+    {
+      "question": "🔋 SIFT Layout Matching: When aligning the Smollan check-in camera with a storefront board, what is the target confidence match score?",
+      "options": [
+        "Minimum 25% alignment",
+        "Minimum 50% alignment",
+        "Over 80% with green GPS alignment lock",
+        "Over 98.4% perfect coordinate match"
+      ],
+      "correctAnswerIndex": 2,
+      "explanation": "A high SIFT alignment of over 80% matches storefront descriptors to authenticate attendance records."
+    },
+    {
+      "question": "📋 Out-Of-Stock (OOS) Risk: If a store records a 'Critical OOS' flag for Dove soap bar two weeks in a row, what is the mandatory action?",
+      "options": [
+        "Wait for the next monthly scheduled visit",
+        "Immediately invoke distributor Scheme A case orders or book with South Dispatch",
+        "Remove the brand tags entirely to prevent negative client impressions",
+        "Temporarily substitute with private label products"
+      ],
+      "correctAnswerIndex": 1,
+      "explanation": "To safeguard market share, multiple consecutive OOS warnings trigger immediate smart booking recommendations."
+    }
+  ],
+  "adaptiveScenarios": {
+    "orderBased": [
+      {
+        "question": "🧠 Learning Pattern: You recently booked order units. To trigger maximum Benefit Schemes (such as Unilever Scheme A), what is the minimum unit threshold?",
+        "options": [
+          "10 Case Units",
+          "15 Units",
+          "25 Units or higher",
+          "50 Case Units"
+        ],
+        "correctAnswerIndex": 2,
+        "explanation": "Case schemes (such as Scheme A) are pre-configured to automatically activate at 25 or more units to unlock wholesale benefits."
+      },
+      {
+        "question": "📈 Inventory Math: Since you booked orders on Dove Beauty Bars, which of the following is the optimal safety stock holding if weekly sales average 6 units?",
+        "options": [
+          "Maintain 0 items to save space",
+          "Maintain 25-30 units of stock to secure against Out-of-Stock (OOS)",
+          "Order 1 item every Monday",
+          "Wait for complete shelf depletion before ordering"
+        ],
+        "correctAnswerIndex": 1,
+        "explanation": "Replenishing 25-30 units ensures 4-5 weeks of safety protection against unexpected Out-of-Stock instances."
+      }
+    ],
+    "visionBased": [
+      {
+        "question": "🔍 Compliance Review: You executed a Shelf SKU Audit. If the automated scanner detects an empty shelf spot (Out-of-Stock), how is your SIFT compliance scoring affected?",
+        "options": [
+          "Decreases compliance scoring and highlights shelf-share warnings",
+          "Increases GPS signal accuracy and geolocks automatically",
+          "Sends an invoice directly to the regional distributor",
+          "OOS does not impact score"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "Visual anomalies and empty slots automatically lower planogram alignment and flag active warnings."
+      }
+    ]
+  }
+}

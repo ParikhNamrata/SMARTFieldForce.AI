@@ -1,0 +1,52 @@
+{
+  "optimizerModel": "Unilever Fleet Routing API v3",
+  "routingMetrics": {
+    "computationTimeMs": 142,
+    "distanceSavedKm": 14.8,
+    "trafficDensityPercent": 38.0
+  },
+  "sequenceOfStops": [
+    {
+      "id": "stop-1",
+      "storeName": "Unilever Selective Express",
+      "address": "Opp Lane Beach Road Bandra",
+      "distanceFromHubKm": 2.4,
+      "estimatedDurationMinutes": 45,
+      "status": "COMPLETED",
+      "optimizedIndex": 1
+    },
+    {
+      "id": "stop-2",
+      "storeName": "Smollan Elite Hub",
+      "address": "Bazaar West Trade Center",
+      "distanceFromHubKm": 5.1,
+      "estimatedDurationMinutes": 60,
+      "status": "COMPLETED",
+      "optimizedIndex": 2
+    },
+    {
+      "id": "stop-3",
+      "storeName": "Apex Mega Supermarket",
+      "address": "Sector 14 High Avenue",
+      "distanceFromHubKm": 7.9,
+      "estimatedDurationMinutes": 90,
+      "status": "PENDING",
+      "optimizedIndex": 3
+    },
+    {
+      "id": "stop-4",
+      "storeName": "City Center Grosser",
+      "address": "Down-town Lane 4",
+      "distanceFromHubKm": 11.2,
+      "estimatedDurationMinutes": 50,
+      "status": "PENDING",
+      "optimizedIndex": 4
+    }
+  ],
+  "coordinatesPath": [
+    { "x": 100, "y": 140 },
+    { "x": 220, "y": 190 },
+    { "x": 310, "y": 110 },
+    { "x": 450, "y": 280 }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "systemTitle": "SMARTFieldForce.AI Predictive Bot",
+  "partnershipDetails": "Unilever & Smollan Field Representative Automation Suite",
+  "quickActions": [
+    {
+      "id": "audit",
+      "label": "Store Check-in",
+      "prompt": "Secure GPS handshake with selective retail shopboard",
+      "actionCode": "GPS_CHECKIN"
+    },
+    {
+      "id": "ir_task",
+      "label": "Vision Audit",
+      "prompt": "Trigger planogram scanner on active shelf space",
+      "actionCode": "IR_AUDIT"
+    },
+    {
+      "id": "survey",
+      "label": "Store Survey",
+      "prompt": "Compute promotional compliance scoring checklist",
+      "actionCode": "SURVEY_SUBMIT"
+    },
+    {
+      "id": "promotion",
+      "label": "Active Promos",
+      "prompt": "Show running distributor campaign and POSM guides",
+      "actionCode": "PROMO_VIEW"
+    }
+  ],
+  "faqCatalog": [
+    {
+      "keywords": ["golden zone", "shelf", "planogram", "rule"],
+      "question": "What is the shelf compliance Golden Zone rule?",
+      "answer": "Primary products (like Dove and Lux beauty bars) must reside in the Golden Zone (shoulder-to-waist shelf range, ideally 1.2M to 1.6M above floor level). They are required to hold at least 45% category shelf space width."
+    },
+    {
+      "keywords": ["oos", "out of stock", "re-order", "booking"],
+      "question": "How should critical Out-Of-Stock (OOS) levels be resolved?",
+      "answer": "When stock drops to Critical OOS (e.g. Dove Cream Bar zero count), immediately place a replenishment draft. If the quantity is above 25 units, auto-apply Scheme A (15% Case Discount) with the South Distributor PRIORITY delivery."
+    },
+    {
+      "keywords": ["sift", "camera", "signage", "verification"],
+      "question": "What is the camera signage SIFT verification threshold?",
+      "answer": "The storefront board registration uses SIFT keypoint descriptor matching. A valid store check-in requires a SIFT score >= 80% with green GPS validation. This authenticates the physical presence of the field agent."
+    }
+  ]
+}

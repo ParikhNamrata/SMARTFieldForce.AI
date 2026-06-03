@@ -49,6 +49,14 @@ import { answerFieldQuery } from '../services/gemini';
 import { dbService, InteractionLog } from '../services/db';
 import { generateAIReportSummary } from '../services/reporting';
 
+// Load AI capabilities sample datasets from JSON configurations
+import aiSmartBot from '../data/aiSmartBot.json';
+import aiVisionShelf from '../data/aiVisionShelf.json';
+import aiVoiceCommand from '../data/aiVoiceCommand.json';
+import aiFieldQuiz from '../data/aiFieldQuiz.json';
+import aiOrderSchemes from '../data/aiOrderSchemes.json';
+import aiRouteOptimized from '../data/aiRouteOptimized.json';
+
 interface MobileSimulatorProps {
   config: AppConfig;
 }
@@ -493,45 +501,27 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     const totalVisits = pastLogs.filter(l => l.type === 'vision');
     
     if (totalOrders.length > 0) {
-      questionsList.push({
-        question: `🧠 Learning Pattern: You recently booked order units totaling substantial value. To trigger maximum Benefit Schemes (such as Unilever Scheme A), what is the minimum unit threshold?`,
-        options: ["10 Case Units", "15 Units", "25 Units or higher", "50 Case Units"],
-        correctAnswerIndex: 2,
-        explanation: "Case schemes (such as Scheme A) are pre-configured to automatically activate at 25 or more units to unlock wholesale benefits."
-      });
-      questionsList.push({
-        question: `📈 Inventory Math: Since you booked orders on Dove Beauty Bars, which of the following is the optimal safety stock holding if weekly sales average 6 units?`,
-        options: ["Maintain 0 items to save space", "Maintain 25-30 units of stock to secure against Out-of-Stock (OOS)", "Order 1 item every Monday", "Wait for complete shelf depletion before ordering"],
-        correctAnswerIndex: 1,
-        explanation: "Replenishing 25-30 units ensures 4-5 weeks of safety protection against unexpected Out-of-Stock instances."
-      });
+      questionsList.push(...aiFieldQuiz.adaptiveScenarios.orderBased);
     }
     
     if (totalVisits.length > 0) {
-      questionsList.push({
-        question: `🔍 Compliance Review: You executed a Shelf SKU Audit. If the automated scanner detects an empty shelf spot (Out-of-Stock), how is your SIFT compliance scoring affected?`,
-        options: ["Decreases compliance scoring and highlights shelf-share warnings", "Increases GPS signal accuracy and geolocks automatically", "Sends an invoice directly to the regional distributor", "OOS does not impact score"],
-        correctAnswerIndex: 0,
-        explanation: "Visual anomalies and empty slots automatically lower planogram alignment and flag active warnings."
-      });
+      questionsList.push(...aiFieldQuiz.adaptiveScenarios.visionBased);
     }
 
-    // Fallback / standard field terms
-    questionsList.push({
-      question: "🏷️ Planogram Compliance: In Unilever/Smollan merchandising, where is the ideal eye-level placement zone for high-margin products?",
-      options: ["The highest shelf unreachable by average customers", "The 'Golden Zone' (shoulder to waist levels)", "Scattered randomly on bottom-row shelves", "Hidden in the back storage room to avoid dust"],
-      correctAnswerIndex: 1,
-      explanation: "The 'Golden Zone' represents high-traffic, easy-access shelving that drives 60% of impulse buying."
-    });
-    
-    questionsList.push({
-      question: "🔋 SIFT Layout Matching: When aligning the Smollan check-in camera with a storefront board, what is the target confidence match score?",
-      options: ["Minimum 25% alignment", "Minimum 50% alignment", "Over 80% with green GPS alignment lock", "Over 98.4% perfect coordinate match"],
-      correctAnswerIndex: 2,
-      explanation: "A high SIFT alignment of over 80% matches storefront descriptors to authenticate attendance records."
-    });
+    // Append fallback / general terminology terms from JSON
+    questionsList.push(...aiFieldQuiz.faqScenarios);
 
-    return questionsList.slice(0, 3);
+    // Filter duplicates
+    const uniqueQuestions: typeof questionsList = [];
+    const seenTitles = new Set<string>();
+    for (const q of questionsList) {
+      if (!seenTitles.has(q.question)) {
+        seenTitles.add(q.question);
+        uniqueQuestions.push(q);
+      }
+    }
+
+    return uniqueQuestions.slice(0, 3);
   };
 
   const handleTriggerQuizGeneration = () => {
@@ -724,66 +714,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       benefitPercent: number;
       description: string;
     }>;
-  }>>([
-    {
-      id: 'dove-soap',
-      name: 'Dove Cream Beauty Bar 100g',
-      price: 1.80,
-      lastMonthOos: true,
-      stockStatus: 'Critical OOS',
-      lastOrderQty: 20,
-      qty: 0,
-      suggestedQty: 25,
-      selectedSchemeId: 'scheme-dove-1', // Pre-select best scheme
-      schemes: [
-        { id: 'scheme-dove-1', name: 'Scheme A (Best Offer)', benefitPercent: 15, description: '15% Off Case Discount' },
-        { id: 'scheme-dove-2', name: 'Scheme B', benefitPercent: 10, description: 'Buy 10 Get 1 Free (10% Value)' },
-        { id: 'scheme-dove-3', name: 'Scheme C', benefitPercent: 5, description: 'Free 24h Express Shipping' }
-      ]
-    },
-    {
-      id: 'dove-shampoo',
-      name: 'Dove Daily Moisture Shampoo 200ml',
-      price: 4.50,
-      lastMonthOos: true,
-      stockStatus: 'Low',
-      lastOrderQty: 12,
-      qty: 0,
-      suggestedQty: 15,
-      selectedSchemeId: 'scheme-shamp-2', // Pre-select best
-      schemes: [
-        { id: 'scheme-shamp-1', name: 'Standard Promo', benefitPercent: 8, description: 'Buy 12 Get 1 Free (8% Value)' },
-        { id: 'scheme-shamp-2', name: 'Super Saver (Best Offer)', benefitPercent: 18, description: '18% Case Pack Coupon' }
-      ]
-    },
-    {
-      id: 'lux-soap',
-      name: 'Lux Scarlet Glow Soap 100g',
-      price: 1.25,
-      lastMonthOos: false,
-      stockStatus: 'In Stock',
-      lastOrderQty: 15,
-      qty: 0,
-      suggestedQty: 0,
-      selectedSchemeId: 'scheme-lux-1',
-      schemes: [
-        { id: 'scheme-lux-1', name: 'Volume Deal (Best Offer)', benefitPercent: 10, description: '10% volume discount' },
-        { id: 'scheme-lux-2', name: 'Standard Deal', benefitPercent: 5, description: '5% generic discount' }
-      ]
-    },
-    {
-      id: 'lifebuoy-wash',
-      name: 'Lifebuoy Total 10 Handwash 200ml',
-      price: 2.60,
-      lastMonthOos: false,
-      stockStatus: 'In Stock',
-      lastOrderQty: 30,
-      qty: 0,
-      suggestedQty: 0,
-      selectedSchemeId: null,
-      schemes: []
-    }
-  ]);
+  }>>(aiOrderSchemes.products as any);
 
   const [isOrderBookingConfirmOpen, setIsOrderBookingConfirmOpen] = useState(false);
   const [bookedReceipt, setBookedReceipt] = useState<{
@@ -942,7 +873,16 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setCompletedStep2ActionIds([]);
       aiResponse = "Welcome back! I'm ready for the store audit/check-in. First, click the Store Check-in button to mark your attendance and begin.";
     } else {
-      aiResponse = await answerFieldQuery(userMsg);
+      // Check if message matches any of our dynamic JSON FAQ catalog keywords/questions
+      const matchedFaq = aiSmartBot.faqCatalog.find(f => 
+        lowMsg.includes(f.question.toLowerCase().trim()) || 
+        f.keywords.some(kw => lowMsg.includes(kw.toLowerCase().trim()))
+      );
+      if (matchedFaq) {
+        aiResponse = matchedFaq.answer;
+      } else {
+        aiResponse = await answerFieldQuery(userMsg);
+      }
     }
 
     setChatMessages(prev => [...prev, { role: 'ai', text: aiResponse, imageUrl: aiImageUrl }]);
@@ -1641,14 +1581,34 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
                   <div className="flex-1 p-4 space-y-4 overflow-y-auto no-scrollbar">
                     {chatMessages.length === 0 && (
-                      <div className="py-10 flex flex-col items-center text-center space-y-4 opacity-40">
-                         <div className="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center">
-                            <Sparkles className="w-10 h-10 text-blue-600" />
-                         </div>
-                         <div>
-                            <p className="text-sm font-black text-slate-800 uppercase tracking-widest">Predictive Assistant</p>
-                            <p className="text-[10px] text-slate-500 px-10">Select a suggested action or type your field request.</p>
-                         </div>
+                      <div className="py-4 space-y-4 flex flex-col items-center">
+                        <div className="py-6 flex flex-col items-center text-center space-y-2 opacity-50">
+                           <div className="w-14 h-14 rounded-[1.5rem] bg-blue-50 flex items-center justify-center">
+                              <Sparkles className="w-7 h-7 text-blue-600 animate-pulse" />
+                           </div>
+                           <div>
+                              <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Predictive Assistant</p>
+                              <p className="text-[10px] text-slate-500 px-6">Select a suggested action, try a config topic, or type below.</p>
+                           </div>
+                        </div>
+
+                        {/* Custom dynamically populated FAQs from our JSON configuration */}
+                        <div className="w-full bg-slate-50/50 rounded-2xl p-3 border border-slate-100/80 space-y-2 max-w-sm">
+                          <p className="text-[8px] font-black tracking-widest uppercase text-slate-400">Ask the Bot (Configuration FAQs):</p>
+                          <div className="flex flex-col gap-1.5">
+                            {aiSmartBot.faqCatalog.map((faq, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  handleSendMessage(faq.question);
+                                }}
+                                className="w-full text-left text-[9px] font-extrabold text-blue-600 bg-white hover:bg-blue-50 hover:text-blue-700 transition-all py-2 px-2.5 rounded-xl border border-slate-100 shadow-sm shrink-0"
+                              >
+                                💬 {faq.question}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
                     {chatMessages.map((msg, i) => (
@@ -1782,6 +1742,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
                       Real-time IR Recognition & SKU Verification
                     </p>
+                  </div>
+
+                  {/* Dynamic Vision AI telemetry powered by JSON */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 flex items-center justify-between text-[8px] font-mono leading-none text-slate-500">
+                    <span>🎯 SIFT Threshold: <span className="text-blue-600 font-bold">{aiVisionShelf.configurations.siftThresholdPercent}%</span></span>
+                    <span>💡 Min Light: <span className="text-amber-600 font-bold">{aiVisionShelf.configurations.minLightingLux} LUX</span></span>
+                    <span>📐 Dev Tolerance: <span className="text-violet-600 font-bold">±{aiVisionShelf.configurations.maxAngleDegrees}°</span></span>
                   </div>
 
                   {/* STEP 1: Storefront Check-in Viewfinder & Shop Board Photo */}

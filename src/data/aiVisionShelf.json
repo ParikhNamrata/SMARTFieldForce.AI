@@ -1,0 +1,24 @@
+{
+  "engineName": "SIFT Real-time Planogram Compliance Engine",
+  "configurations": {
+    "siftThresholdPercent": 80,
+    "minLightingLux": 250,
+    "maxAngleDegrees": 15
+  },
+  "shopboardDetections": {
+    "matchedBrand": "Smollan Preferred Unilever Elite Hub",
+    "scorePercent": 94.2,
+    "siftMatchesCount": 128,
+    "gpsResult": "MATCHED",
+    "boundingBox": { "x": 50, "y": 40, "width": 500, "height": 150 }
+  },
+  "detectedSkus": [
+    { "id": "dove-soap", "label": "Dove Cream Bar 100g", "confidence": 99.1, "x": 25, "y": 25, "w": 80, "h": 110, "state": "COMPLIANT" },
+    { "id": "dove-soap", "label": "Dove Cream Bar 100g", "confidence": 98.4, "x": 110, "y": 25, "w": 80, "h": 110, "state": "COMPLIANT" },
+    { "id": "dove-shampoo", "label": "Dove Moisture Shampoo 200ml", "confidence": 97.2, "x": 195, "y": 15, "w": 75, "h": 120, "state": "COMPLIANT" },
+    { "id": "lux-soap", "label": "Lux Scarlet Gold Soap 100g", "confidence": 96.0, "x": 25, "y": 160, "w": 85, "h": 105, "state": "COMPLIANT" },
+    { "id": "lux-soap", "label": "Lux Scarlet Gold Soap 100g", "confidence": 95.3, "x": 115, "y": 160, "w": 85, "h": 105, "state": "COMPLIANT" },
+    { "id": "lifebuoy-wash", "label": "Lifebuoy Total 10 Handwash 200ml", "confidence": 99.0, "x": 205, "y": 160, "w": 85, "h": 105, "state": "COMPLIANT" },
+    { "id": "lifebuoy-wash", "label": "Lifebuoy Total 10 Handwash 200ml", "confidence": 97.4, "x": 295, "y": 160, "w": 85, "h": 105, "state": "COMPLIANT" }
+  ]
+}
