@@ -36,6 +36,8 @@ import {
   Lock,
   Plus,
   Minus,
+  Trash2,
+  Edit2,
   AlertCircle,
   PiggyBank,
   Percent,
@@ -45,7 +47,7 @@ import {
 } from 'lucide-react';
 import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
-import { answerFieldQuery } from '../services/gemini';
+import { answerFieldQuery, analyzeStorefrontImage } from '../services/gemini';
 import { dbService, InteractionLog } from '../services/db';
 import { generateAIReportSummary } from '../services/reporting';
 
@@ -76,10 +78,392 @@ const UNILEVER_SHOPBOARD_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w
 
 const UNILEVER_SKUS_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%"><rect x="0" y="0" width="600" height="450" fill="%230f172a" /><rect x="0" y="140" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="280" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="420" width="600" height="15" fill="%23475569" stroke="%23334155" stroke-width="2" /><rect x="0" y="155" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><rect x="0" y="295" width="600" height="4" fill="%2338bdf8" opacity="0.4" /><g transform="translate(30, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(115, 25)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23ffffff" stroke="%23e2e8f0" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%230f2c59" /><path d="M20 70 Q35 50 50 70" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-linecap="round" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="950" font-size="8" fill="%23ffffff" text-anchor="middle">DOVE</text><text x="35" y="85" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%2364748b" text-anchor="middle">SOAP 100g</text></g><g transform="translate(200, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(280, 15)"><rect x="0" y="0" width="65" height="110" rx="12" fill="%23ffffff" stroke="%23bae6fd" stroke-width="2" /><path d="M15 15 C15 5 50 5 50 15 L45 35 L20 35 Z" fill="%23e2e8f0" /><rect x="10" y="45" width="45" height="40" rx="4" fill="%2338bdf8" opacity="0.15" /><text x="32" y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%230f2c59" text-anchor="middle">DOVE</text><text x="32" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="5" fill="%230284c7" text-anchor="middle">SHAMPOO</text></g><g transform="translate(365, 25)"><rect x="0" y="0" width="70" height="100" rx="18" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g transform="translate(30, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(120, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fef08a" stroke="%23eab308" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23ca8a04" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="950" font-size="9" fill="%23ffffff" text-anchor="middle">LUX</text><text x="37.5" y="65" font-family="'Inter', sans-serif" font-weight="700" font-size="6.5" fill="%23854d0e" text-anchor="middle">SCARLET</text><circle cx="37.5" cy="80" r="4" fill="%23ffffff" opacity="0.6" /></g><g transform="translate(210, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(300, 165)"><rect x="0" y="0" width="75" height="95" rx="8" fill="%23fee2e2" stroke="%23ef4444" stroke-width="2" /><rect x="8" y="15" width="59" height="25" rx="4" fill="%23dc2626" /><text x="37.5" y="31" font-family="'Inter', sans-serif" font-weight="900" font-size="7" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="37.5" y="65" font-weight="700" font-size="6.5" fill="%23991b1b" text-anchor="middle">HYGIENE</text><path d="M32.5 80 H42.5 M37.5 75 V85" stroke="%23dc2626" stroke-width="3" stroke-linecap="round" /></g><g transform="translate(30, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(115, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="%23f0fdf4" stroke="%2322c55e" stroke-width="2" /><rect x="10" y="15" width="50" height="20" rx="4" fill="%2315803d" /><text x="35" y="28" font-family="'Inter', sans-serif" font-weight="900" font-size="7.5" fill="%23ffffff" text-anchor="middle">LIFEBUOY</text><text x="35" y="70" font-family="'Inter', sans-serif" font-weight="700" font-size="6" fill="%23166534" text-anchor="middle">LEMON FRESH</text></g><g transform="translate(200, 305)"><rect x="0" y="0" width="70" height="100" rx="8" fill="none" stroke="%23f43f5e" stroke-dasharray="4 4" stroke-width="2" /><circle cx="35" cy="50" r="14" fill="%23ffe4e6" /><text x="35" y="53" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="%23e11d48" text-anchor="middle">OOS</text></g><g opacity="0.85"><rect x="25" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 99%</text><rect x="110" y="25" width="80" height="110" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="113" y="22" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">DOVE_SOAP: 98%</text><rect x="195" y="15" width="75" height="120" fill="none" stroke="%233b82f6" stroke-width="1.5" /><text x="198" y="11" font-family="'JetBrains Mono', monospace" font-size="6" fill="%233b82f6" font-weight="950">DOVE_SHMP: 97%</text><rect x="25" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="28" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 96%</text><rect x="115" y="160" width="85" height="105" fill="none" stroke="%2310b981" stroke-width="1.5" /><text x="118" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%2310b981" font-weight="950">LUX_GOLD: 95%</text><rect x="205" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="208" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 99%</text><rect x="295" y="160" width="85" height="105" fill="none" stroke="%23ec4899" stroke-width="1.5" /><text x="298" y="156" font-family="'JetBrains Mono', monospace" font-size="6" fill="%23ec4899" font-weight="950">LFB_RED: 97%</text></g></svg>`;
 
+const STATION_COORDINATES: Record<string, { lat: number, lng: number }> = {
+  "stop-1": { lat: 19.0544, lng: 72.8402 },
+  "stop-2": { lat: 19.0600, lng: 72.8250 },
+  "stop-3": { lat: 19.0580, lng: 72.8300 },
+  "stop-4": { lat: 19.0800, lng: 72.8350 },
+  "stop-5": { lat: 19.0650, lng: 72.8200 },
+  "stop-6": { lat: 19.0680, lng: 72.8340 },
+  "stop-7": { lat: 19.0750, lng: 72.8360 },
+  "stop-8": { lat: 19.0850, lng: 72.8400 },
+  "stop-9": { lat: 19.0550, lng: 72.8280 },
+  "stop-10": { lat: 19.0570, lng: 72.8350 },
+  "stop-11": { lat: 19.0620, lng: 72.8380 },
+  "stop-12": { lat: 19.0610, lng: 72.8260 },
+  "stop-13": { lat: 19.0680, lng: 72.8630 },
+  "stop-14": { lat: 19.0740, lng: 72.8680 },
+  "stop-15": { lat: 19.0700, lng: 72.8750 },
+};
+
 export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeScreen, setActiveScreen] = useState<Screen>('home');
   const [isVoiceActive, setIsVoiceActive] = useState(false);
+
+  // --- Stateful AI Route Optimizer & Dynamic Planning (with Spatial Coordinates Core) ---
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; label: string; isReal: boolean }>(() => {
+    try {
+      const saved = localStorage.getItem('smart_user_location');
+      return saved ? JSON.parse(saved) : { lat: 19.0544, lng: 72.8402, label: "Smollan South HQ (Bandra Hub)", isReal: false };
+    } catch {
+      return { lat: 19.0544, lng: 72.8402, label: "Smollan South HQ (Bandra Hub)", isReal: false };
+    }
+  });
+
+  const [routeStops, setRouteStops] = useState<Array<{
+    id: string;
+    storeName: string;
+    address: string;
+    distanceFromHubKm: number;
+    estimatedDurationMinutes: number;
+    status: 'COMPLETED' | 'CURRENT' | 'PENDING';
+    time: string;
+    optimizedIndex: number;
+    lat: number;
+    lng: number;
+  }>>(() => {
+    try {
+      const saved = localStorage.getItem('smart_route_stops');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const mapped = parsed.map((item: any) => ({
+          ...item,
+          lat: item.lat ?? STATION_COORDINATES[item.id]?.lat ?? (19.0544 + (Math.random() - 0.5) * 0.05),
+          lng: item.lng ?? STATION_COORDINATES[item.id]?.lng ?? (72.8402 + (Math.random() - 0.5) * 0.05)
+        }));
+        if (!mapped.some((stop: any) => stop.storeName.toLowerCase().includes("mini mercado extra"))) {
+          mapped.push({
+            id: "stop-16",
+            storeName: "Mini Mercado Extra",
+            address: "Avenida Paulista 1200, Sao Paulo",
+            distanceFromHubKm: 36.2,
+            estimatedDurationMinutes: 45,
+            status: "PENDING",
+            time: "07:15 PM",
+            optimizedIndex: 16,
+            lat: -23.5616,
+            lng: -46.6560
+          });
+        }
+        return mapped;
+      }
+      return aiRouteOptimized.sequenceOfStops.map((stop: any) => ({
+        ...stop,
+        lat: STATION_COORDINATES[stop.id]?.lat ?? 19.0544,
+        lng: STATION_COORDINATES[stop.id]?.lng ?? 72.8402,
+      }));
+    } catch {
+      return aiRouteOptimized.sequenceOfStops.map((stop: any) => ({
+        ...stop,
+        lat: STATION_COORDINATES[stop.id]?.lat ?? 19.0544,
+        lng: STATION_COORDINATES[stop.id]?.lng ?? 72.8402,
+      })) as any;
+    }
+  });
+
+  const [routeMetrics, setRouteMetrics] = useState(() => {
+    try {
+      const saved = localStorage.getItem('smart_route_metrics');
+      return saved ? JSON.parse(saved) : aiRouteOptimized.routingMetrics;
+    } catch {
+      return aiRouteOptimized.routingMetrics;
+    }
+  });
+
+  // Keep localStorage in sync
+  useEffect(() => {
+    try {
+      localStorage.setItem('smart_user_location', JSON.stringify(userLocation));
+    } catch (e) {
+      console.warn('Storage restricted:', e);
+    }
+  }, [userLocation]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('smart_route_stops', JSON.stringify(routeStops));
+    } catch (e) {
+      console.warn('Storage restricted:', e);
+    }
+  }, [routeStops]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('smart_route_metrics', JSON.stringify(routeMetrics));
+    } catch (e) {
+      console.warn('Storage restricted:', e);
+    }
+  }, [routeMetrics]);
+
+  // Auxiliary Planning UI States
+  const [isOptimizationRunning, setIsOptimizationRunning] = useState(false);
+  const [isAddingStop, setIsAddingStop] = useState(false);
+  const [editingStopId, setEditingStopId] = useState<string | null>(null);
+
+  // Add Stop Form Fields
+  const [newStoreName, setNewStoreName] = useState('');
+  const [newAddress, setNewAddress] = useState('');
+  const [newDistance, setNewDistance] = useState(5.0);
+  const [newDuration, setNewDuration] = useState(30);
+  const [newLat, setNewLat] = useState(19.0600);
+  const [newLng, setNewLng] = useState(72.8300);
+
+  // Edit Stop Form Fields
+  const [editStoreName, setEditStoreName] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editDistance, setEditDistance] = useState(5.0);
+  const [editDuration, setEditDuration] = useState(30);
+  const [editLat, setEditLat] = useState(19.0600);
+  const [editLng, setEditLng] = useState(72.8300);
+
+  // --- Geolocation Distance Helpers (Haversine formula in KM) ---
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of Earth in KM
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  };
+
+  // Dynamically re-sort and calculate schedules based on proximity to active current-location
+  const updateRouteWithNewLocation = (lat: number, lng: number, currentStops: typeof routeStops) => {
+    const completedStops = currentStops.filter(s => s.status === 'COMPLETED');
+    const currentStopsList = currentStops.filter(s => s.status === 'CURRENT');
+    const pendingStops = currentStops.filter(s => s.status === 'PENDING');
+
+    // We start routing optimization from active coordinates
+    let refLat = lat;
+    let refLng = lng;
+
+    if (currentStopsList.length > 0) {
+      refLat = currentStopsList[currentStopsList.length - 1].lat;
+      refLng = currentStopsList[currentStopsList.length - 1].lng;
+    } else if (completedStops.length > 0) {
+      refLat = completedStops[completedStops.length - 1].lat;
+      refLng = completedStops[completedStops.length - 1].lng;
+    }
+
+    // Sort pending items to the nearest spatial neighbor based on coordinates
+    const sortedPending = [...pendingStops].sort((a, b) => {
+      const distA = calculateDistance(refLat, refLng, a.lat, a.lng);
+      const distB = calculateDistance(refLat, refLng, b.lat, b.lng);
+      return distA - distB;
+    });
+
+    const united = [...completedStops, ...currentStopsList, ...sortedPending];
+
+    // Re-assign distanceFromHubKm relative to the user's current spatial coordinates and rebuild timing flow
+    const localized = united.map((stop, idx) => {
+      const distFromUser = calculateDistance(lat, lng, stop.lat, stop.lng);
+      return {
+        ...stop,
+        optimizedIndex: idx + 1,
+        distanceFromHubKm: distFromUser
+      };
+    });
+
+    setRouteStops(recalculateSchedules(localized));
+
+    setRouteMetrics(prev => ({
+      ...prev,
+      distanceSavedKm: parseFloat((localized.length * 1.35).toFixed(1)),
+      computationTimeMs: Math.floor(Math.random() * 60) + 140
+    }));
+  };
+
+  // --- Stateful Route Scheduling & Planner Handlers ---
+  const formatMinutesToTime = (totalMinutes: number): string => {
+    let hours = Math.floor(totalMinutes / 60) % 24;
+    const minutes = Math.floor(totalMinutes % 60);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    const hoursStr = hours < 10 ? '0' + hours : hours;
+    return `${hoursStr}:${minutesStr} ${ampm}`;
+  };
+
+  // Recalculates time schedules and optimized sequence indices
+  const recalculateSchedules = (stopsList: typeof routeStops) => {
+    let currentMin = 480; // Start at 08:00 AM (8 * 60)
+    return stopsList.map((stop, idx) => {
+      const stopWithTime = {
+        ...stop,
+        optimizedIndex: idx + 1,
+        time: formatMinutesToTime(currentMin)
+      };
+      // Advance clock: duration of visit + drive time (simulated as distanceFromHubKm * 1.5 + 10 mins)
+      const travelTime = Math.round((stop.distanceFromHubKm || 2) * 1.5) + 12;
+      currentMin += (stop.estimatedDurationMinutes || 30) + travelTime;
+      return stopWithTime;
+    });
+  };
+
+  // Auto-fill custom store coordinate form to offset slightly from current location
+  useEffect(() => {
+    setNewLat(Number((userLocation.lat + (Math.random() - 0.5) * 0.02).toFixed(4)));
+    setNewLng(Number((userLocation.lng + (Math.random() - 0.5) * 0.02).toFixed(4)));
+  }, [userLocation]);
+
+  // Keep distance updated dynamically in form if coordinates change
+  useEffect(() => {
+    const calc = calculateDistance(userLocation.lat, userLocation.lng, newLat, newLng);
+    setNewDistance(calc);
+  }, [newLat, newLng, userLocation]);
+
+  const handleAddStop = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStoreName.trim()) return;
+
+    const calcDist = calculateDistance(userLocation.lat, userLocation.lng, Number(newLat), Number(newLng));
+
+    const newStopItem = {
+      id: `stop-custom-${Date.now()}`,
+      storeName: newStoreName,
+      address: newAddress || "Unassigned Zone Lane",
+      distanceFromHubKm: calcDist,
+      estimatedDurationMinutes: Math.max(10, Number(newDuration)),
+      status: 'PENDING' as const,
+      time: '04:00 PM', // calculated below
+      optimizedIndex: routeStops.length + 1,
+      lat: Number(newLat),
+      lng: Number(newLng)
+    };
+
+    setRouteStops(prev => {
+      const updated = [...prev, newStopItem];
+      return recalculateSchedules(updated);
+    });
+
+    // Reset fields
+    setNewStoreName('');
+    setNewAddress('');
+    setIsAddingStop(false);
+  };
+
+  const handleDeleteStop = (id: string) => {
+    setRouteStops(prev => {
+      const filtered = prev.filter(s => s.id !== id);
+      return recalculateSchedules(filtered);
+    });
+  };
+
+  const handleStartEdit = (stop: typeof routeStops[0]) => {
+    setEditingStopId(stop.id);
+    setEditStoreName(stop.storeName);
+    setEditAddress(stop.address);
+    setEditDistance(stop.distanceFromHubKm);
+    setEditDuration(stop.estimatedDurationMinutes);
+    setEditLat(stop.lat || 19.0544);
+    setEditLng(stop.lng || 72.8402);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    setRouteStops(prev => {
+      const updated = prev.map(s => {
+        if (s.id === id) {
+          const calcDist = calculateDistance(userLocation.lat, userLocation.lng, Number(editLat), Number(editLng));
+          return {
+            ...s,
+            storeName: editStoreName,
+            address: editAddress,
+            distanceFromHubKm: calcDist,
+            estimatedDurationMinutes: Number(editDuration),
+            lat: Number(editLat),
+            lng: Number(editLng)
+          };
+        }
+        return s;
+      });
+      return recalculateSchedules(updated);
+    });
+    setEditingStopId(null);
+  };
+
+  const handleUpdateStatus = (id: string, status: 'COMPLETED' | 'CURRENT' | 'PENDING') => {
+    setRouteStops(prev => {
+      const updated = prev.map(s => s.id === id ? { ...s, status } : s);
+      return recalculateSchedules(updated);
+    });
+  };
+
+  // Triggers fleet-wide AI planning model to optimize stops sequence
+  const handleRunAIExtendedOptimizer = () => {
+    setIsOptimizationRunning(true);
+    
+    setTimeout(() => {
+      setRouteStops(prev => {
+        // Group into Completed, Current and Pending modules
+        const completedStops = prev.filter(s => s.status === 'COMPLETED');
+        const currentStops = prev.filter(s => s.status === 'CURRENT');
+        const pendingStops = prev.filter(s => s.status === 'PENDING');
+
+        // Optimize Pending list: Sort by distance of coordinates ascending (closest first)
+        const optimizedPending = [...pendingStops].sort((a, b) => {
+          const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng);
+          const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
+          return distA - distB;
+        });
+
+        // Put them back together with accurate localized distances
+        const united = [...completedStops, ...currentStops, ...optimizedPending];
+        const updatedDistances = united.map(stop => ({
+          ...stop,
+          distanceFromHubKm: calculateDistance(userLocation.lat, userLocation.lng, stop.lat, stop.lng)
+        }));
+
+        return recalculateSchedules(updatedDistances);
+      });
+
+      setRouteMetrics(prev => ({
+        ...prev,
+        computationTimeMs: Math.floor(Math.random() * 120) + 180,
+         // Dynamic distance saved calculation
+        distanceSavedKm: parseFloat((routeStops.length * 1.45).toFixed(1)),
+        trafficDensityPercent: parseFloat((25 + (routeStops.length % 5) * 6.5).toFixed(1))
+      }));
+
+      setIsOptimizationRunning(false);
+    }, 750);
+  };
+
+  // Automatically refresh GPS coordinates and recalculate route sequence when entering the Route Planner screen!
+  useEffect(() => {
+    if (activeScreen === 'planner') {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const newLoc = {
+              lat: Number(latitude.toFixed(4)),
+              lng: Number(longitude.toFixed(4)),
+              label: `GPS Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+              isReal: true
+            };
+            setUserLocation(newLoc);
+            setRouteStops(prev => {
+              const recalculated = prev.map(stop => ({
+                ...stop,
+                distanceFromHubKm: calculateDistance(newLoc.lat, newLoc.lng, stop.lat, stop.lng)
+              }));
+              const completed = recalculated.filter(s => s.status === 'COMPLETED');
+              const current = recalculated.filter(s => s.status === 'CURRENT');
+              const pending = recalculated.filter(s => s.status === 'PENDING').sort((a, b) => a.distanceFromHubKm - b.distanceFromHubKm);
+              return recalculateSchedules([...completed, ...current, ...pending]);
+            });
+          },
+          (err) => {
+            console.log("Device Geolocation auto-refresh skipped. Keeping active node coordinates.", err);
+          }
+        );
+      }
+    }
+  }, [activeScreen]);
 
   // --- AI Field Quiz States ---
   const [quizState, setQuizState] = useState<'idle' | 'generating' | 'active' | 'completed'>('idle');
@@ -555,6 +939,66 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     }
   };
 
+  const verifyAndCheckInStore = async (analysis: { storeName: string; location: string }, dataUrl: string) => {
+    const rawDetected = analysis.storeName || "";
+    const cleanDetected = rawDetected.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const matchedIdx = routeStops.findIndex(stop => {
+      const cleanStopName = stop.storeName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanStopName.includes(cleanDetected) || cleanDetected.includes(cleanStopName)) {
+        return true;
+      }
+      const sWords = stop.storeName.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+      const dWords = rawDetected.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+      return dWords.some(dw => sWords.some(sw => sw.includes(dw) || dw.includes(sw)));
+    });
+
+    if (matchedIdx === -1) {
+      setCameraState('idle');
+      setChatMessages(prev => [
+        ...prev,
+        {
+          role: 'ai',
+          text: `❌ Verification Failed! The shop board photo shows "**${rawDetected}**" (${analysis.location || "unknown location"}), which does NOT match any store in today's daily route plan.\n\nPlease upload or take a correct shop board photo for one of your planned stores: ${routeStops.map(s => s.storeName).join(', ')}`
+        }
+      ]);
+      return false;
+    }
+
+    const targetStop = routeStops[matchedIdx];
+    setRouteStops(prev => {
+      const updated = prev.map((s, idx) => {
+        if (idx === matchedIdx) {
+          return { ...s, status: 'CURRENT' as const };
+        }
+        if (s.status === 'CURRENT') {
+          return { ...s, status: 'PENDING' as const };
+        }
+        return s;
+      });
+      return recalculateSchedules(updated);
+    });
+
+    setSampleVisionData(prev => ({
+      ...prev,
+      storeName: targetStop.storeName,
+      location: targetStop.address || prev.location
+    }));
+    
+    setVisionShopboardUrl(dataUrl);
+    setCheckInStep('location_checked_in');
+    setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
+
+    setChatMessages(prev => [
+      ...prev,
+      {
+        role: 'ai',
+        text: `✅ Route Verified! Checked-in successfully for **${targetStop.storeName}** based on route planning. General data has been updated. Now, let's capture/upload the shelf SKU photo.`
+      }
+    ]);
+    return true;
+  };
+
   const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -571,8 +1015,12 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
       if (cameraPurpose === 'bot-loc') {
         if (cameraStep === 'shopboard') {
-          setCameraStep('allSkus');
-          setCameraState('idle');
+          const analysis = await analyzeStorefrontImage(dataUrl, file.name);
+          const success = await verifyAndCheckInStore(analysis, dataUrl);
+          if (success) {
+            setCameraStep('allSkus');
+            setCameraState('idle');
+          }
           return;
         }
 
@@ -588,13 +1036,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           },
           {
             role: 'ai',
-            text: "✅ Gallery photo of storefront received and verified under geolocation match! GPS: locked.",
+            text: `✅ Gallery photo of storefront received and verified under geolocation match! GPS: locked. Storefront confirmed: ${sampleVisionData.storeName}`,
             imageUrl: dataUrl
           },
           {
             role: 'ai',
             text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf from gallery upload! Verification 100% complete.`,
-            imageUrl: FIELD_IMAGES.allSkus
+            imageUrl: dataUrl
           }
         ]);
 
@@ -603,26 +1051,26 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           type: 'chat',
           content: { 
             message: 'Location Check-in via Gallery Upload', 
-            response: `📍 Check-in verified via custom uploaded photo. Counted ${sampleVisionData.skus} display SKUs.` 
+            response: `📍 Check-in verified via custom uploaded photo at ${sampleVisionData.storeName}. Counted ${sampleVisionData.skus} display SKUs.` 
           },
           summary: 'Check-in: Custom Photo Verified'
         });
         setLogs(dbService.getLogs());
 
       } else if (cameraPurpose === 'vision-loc') {
+        if (cameraStep === 'shopboard') {
+          const analysis = await analyzeStorefrontImage(dataUrl, file.name);
+          const success = await verifyAndCheckInStore(analysis, dataUrl);
+          if (success) {
+            setIsVisionCameraActive(false);
+          }
+          return;
+        }
+
         setIsVisionCameraActive(false);
         ensureAttendanceMarked("Uploaded storefront board");
         
-        if (cameraStep === 'shopboard') {
-          setVisionShopboardUrl(dataUrl);
-          setChatMessages(prev => [
-            ...prev, 
-            { 
-              role: 'ai', 
-              text: `Storefront verified! Custom gallery photo matched successfully at ${sampleVisionData.location}.` 
-            }
-          ]);
-        } else if (cameraStep === 'allSkus') {
+        if (cameraStep === 'allSkus') {
           setVisionSkuImageUrl(dataUrl);
           setDetectedSkuCount(sampleVisionData.skus);
           setShelfSkuCounts({
@@ -654,6 +1102,22 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [checkInStep, setCheckInStep] = useState<'idle' | 'store_checked_in' | 'location_checked_in' | 'checked_out'>('idle');
   const [completedStep2ActionIds, setCompletedStep2ActionIds] = useState<string[]>([]);
 
+  // Automatically sync attendance based on business logic:
+  // - If field user is working on 13th store then attendance must be marked.
+  // - Only in case of no stores done then attendance is not marked will be shown.
+  useEffect(() => {
+    const completedCount = routeStops.filter(s => s.status === 'COMPLETED').length;
+    const isWorkingOn13 = routeStops.some(s => (s.id === 'stop-13' || s.optimizedIndex === 13) && s.status === 'CURRENT');
+    
+    if (isWorkingOn13) {
+      setAttendanceMarked(true);
+    } else if (completedCount === 0) {
+      setAttendanceMarked(false);
+    } else {
+      setAttendanceMarked(true);
+    }
+  }, [routeStops]);
+
   const ensureAttendanceMarked = (source: string) => {
     if (!attendanceMarked) {
       setAttendanceMarked(true);
@@ -675,7 +1139,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setChatMessages(prev => [...prev, {
         role: 'ai',
         text: `⚡ [Vision AI Auto-Check-in] Attendance marked automatically! Photo of ${source} verified. Your visit status is now ACTIVE.`,
-        imageUrl: UNILEVER_SHOPBOARD_SVG
+        imageUrl: visionShopboardUrl || generateDynamicCapturePlaceholder('Storefront Check-In', 'Auto-Check-In Active')
       }]);
     }
   };
@@ -752,11 +1216,89 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [cameraState, setCameraState] = useState<'idle' | 'snapping' | 'verifying'>('idle');
   const [cameraWatermarkOpacity, setCameraWatermarkOpacity] = useState<number>(0.3);
   const [cameraStep, setCameraStep] = useState<'shopboard' | 'allSkus'>('shopboard');
+  const [simulatedShopBoard, setSimulatedShopBoard] = useState<string>('');
+
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [cameraFacingMode, setCameraFacingMode] = useState<'user' | 'environment'>('user');
+
+  const generateDynamicCapturePlaceholder = (title: string, subtitle: string) => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+      <rect width="100%" height="100%" fill="#0f172a"/>
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1e1b4b"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <rect width="100%" height="100%" fill="url(#grid)" opacity="0.5"/>
+      <circle cx="300" cy="225" r="120" stroke="#3b82f6" stroke-width="1" fill="none" stroke-dasharray="5,5" opacity="0.3"/>
+      <circle cx="300" cy="225" r="60" stroke="#3b82f6" stroke-width="2" fill="none" opacity="0.4"/>
+      <path d="M 280 225 L 320 225 M 300 205 L 300 245" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+      <text x="300" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="900" fill="#3b82f6" text-anchor="middle" letter-spacing="2">${title.toUpperCase()}</text>
+      <text x="300" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold" fill="#64748b" text-anchor="middle">${subtitle.toUpperCase()}</text>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  };
+
+  useEffect(() => {
+    let activeStream: MediaStream | null = null;
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: cameraFacingMode }
+        });
+        activeStream = stream;
+        setCameraStream(stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.warn(`Could not start camera with preference ${cameraFacingMode}:`, err);
+        try {
+          // Direct fallback to whatever raw video is available
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true
+          });
+          activeStream = stream;
+          setCameraStream(stream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (innerErr) {
+          console.warn("webcam fallback start failed completely:", innerErr);
+        }
+      }
+    };
+
+    if (isBotCameraOpen || isVisionCameraActive) {
+      startCamera();
+    } else {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      }
+    }
+
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [isBotCameraOpen, isVisionCameraActive, cameraFacingMode]);
 
   const openCamera = (purpose: 'bot-loc' | 'vision-loc', step: 'shopboard' | 'allSkus' = 'shopboard') => {
     setCameraPurpose(purpose);
     setCameraStep(step);
     setCameraState('idle');
+    if (step === 'shopboard') {
+      const activeStop = routeStops.find(s => s.status === 'CURRENT') || routeStops.find(s => s.status === 'PENDING') || routeStops[0];
+      setSimulatedShopBoard(activeStop ? activeStop.storeName : "Mini Mercado Extra");
+    }
     if (purpose === 'bot-loc') {
       setIsBotCameraOpen(true);
     } else {
@@ -773,7 +1315,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   };
 
   // Sample Vision Data
-  const sampleVisionData = {
+  const [sampleVisionData, setSampleVisionData] = useState({
     storeName: "Smollan Elite Hub #442",
     location: "Bandra West, Mumbai",
     stockCount: 284,
@@ -781,7 +1323,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     compliance: 94,
     outOfStock: ["Dove Deep Moisture 400ml", "Lux Scarlet 100g", "Lifebuoy Lemon"],
     timestamp: new Date().toISOString()
-  };
+  });
 
   useEffect(() => {
     setLogs(dbService.getLogs());
@@ -801,6 +1343,15 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     let aiResponse = "";
     let aiImageUrl: string | undefined = undefined;
     const lowMsg = userMsg.toLowerCase().trim();
+
+    // Check if user is referencing the Mini Mercado Extra store
+    if (lowMsg.includes('mini mercado') || lowMsg.includes('mercado') || lowMsg.includes('extra')) {
+      setSampleVisionData(prev => ({
+        ...prev,
+        storeName: "Mini Mercado Extra",
+        location: "Sao Paulo, Brazil"
+      }));
+    }
 
     // Check if the message matches any of the Step 2 action prompts to mark it completed
     const matchedStep2Id = (() => {
@@ -823,7 +1374,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setAttendanceMarked(true);
       setCheckInStep('store_checked_in');
       setCompletedStep2ActionIds([]);
-      aiResponse = "✅ Attendance Marked! Store Check-in completed automatically for Smollan Elite Hub #442.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.";
+      aiResponse = `✅ Attendance Marked! Store Check-in completed automatically for ${sampleVisionData.storeName || "Smollan Elite Hub #442"}.\n\nNow, your status is ACTIVE. Please proceed with the next options (Step 2):\n📌 Location Check-in\n📋 Survey Question\n🎁 Promotion\n🔍 IR (Image Recognition) / Vision Audit\n\nOr click Location Checkout when you are done.`;
     } else if (lowMsg.includes('location check-in') || lowMsg.includes('location checkin')) {
       if (!isBotCameraOpen && checkInStep !== 'location_checked_in' && cameraPurpose !== 'bot-loc') {
         openCamera('bot-loc');
@@ -831,8 +1382,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         return;
       }
       setCheckInStep('location_checked_in');
-      aiResponse = "📍 Location Check-in completed. GPS coordinates matches with Smollan Elite Hub #442 perfectly. Verified store board photo below:";
-      aiImageUrl = UNILEVER_SHOPBOARD_SVG;
+      aiResponse = `📍 Location Check-in completed. GPS coordinates matches with ${sampleVisionData.storeName || "Smollan Elite Hub #442"} perfectly. Verified store board photo below:`;
+      aiImageUrl = visionShopboardUrl || generateDynamicCapturePlaceholder('Storefront Check-In', sampleVisionData.location || 'Bandra West, Mumbai');
     } else if (lowMsg.includes('survey question') || lowMsg.includes('survey')) {
       aiResponse = "📋 [Survey Question] Store Display Audit: Are products placed prominently at eye-level on the main aisle?\n\n🤖 Recommendation: Yes, they are in primary slot. (Recorded: YES)";
     } else if (lowMsg.includes('promotion check') || lowMsg.includes('promotion')) {
@@ -864,7 +1415,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           aiResponse = `⚠️ Checkout Locked!\n\nPlease complete all Step 2 activities first before checking out.\n\nRemaining pending activities:\n${remainingStr}`;
         } else {
           setCheckInStep('checked_out');
-          aiResponse = "🚪 Location Checkout Complete! All survey and image recognition (IR) audit tasks have been synchronized. Thank you for finishing your visit at Smollan Elite Hub #442!";
+          aiResponse = `🚪 Location Checkout Complete! All survey and image recognition (IR) audit tasks have been synchronized. Thank you for finishing your visit at ${sampleVisionData.storeName || "Smollan Elite Hub #442"}!`;
         }
       }
     } else if (userMsg.toLowerCase().includes('reporting') || userMsg.toLowerCase().includes('check-in')) {
@@ -929,12 +1480,41 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setCameraState('snapping');
     await new Promise(r => setTimeout(r, 250));
     setCameraState('verifying');
+
+    // Attempt to capture frame from live stream
+    let capturedUrl = '';
+    if (videoRef.current && cameraStream) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth || 640;
+        canvas.height = videoRef.current.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          capturedUrl = canvas.toDataURL('image/jpeg');
+        }
+      } catch (err) {
+        console.error("Failed to capture image track:", err);
+      }
+    }
+
+    if (!capturedUrl) {
+      capturedUrl = generateDynamicCapturePlaceholder(
+        cameraStep === 'shopboard' ? (simulatedShopBoard || 'Storefront Check-In') : 'Shelf SKU Audit',
+        cameraStep === 'shopboard' ? 'Bandra West, Mumbai' : '156 SKUs Connected'
+      );
+    }
+
     await new Promise(r => setTimeout(r, 2200));
 
     if (cameraPurpose === 'bot-loc') {
       if (cameraStep === 'shopboard') {
-        setCameraStep('allSkus');
-        setCameraState('idle');
+        const analysis = await analyzeStorefrontImage(capturedUrl, simulatedShopBoard);
+        const success = await verifyAndCheckInStore(analysis, capturedUrl);
+        if (success) {
+          setCameraStep('allSkus');
+          setCameraState('idle');
+        }
         return;
       }
 
@@ -942,6 +1522,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setCheckInStep('location_checked_in');
       setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
       
+      setVisionSkuImageUrl(capturedUrl);
+
       setChatMessages(prev => [
         ...prev,
         {
@@ -950,13 +1532,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         },
         {
           role: 'ai',
-          text: "📍 Location Check-in completed. GPS coordinates matches with Smollan Elite Hub #442 perfectly. Verified store board photo below:",
-          imageUrl: FIELD_IMAGES.shopboard
+          text: `📍 Location Check-in completed. GPS coordinates matches with ${sampleVisionData.storeName} perfectly. Verified store board photo below:`,
+          imageUrl: visionShopboardUrl || capturedUrl
         },
         {
           role: 'ai',
           text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf! Verification 100% complete.`,
-          imageUrl: FIELD_IMAGES.allSkus
+          imageUrl: capturedUrl
         }
       ]);
 
@@ -965,27 +1547,27 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         type: 'chat',
         content: { 
           message: 'Location Check-in via Camera & SKU Count', 
-          response: `📍 Location Check-in completed. GPS coordinates matches. Checked storefront and counted ${sampleVisionData.skus} display SKUs.` 
+          response: `📍 Location Check-in completed. GPS coordinates matches. Checked storefront for ${sampleVisionData.storeName} and counted ${sampleVisionData.skus} display SKUs.` 
         },
         summary: 'Check-in: Storefront & SKU Verified'
       });
       setLogs(dbService.getLogs());
 
     } else if (cameraPurpose === 'vision-loc') {
+      if (cameraStep === 'shopboard') {
+        const analysis = await analyzeStorefrontImage(capturedUrl, simulatedShopBoard);
+        const success = await verifyAndCheckInStore(analysis, capturedUrl);
+        if (success) {
+          setIsVisionCameraActive(false);
+        }
+        return;
+      }
+
       setIsVisionCameraActive(false);
       ensureAttendanceMarked("Shop board SKU");
       
-      if (cameraStep === 'shopboard') {
-        setVisionShopboardUrl(FIELD_IMAGES.shopboard);
-        setChatMessages(prev => [
-          ...prev, 
-          { 
-            role: 'ai', 
-            text: `Shopboard verified: ${sampleVisionData.storeName} at ${sampleVisionData.location}. Storefront board photo matched successfully.` 
-          }
-        ]);
-      } else if (cameraStep === 'allSkus') {
-        setVisionSkuImageUrl(FIELD_IMAGES.allSkus);
+      if (cameraStep === 'allSkus') {
+        setVisionSkuImageUrl(capturedUrl);
         setDetectedSkuCount(sampleVisionData.skus);
         setShelfSkuCounts({
           'dove-soap': 45,
@@ -1200,6 +1782,10 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       });
   }, [config.features, config.featureOrder]);
 
+  const dashboardFeatures = useMemo(() => {
+    return enabledFeatures.filter(f => f.id !== 'voiceToText');
+  }, [enabledFeatures]);
+
   const topFeatures = useMemo(() => {
     const screensWithUI = [
       'predictiveBot', 
@@ -1384,35 +1970,35 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   exit={{ opacity: 0, y: -10 }}
                   className="p-6 space-y-8"
                 >
-                  {enabledFeatures[0] && (
+                  {dashboardFeatures[0] && (
                     <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
                        <div className="relative z-10">
                           <div className="flex items-center gap-2 mb-4">
                              <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white">
-                                {iconMap[enabledFeatures[0].icon] || <Sparkles className="w-4 h-4" />}
+                                {iconMap[dashboardFeatures[0].icon] || <Sparkles className="w-4 h-4" />}
                              </div>
                              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">Priority Action</span>
                           </div>
                           <h3 className="text-lg font-black text-slate-800 leading-tight mb-2 tracking-tight">
-                            {enabledFeatures[0].id === 'visionAutomation' ? `Audit Required: ${sampleVisionData.storeName}` : `Next Up: ${enabledFeatures[0].name}`}
+                            {dashboardFeatures[0].id === 'visionAutomation' ? `Audit Required: ${sampleVisionData.storeName}` : `Next Up: ${dashboardFeatures[0].name}`}
                           </h3>
                           <p className="text-11px font-medium text-slate-500 leading-relaxed max-w-[200px]">
-                            {enabledFeatures[0].description} - Optimized by AI for your current route.
+                            {dashboardFeatures[0].description} - Optimized by AI for your current route.
                           </p>
                           
                           <button 
                             onClick={() => {
-                              if (enabledFeatures[0].id === 'visionAutomation') setActiveScreen('vision');
-                              else if (enabledFeatures[0].id === 'predictiveBot') setActiveScreen('bot');
-                              else if (enabledFeatures[0].id === 'voiceToText') toggleVoice(false);
-                              else if (enabledFeatures[0].id === 'salesInsights') setActiveScreen('reports');
-                              else if (enabledFeatures[0].id === 'trainingHub') setActiveScreen('training');
-                              else if (enabledFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
-                              else if (enabledFeatures[0].id === 'userProfile') setActiveScreen('performance');
-                              else if (enabledFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
-                              else if (enabledFeatures[0].id === 'territoryMap') setActiveScreen('territory');
-                              else if (enabledFeatures[0].id === 'orderManagement') setActiveScreen('order');
-                              else if (enabledFeatures[0].id === 'quizModule') setActiveScreen('quiz');
+                              if (dashboardFeatures[0].id === 'visionAutomation') setActiveScreen('vision');
+                              else if (dashboardFeatures[0].id === 'predictiveBot') setActiveScreen('bot');
+                              else if (dashboardFeatures[0].id === 'voiceToText') toggleVoice(false);
+                              else if (dashboardFeatures[0].id === 'salesInsights') setActiveScreen('reports');
+                              else if (dashboardFeatures[0].id === 'trainingHub') setActiveScreen('training');
+                              else if (dashboardFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
+                              else if (dashboardFeatures[0].id === 'userProfile') setActiveScreen('performance');
+                              else if (dashboardFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
+                              else if (dashboardFeatures[0].id === 'territoryMap') setActiveScreen('territory');
+                              else if (dashboardFeatures[0].id === 'orderManagement') setActiveScreen('order');
+                              else if (dashboardFeatures[0].id === 'quizModule') setActiveScreen('quiz');
                             }}
                             className="mt-6 flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
                           >
@@ -1420,7 +2006,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                           </button>
                        </div>
                        <div className="absolute -top-4 -right-4 opacity-[0.03] rotate-12">
-                          {iconMap[enabledFeatures[0].icon] || <Layers className="w-40 h-40" />}
+                          {iconMap[dashboardFeatures[0].icon] || <Layers className="w-40 h-40" />}
                        </div>
                     </div>
                   )}
@@ -1468,7 +2054,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                        <div className="h-0.5 flex-1 mx-4 bg-slate-100" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      {enabledFeatures.map((feature, i) => (
+                      {dashboardFeatures.map((feature, i) => (
                         <motion.button
                           key={feature.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -1771,15 +2357,22 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
                     {/* Viewfinder Cam Feed */}
                     <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 group shadow-inner">
-                      <img 
-                        src={FIELD_IMAGES.shopboard} 
-                        alt="Shop Board Live Feed" 
-                        className={cn(
-                          "w-full h-full object-cover transition-all duration-305",
-                          visionShopboardUrl ? "opacity-100 scale-100" : "opacity-40 scale-105"
-                        )}
-                        referrerPolicy="no-referrer"
-                      />
+                      {visionShopboardUrl ? (
+                        <img 
+                          src={visionShopboardUrl} 
+                          alt="Shop Board Live Feed" 
+                          className="w-full h-full object-cover transition-all"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center gap-2 p-4 text-center">
+                          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
+                             <Camera className="w-4 h-4 animate-pulse text-blue-500" />
+                          </div>
+                          <p className="text-[8px] font-black uppercase tracking-wider text-slate-400">Camera Viewfinder Ready</p>
+                          <p className="text-[6px] font-bold text-slate-500 uppercase max-w-[150px]">Tap "Take Photo" to activate full live camera screen</p>
+                        </div>
+                      )}
                       
                       {/* Scan / Align Grid Overlay */}
                       {!visionShopboardUrl && (
@@ -1864,15 +2457,22 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
                     {/* Viewfinder Sku Feed */}
                     <div className="aspect-[16/10] bg-slate-950 rounded-2xl relative overflow-hidden border border-slate-800 shadow-inner">
-                      <img 
-                        src={FIELD_IMAGES.allSkus} 
-                        alt="SKUs Shelf" 
-                        className={cn(
-                          "w-full h-full object-cover transition-all duration-305",
-                          visionSkuImageUrl ? "opacity-100 scale-100" : "opacity-35 scale-105"
-                        )}
-                        referrerPolicy="no-referrer"
-                      />
+                      {visionSkuImageUrl ? (
+                        <img 
+                          src={visionSkuImageUrl} 
+                          alt="SKUs Shelf" 
+                          className="w-full h-full object-cover transition-all"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center gap-2 p-4 text-center">
+                          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
+                             <Camera className="w-4 h-4 animate-pulse text-blue-500" />
+                          </div>
+                          <p className="text-[8px] font-black uppercase tracking-wider text-slate-400">SKU Sensor Ready</p>
+                          <p className="text-[6px] font-bold text-slate-500 uppercase max-w-[150px]">Open camera view to perform real-time IR recognition</p>
+                        </div>
+                      )}
                       
                       {!visionSkuImageUrl && (
                         <>
@@ -2089,11 +2689,11 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
                               <ChevronRight className="w-4 h-4 text-slate-300" />
                            </div>
-                        </div>
-                      ))}
-                   </div>
-                </motion.div>
-              )}
+                           </div>
+                           ))}
+                           </div>
+                           </motion.div>
+                           )}
 
               {activeScreen === 'planner' && (
                 <motion.div
@@ -2101,48 +2701,375 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="p-4 space-y-6 h-full flex flex-col"
+                  className="p-4 space-y-4 h-full flex flex-col"
                 >
-                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                   {/* Main Journey Header & Dynamic Fleet Stats */}
+                   <div className="bg-white p-5 rounded-[2.2rem] border border-slate-100 shadow-sm space-y-3 shrink-0">
                       <div className="flex items-center justify-between">
-                         <div className="p-2 rounded-xl bg-orange-50 text-orange-600">
-                            <Navigation className="w-5 h-5" />
+                         <div className="flex items-center gap-2">
+                           <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600">
+                              <Navigation className="w-4 h-4" />
+                           </div>
+                           <span className="text-[10px] font-black text-slate-800 tracking-wider uppercase">AI Route Optimizer</span>
                          </div>
-                         <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase italic">Optimized Route</span>
+                         <span className="text-[8px] font-mono font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                           {routeMetrics.computationTimeMs ? `${routeMetrics.computationTimeMs}ms` : '312ms'}
+                         </span>
                       </div>
+                      
                       <div>
-                         <h3 className="text-xl font-black text-slate-800 tracking-tight">Today's Journey</h3>
-                         <p className="text-xs font-bold text-slate-500 mt-1">4.2km saved today using AI Planner</p>
+                         <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-2 mb-2 font-sans text-slate-800">
+                           <div className="flex justify-between items-start">
+                             <div className="min-w-0">
+                               <span className="text-[7.5px] font-black tracking-widest text-slate-400 uppercase block leading-none">Active GPS Reference Location</span>
+                               <p className="text-xs font-black text-slate-700 truncate leading-tight mt-1">{userLocation.label}</p>
+                               <span className="text-[8px] font-mono text-indigo-500 mt-0.5 block font-bold">📍 ({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)})</span>
+                             </div>
+                             <button
+                               type="button"
+                               onClick={() => {
+                                 if (navigator.geolocation) {
+                                   navigator.geolocation.getCurrentPosition(
+                                     (position) => {
+                                       const { latitude, longitude } = position.coords;
+                                       const newLoc = {
+                                         lat: Number(latitude.toFixed(4)),
+                                         lng: Number(longitude.toFixed(4)),
+                                         label: `Live GPS Location`,
+                                         isReal: true
+                                       };
+                                       setUserLocation(newLoc);
+                                       updateRouteWithNewLocation(newLoc.lat, newLoc.lng, routeStops);
+                                     },
+                                     (err) => {
+                                       alert("Auto GPS blocked/unavailable in iframe. Test route refresh with the Simulated presets below!");
+                                     }
+                                   );
+                                 }
+                               }}
+                               className="p-1.5 text-indigo-600 hover:text-indigo-800 transition-colors shrink-0"
+                               title="Trigger Geolocation Refresh"
+                             >
+                               <RefreshCcw className="w-3.5 h-3.5" />
+                             </button>
+                           </div>
+                         </div>
+                         <h3 className="text-sm font-black text-slate-800 tracking-tight leading-tight">Territory Routing</h3>
+                         <p className="text-[10px] font-bold text-blue-600 mt-1">
+                           ✨ {routeMetrics.distanceSavedKm}km saved today using fleet optimization
+                         </p>
+                      </div>
+
+                      {/* Visited Progress Tracker */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex justify-between text-[9px] font-black uppercase text-slate-500 tracking-wider">
+                          <span>Progress Tracker</span>
+                          <span>{routeStops.filter(s => s.status === 'COMPLETED').length} / {routeStops.length} Visited</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+                          <motion.div 
+                            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full"
+                            animate={{ width: `${routeStops.length ? (routeStops.filter(s => s.status === 'COMPLETED').length / routeStops.length) * 100 : 0}%` }}
+                            transition={{ duration: 0.5 }}
+                          />
+                        </div>
                       </div>
                    </div>
 
-                   <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
-                      {[
-                        { time: '09:00 AM', location: 'Smollan HQ', status: 'completed' },
-                        { time: '10:30 AM', location: 'Distribution Hub', status: 'current' },
-                        { time: '01:00 PM', location: 'Spar Supermarket', status: 'pending' },
-                        { time: '03:15 PM', location: 'Checkers Metro', status: 'pending' }
-                      ].map((stop, idx) => (
-                        <div key={idx} className="flex gap-4">
-                           <div className="flex flex-col items-center">
-                              <div className={cn(
-                                "w-3 h-3 rounded-full border-2",
-                                stop.status === 'completed' ? "bg-blue-600 border-blue-600" :
-                                stop.status === 'current' ? "bg-white border-blue-600 animate-pulse" : "bg-white border-slate-200"
-                              )} />
-                              {idx < 3 && <div className="w-0.5 flex-1 bg-slate-100 my-1" />}
-                           </div>
-                           <div className="pb-6">
-                              <p className="text-[10px] font-black text-slate-400 mb-1">{stop.time}</p>
-                              <p className={cn(
-                                "text-sm font-bold tracking-tight",
-                                stop.status === 'current' ? "text-blue-600" : "text-slate-700"
-                              )}>{stop.location}</p>
-                           </div>
-                        </div>
-                      ))}
+                   {/* Master Optimizer and Adder Action bar */}
+                   <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={handleRunAIExtendedOptimizer}
+                        disabled={isOptimizationRunning}
+                        className="flex-1 py-3 bg-slate-900 text-white rounded-2xl text-[9px] font-black uppercase tracking-wider hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center gap-2 relative shadow-md"
+                      >
+                         {isOptimizationRunning ? (
+                           <>
+                             <RefreshCcw className="w-3.5 h-3.5 animate-spin text-blue-400" />
+                             <span>Calculating Sequence...</span>
+                           </>
+                         ) : (
+                           <>
+                             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                             <span>Run AI Optimization</span>
+                           </>
+                         )}
+                      </button>
+
+                      <button
+                        onClick={() => setIsAddingStop(!isAddingStop)}
+                        className="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-colors active:scale-95"
+                        title="Add Custom Store Visit"
+                      >
+                         <Plus className="w-4 h-4" />
+                      </button>
                    </div>
-                 </motion.div>
+
+                   {/* "Add Custom Store" Drawer / Panel */}
+                   <AnimatePresence>
+                     {isAddingStop && (
+                       <motion.form
+                         initial={{ opacity: 0, height: 0 }}
+                         animate={{ opacity: 1, height: 'auto' }}
+                         exit={{ opacity: 0, height: 0 }}
+                         onSubmit={handleAddStop}
+                         className="bg-slate-50 p-4 rounded-3xl border border-slate-200/60 shadow-inner space-y-3 shrink-0 overflow-hidden"
+                       >
+                         <div className="flex justify-between items-center">
+                           <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider">Configure New Visit</span>
+                           <button type="button" onClick={() => setIsAddingStop(false)} className="text-slate-400 hover:text-slate-600">
+                             <X className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
+
+                         <div className="space-y-2">
+                           <input
+                             type="text"
+                             placeholder="Store Name (e.g. Spar Metro Elite)"
+                             value={newStoreName}
+                             onChange={(e) => setNewStoreName(e.target.value)}
+                             required
+                             className="w-full text-xs p-2 bg-white rounded-xl border border-slate-200 outline-none focus:border-blue-500 font-bold"
+                           />
+                           <input
+                             type="text"
+                             placeholder="Street Address, Sector/Suburb"
+                             value={newAddress}
+                             onChange={(e) => setNewAddress(e.target.value)}
+                             className="w-full text-[10px] p-2 bg-white rounded-xl border border-slate-200 outline-none focus:border-blue-500 font-medium"
+                           />
+                           
+                           <div className="grid grid-cols-2 gap-2">
+                             <div>
+                               <label className="text-[8px] font-bold text-slate-400 uppercase">Store Latitude & Longitude</label>
+                               <div className="grid grid-cols-2 gap-1.5 mt-1">
+                                 <input
+                                   type="number"
+                                   step="0.0001"
+                                   value={newLat}
+                                   onChange={(e) => setNewLat(Number(e.target.value))}
+                                   className="w-full text-[11px] p-1.5 bg-white rounded-xl border border-slate-200 focus:border-blue-500 font-mono font-bold"
+                                   placeholder="Lat"
+                                 />
+                                 <input
+                                   type="number"
+                                   step="0.0001"
+                                   value={newLng}
+                                   onChange={(e) => setNewLng(Number(e.target.value))}
+                                   className="w-full text-[11px] p-1.5 bg-white rounded-xl border border-slate-200 focus:border-blue-500 font-mono font-bold"
+                                   placeholder="Lng"
+                                 />
+                                </div>
+                                <div className="mt-1 bg-blue-50/50 p-1.5 rounded-lg border border-blue-100 flex justify-between items-center">
+                                  <span className="text-[7.5px] font-black text-blue-500 uppercase leading-none">Simulated Distance from active location</span>
+                                  <span className="text-[10px] font-black text-slate-700 font-mono shrink-0">
+                                    {newDistance ? `${newDistance.toFixed(2)} KM` : 'Calculating...'}
+                                  </span>
+                                </div>
+                             </div>
+                             <div>
+                               <label className="text-[8px] font-bold text-slate-400 uppercase">Est. Minutes Visit</label>
+                               <input
+                                 type="number"
+                                 min="5"
+                                 value={newDuration}
+                                 onChange={(e) => setNewDuration(Number(e.target.value))}
+                                 className="w-full text-xs p-1.5 bg-white rounded-xl border border-slate-200 focus:border-blue-500 font-mono"
+                               />
+                             </div>
+                           </div>
+                         </div>
+
+                         <button
+                           type="submit"
+                           className="w-full py-2 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-blue-700"
+                         >
+                           Add Store to Route Plan
+                         </button>
+                       </motion.form>
+                     )}
+                   </AnimatePresence>
+
+                   {/* Stateful Sequence Timeline */}
+                   <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+                      {routeStops.length === 0 ? (
+                        <div className="text-center py-12 bg-white rounded-3xl border border-slate-100">
+                          <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">No stores on active route</p>
+                          <p className="text-[10px] text-slate-500 mt-1">Click '+' to design custom visits</p>
+                        </div>
+                      ) : (
+                        routeStops.map((stop, idx) => {
+                          const isEditing = editingStopId === stop.id;
+                          return (
+                            <div key={stop.id} className="flex gap-3 bg-white p-3.5 rounded-3xl border border-slate-100 shadow-sm transition-all hover:border-slate-200">
+                               {/* Timeline status balls */}
+                               <div className="flex flex-col items-center shrink-0 pt-1">
+                                  <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all bg-white border-slate-200">
+                                    <button 
+                                      onClick={() => {
+                                        const cycles: Record<typeof stop.status, typeof stop.status> = {
+                                          'PENDING': 'CURRENT',
+                                          'CURRENT': 'COMPLETED',
+                                          'COMPLETED': 'PENDING'
+                                        };
+                                        handleUpdateStatus(stop.id, cycles[stop.status]);
+                                      }}
+                                      title="Toggle status cycle"
+                                      className={cn(
+                                        "w-2.5 h-2.5 rounded-full transition-all",
+                                        stop.status === 'COMPLETED' ? "bg-blue-600" :
+                                        stop.status === 'CURRENT' ? "bg-amber-500 scale-110 animate-pulse" :
+                                        "bg-slate-200"
+                                      )}
+                                    />
+                                  </div>
+                                  {idx < routeStops.length - 1 && <div className="w-0.5 flex-1 bg-slate-100 my-1 min-h-[30px]" />}
+                               </div>
+
+                               <div className="flex-1 min-w-0">
+                                 {isEditing ? (
+                                   /* Inline Store Editor */
+                                   <div className="space-y-2 p-1">
+                                     <div className="flex justify-between items-center">
+                                       <span className="text-[8px] font-black text-blue-600 uppercase">Edit Stop Store Info</span>
+                                       <span className="text-[8px] font-mono text-slate-400">ID: {stop.id.slice(0, 8)}</span>
+                                     </div>
+                                     <input
+                                       type="text"
+                                       value={editStoreName}
+                                       onChange={(e) => setEditStoreName(e.target.value)}
+                                       className="w-full text-xs font-bold p-1 border rounded"
+                                     />
+                                     <input
+                                       type="text"
+                                       value={editAddress}
+                                       onChange={(e) => setEditAddress(e.target.value)}
+                                       className="w-full text-[9px] font-medium p-1 border rounded text-slate-500"
+                                     />
+                                     <div className="grid grid-cols-2 gap-2">
+                                       <div>
+                                         <label className="text-[7px] font-bold text-slate-400 uppercase">Latitude</label>
+                                         <input
+                                           type="number"
+                                           step="0.0001"
+                                           value={editLat}
+                                           onChange={(e) => setEditLat(Number(e.target.value))}
+                                           className="w-full text-[10px] p-1 font-mono border rounded font-bold"
+                                         />
+                                       </div>
+                                       <div>
+                                         <label className="text-[7px] font-bold text-slate-400 uppercase">Longitude</label>
+                                         <input
+                                           type="number"
+                                           step="0.0001"
+                                           value={editLng}
+                                           onChange={(e) => setEditLng(Number(e.target.value))}
+                                           className="w-full text-[10px] p-1 font-mono border rounded font-bold"
+                                         />
+                                       </div>
+                                     </div>
+                                     <div className="grid grid-cols-2 gap-2 mt-1">
+                                       <div className="p-1.5 bg-indigo-50 border border-indigo-100 rounded flex flex-col justify-center">
+                                         <span className="text-[7px] font-bold text-indigo-500 block leading-none uppercase">Distance</span>
+                                         <span className="text-xs font-black font-mono text-slate-800 mt-1">
+                                            {calculateDistance(userLocation.lat, userLocation.lng, Number(editLat), Number(editLng))} KM
+                                         </span>
+                                       </div>
+                                       <div>
+                                         <label className="text-[7px] font-bold text-slate-400 uppercase">Est Min</label>
+                                         <input
+                                           type="number"
+                                           value={editDuration}
+                                           onChange={(e) => setEditDuration(Number(e.target.value))}
+                                           className="w-full text-[10px] p-1 font-mono border rounded font-bold"
+                                         />
+                                       </div>
+                                     </div>
+                                     <div className="flex gap-1.5 pt-1">
+                                       <button
+                                         onClick={() => handleSaveEdit(stop.id)}
+                                         className="px-2.5 py-1 bg-indigo-600 text-white rounded text-[8px] font-black uppercase"
+                                       >
+                                         Apply Changes
+                                       </button>
+                                       <button
+                                         onClick={() => setEditingStopId(null)}
+                                         className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded text-[8px] font-black uppercase"
+                                       >
+                                         Cancel
+                                       </button>
+                                     </div>
+                                   </div>
+                                 ) : (
+                                   /* Default Render Layout */
+                                   <div>
+                                      <div className="flex items-center justify-between gap-2 mb-1">
+                                         <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className="text-[9px] font-black text-slate-400">{stop.time}</span>
+                                            <span className={cn(
+                                              "text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded leading-none",
+                                              stop.status === 'COMPLETED' ? "bg-blue-50 text-blue-600" :
+                                              stop.status === 'CURRENT' ? "bg-amber-50 text-amber-600 animate-pulse" :
+                                              "bg-slate-100 text-slate-400"
+                                            )}>
+                                              {stop.status}
+                                            </span>
+                                            {stop.distanceFromHubKm > 0 && (
+                                              <span className="text-[8px] font-mono font-semibold text-indigo-500 bg-indigo-50/50 px-1 rounded">
+                                                {stop.distanceFromHubKm} km
+                                              </span>
+                                            )}
+                                         </div>
+
+                                         {/* Dropdown Action tools inline */}
+                                         <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+                                            <button
+                                              onClick={() => handleStartEdit(stop)}
+                                              className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
+                                              title="Edit store"
+                                            >
+                                              <Edit2 className="w-3 h-3" />
+                                            </button>
+                                            <button
+                                              onClick={() => handleDeleteStop(stop.id)}
+                                              className="p-1 text-slate-400 hover:text-rose-500 transition-colors"
+                                              title="Remove visit"
+                                            >
+                                              <Trash2 className="w-3 h-3" />
+                                            </button>
+                                         </div>
+                                      </div>
+
+                                      <p className={cn(
+                                        "text-xs font-black tracking-tight",
+                                        stop.status === 'CURRENT' ? "text-blue-600" : "text-slate-700"
+                                      )}>
+                                        {stop.storeName}
+                                      </p>
+                                      <p className="text-[9px] text-slate-400 font-medium leading-relaxed mt-0.5">{stop.address}</p>
+                                      
+                                      <div className="flex items-center justify-between gap-3 mt-2 pt-1.5 border-t border-slate-50">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-1.5 py-0.5 rounded leading-none">
+                                            Seq #{stop.optimizedIndex || idx + 1}
+                                          </span>
+                                          <span className="text-[8px] font-semibold text-slate-500 font-mono">
+                                            ⏱️ {stop.estimatedDurationMinutes}m visit
+                                          </span>
+                                        </div>
+                                        <span className="text-[8px] font-mono font-bold text-indigo-400 bg-indigo-50/20 px-1 rounded">
+                                          📍 {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
+                                        </span>
+                                      </div>
+                                   </div>
+                                 )}
+                               </div>
+                            </div>
+                          );
+                        })
+                      )}
+                   </div>
+                </motion.div>
               )}
 
               {activeScreen === 'performance' && (
@@ -2868,7 +3795,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               </div>
                               <div>
                                 <h4 className="text-xs font-black text-slate-800 leading-none">Confirm Booking?</h4>
-                                <p className="text-[7px] font-extrabold text-blue-500 uppercase tracking-widest leading-none mt-1">Elite Hub #442</p>
+                                <p className="text-[7px] font-extrabold text-blue-500 uppercase tracking-widest leading-none mt-1">{sampleVisionData.storeName}</p>
                               </div>
                             </div>
                             <button
@@ -2997,7 +3924,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
             </AnimatePresence>
 
             {/* FLOATING HANDS-FREE VOICE ASSISTANT TRIGGER */}
-            {!isVoiceSheetOpen && (
+            {!isVoiceSheetOpen && activeScreen !== 'planner' && activeScreen !== 'home' && activeScreen !== 'bot' && activeScreen !== 'vision' && (
               <div className="absolute bottom-6 right-6 z-[90]">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -3362,40 +4289,71 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     </p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => {
-                    setIsBotCameraOpen(false);
-                    setIsVisionCameraActive(false);
-                    setCameraPurpose(null);
-                    setCameraState('idle');
-                    setCameraStep('shopboard');
-                  }}
-                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 active:scale-95 transition-all text-slate-300"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1.5 animate-fade-in">
+                  <button
+                    onClick={() => setCameraFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-[8px] font-black uppercase text-blue-300 border border-blue-500/10 cursor-pointer"
+                  >
+                    <RefreshCcw className="w-2.5 h-2.5" />
+                    <span>Cam: {cameraFacingMode === 'user' ? 'Front' : 'Back'}</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsBotCameraOpen(false);
+                      setIsVisionCameraActive(false);
+                      setCameraPurpose(null);
+                      setCameraState('idle');
+                      setCameraStep('shopboard');
+                    }}
+                    className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 active:scale-95 transition-all text-slate-300 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Viewfinder Frame */}
               <div className="flex-1 relative bg-slate-950 flex flex-col items-center justify-center p-4 overflow-hidden">
                 <div className="w-full aspect-[3/4] rounded-[2rem] overflow-hidden bg-slate-900 relative border-2 border-white/15 shadow-2xl">
                   
-                  {/* Backdrop Simulator Feed */}
-                  <img 
-                    src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus}
-                    alt="Camera feed simulation"
-                    className="w-full h-full object-cover opacity-60 brightness-90 saturate-75 transition-all duration-300"
-                    referrerPolicy="no-referrer"
-                  />
+                  {/* Camera Live Stream & Fallback Visualizer */}
+                  {cameraStream ? (
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="absolute inset-0 w-full h-full object-cover z-0"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-4 text-center z-0">
+                      <div className="w-14 h-14 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 mb-3 animate-pulse">
+                        <Camera className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1">LIVE VIEW DISCONNECTED</p>
+                      <p className="text-[8px] font-bold text-slate-500 uppercase max-w-[180px]">Accept browser camera permission or use simulated manual upload</p>
+                    </div>
+                  )}
                   
-                  {/* Adjustable Watermark Alignment Template Overlay */}
-                  <img 
-                    src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus} 
-                    alt="Alignment overlay outline template"
+                  {/* High Accuracy Geometric Alignment Mask Watermark (Replaces static image template) */}
+                  <div 
                     style={{ opacity: cameraWatermarkOpacity }}
-                    className="absolute inset-0 w-full h-full object-cover mix-blend-screen pointer-events-none transition-all duration-350"
-                    referrerPolicy="no-referrer"
-                  />
+                    className="absolute inset-6 border-2 border-dashed border-blue-500/35 rounded-3xl pointer-events-none flex items-center justify-center m-4"
+                  >
+                    <div className="w-full h-full relative">
+                      {/* Sub alignment target corners */}
+                      <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-blue-500/50" />
+                      <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-blue-500/50" />
+                      <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-blue-500/50" />
+                      <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-blue-500/50" />
+                      
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-[7px] font-black uppercase tracking-[0.2em] text-blue-400/90 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-500/10">
+                          {cameraStep === 'shopboard' ? 'Align Storefront Signage' : 'Lock SKU Display Grid'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                   
                   {/* Grid overlay & indicator brackets */}
                   <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-30">
@@ -3431,18 +4389,53 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                     />
                   )}
 
-                  {/* Picture-in-picture reference card floating in viewfinder */}
-                  <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-white/10 max-w-[110px] shadow-xl pointer-events-none">
-                    <p className="text-[6.5px] font-black text-blue-400 uppercase tracking-widest leading-none mb-1">📢 SAMPLE TEMPLATE</p>
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border border-white/20">
-                      <img 
-                        src={cameraStep === 'shopboard' ? FIELD_IMAGES.shopboard : FIELD_IMAGES.allSkus} 
-                        alt="Template reference" 
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
+                  {/* Picture-in-picture GPS metadata panel floating in viewfinder (Replaces static image sample) */}
+                  <div className="absolute top-3 left-3 bg-slate-900/95 backdrop-blur-md px-2.5 py-2 rounded-xl border border-white/10 max-w-[110px] shadow-xl pointer-events-none space-y-1 z-10">
+                     <p className="text-[7px] font-black text-blue-400 uppercase tracking-widest leading-none">🛰️ GPS TRACKER</p>
+                     <div className="space-y-0.5 text-left font-mono">
+                       <p className="text-[6px] font-bold text-slate-300">LAT: 19.0760 N</p>
+                       <p className="text-[6px] font-bold text-slate-300">LNG: 72.8777 E</p>
+                       <p className="text-[5.5px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-0.5 mt-0.5 leading-none">
+                         ● LOCK SUCCESS
+                       </p>
+                     </div>
                   </div>
+
+                  {/* Simulated storefront board holding selection panel */}
+                  {cameraStep === 'shopboard' && (
+                    <div className="absolute bottom-3 left-3 right-24 bg-slate-950/90 border border-white/10 p-2 rounded-xl shadow-2xl z-25 space-y-1 backdrop-blur-md">
+                      <p className="text-[6px] font-black tracking-widest text-slate-400 uppercase leading-none">📸 Simulated Shop Board in Feed</p>
+                      <div className="flex flex-wrap gap-1 leading-none">
+                        {routeStops.slice(0, 4).map((stop) => (
+                          <button
+                            type="button"
+                            key={stop.id}
+                            onClick={() => setSimulatedShopBoard(stop.storeName)}
+                            className={cn(
+                              "px-1 py-0.5 rounded text-[5px] font-black uppercase transition-all",
+                              simulatedShopBoard === stop.storeName
+                                ? "bg-blue-600 text-white"
+                                : "bg-white/10 text-slate-300 hover:bg-white/20"
+                            )}
+                          >
+                            {stop.storeName.replace(" Mercado Extra", "").replace(" (Bandra Hub)", "").replace(" #442", "").replace(" Metro Outlet", "").replace("Smollan ", "")}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setSimulatedShopBoard("McDonald's Storefront")}
+                          className={cn(
+                            "px-1 py-0.5 rounded text-[5px] font-black uppercase transition-all",
+                            simulatedShopBoard === "McDonald's Storefront"
+                              ? "bg-rose-600 text-white"
+                              : "bg-white/10 text-slate-300 hover:bg-white/20"
+                          )}
+                        >
+                          McDonalds
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Floating transparency slider controller inside viewfinder */}
                   <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg flex flex-col gap-1">
@@ -3524,12 +4517,19 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
               {/* Shutter Controls */}
               <div className="p-4 bg-slate-900 border-t border-white/10 shrink-0 flex items-center justify-between">
-                <div className="flex flex-col items-center w-16 text-center text-slate-400 leading-none">
-                  <span className="text-[6.5px] font-bold uppercase tracking-wider text-slate-500 leading-none">Gps LOCK</span>
-                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tight flex items-center gap-0.5 mt-1 justify-center">
-                    <Check className="w-2.5 h-2.5 p-0" /> Geofence
+                <button
+                  type="button"
+                  disabled={cameraState !== 'idle'}
+                  onClick={() => setCameraFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
+                  className="flex flex-col items-center justify-center w-16 text-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all py-1.5 px-1 rounded-xl border border-white/5 cursor-pointer disabled:opacity-40"
+                  id="camera-flip-btn"
+                >
+                  <RefreshCcw className="w-3.5 h-3.5 text-emerald-400 animate-pulse mb-1" />
+                  <span className="text-[7.5px] font-black uppercase tracking-wider leading-none">Flip Cam</span>
+                  <span className="text-[5.5px] font-extrabold text-slate-500 uppercase mt-0.5 leading-none">
+                    {cameraFacingMode === 'user' ? 'Front' : 'Back'}
                   </span>
-                </div>
+                </button>
 
                 <div className="relative flex items-center justify-center">
                   <button 

@@ -1,52 +1,187 @@
 {
   "optimizerModel": "Unilever Fleet Routing API v3",
   "routingMetrics": {
-    "computationTimeMs": 142,
-    "distanceSavedKm": 14.8,
-    "trafficDensityPercent": 38.0
+    "computationTimeMs": 284,
+    "distanceSavedKm": 18.2,
+    "trafficDensityPercent": 34.2
   },
   "sequenceOfStops": [
     {
       "id": "stop-1",
-      "storeName": "Unilever Selective Express",
-      "address": "Opp Lane Beach Road Bandra",
-      "distanceFromHubKm": 2.4,
-      "estimatedDurationMinutes": 45,
+      "storeName": "Smollan South HQ",
+      "address": "Terminal Park Avenue, Sector 1",
+      "distanceFromHubKm": 0.0,
+      "estimatedDurationMinutes": 30,
       "status": "COMPLETED",
+      "time": "08:00 AM",
       "optimizedIndex": 1
     },
     {
       "id": "stop-2",
-      "storeName": "Smollan Elite Hub",
-      "address": "Bazaar West Trade Center",
-      "distanceFromHubKm": 5.1,
-      "estimatedDurationMinutes": 60,
+      "storeName": "Unilever Selective Express",
+      "address": "Opp Lane Beach Road, Bandra",
+      "distanceFromHubKm": 2.4,
+      "estimatedDurationMinutes": 45,
       "status": "COMPLETED",
+      "time": "08:45 AM",
       "optimizedIndex": 2
     },
     {
       "id": "stop-3",
-      "storeName": "Apex Mega Supermarket",
-      "address": "Sector 14 High Avenue",
-      "distanceFromHubKm": 7.9,
-      "estimatedDurationMinutes": 90,
-      "status": "PENDING",
+      "storeName": "Smollan Elite Hub",
+      "address": "Bazaar West Trade Center",
+      "distanceFromHubKm": 5.1,
+      "estimatedDurationMinutes": 40,
+      "status": "COMPLETED",
+      "time": "09:30 AM",
       "optimizedIndex": 3
     },
     {
       "id": "stop-4",
-      "storeName": "City Center Grosser",
-      "address": "Down-town Lane 4",
-      "distanceFromHubKm": 11.2,
-      "estimatedDurationMinutes": 50,
-      "status": "PENDING",
+      "storeName": "Metro General Mart",
+      "address": "Link Road, Santacruz West",
+      "distanceFromHubKm": 7.2,
+      "estimatedDurationMinutes": 35,
+      "status": "COMPLETED",
+      "time": "10:15 AM",
       "optimizedIndex": 4
+    },
+    {
+      "id": "stop-5",
+      "storeName": "HyperMart Bandra",
+      "address": "Carter Road Promenade",
+      "distanceFromHubKm": 9.1,
+      "estimatedDurationMinutes": 50,
+      "status": "COMPLETED",
+      "time": "11:00 AM",
+      "optimizedIndex": 5
+    },
+    {
+      "id": "stop-6",
+      "storeName": "Bazaar West Foods",
+      "address": "Linking Road junction",
+      "distanceFromHubKm": 11.5,
+      "estimatedDurationMinutes": 35,
+      "status": "COMPLETED",
+      "time": "11:45 AM",
+      "optimizedIndex": 6
+    },
+    {
+      "id": "stop-7",
+      "storeName": "Unilever Choice Center",
+      "address": "S.V. Road Business Arcade",
+      "distanceFromHubKm": 14.0,
+      "estimatedDurationMinutes": 45,
+      "status": "COMPLETED",
+      "time": "12:30 PM",
+      "optimizedIndex": 7
+    },
+    {
+      "id": "stop-8",
+      "storeName": "Apex Mega Supermarket",
+      "address": "Sector 14 High Avenue",
+      "distanceFromHubKm": 16.8,
+      "estimatedDurationMinutes": 60,
+      "status": "COMPLETED",
+      "time": "01:15 PM",
+      "optimizedIndex": 8
+    },
+    {
+      "id": "stop-9",
+      "storeName": "Golden Zone Retailers",
+      "address": "Hill Road Shopping Plaza",
+      "distanceFromHubKm": 18.2,
+      "estimatedDurationMinutes": 40,
+      "status": "COMPLETED",
+      "time": "02:00 PM",
+      "optimizedIndex": 9
+    },
+    {
+      "id": "stop-10",
+      "storeName": "Premium Consumer Store",
+      "address": "Turner Road Boutique Lane",
+      "distanceFromHubKm": 20.1,
+      "estimatedDurationMinutes": 35,
+      "status": "COMPLETED",
+      "time": "02:45 PM",
+      "optimizedIndex": 10
+    },
+    {
+      "id": "stop-11",
+      "storeName": "City Center Grocer",
+      "address": "Down-town Lane 4",
+      "distanceFromHubKm": 22.4,
+      "estimatedDurationMinutes": 50,
+      "status": "COMPLETED",
+      "time": "03:30 PM",
+      "optimizedIndex": 11
+    },
+    {
+      "id": "stop-12",
+      "storeName": "SmartField Hub (Active)",
+      "address": "Pali Hill Residential High Street",
+      "distanceFromHubKm": 24.5,
+      "estimatedDurationMinutes": 60,
+      "status": "CURRENT",
+      "time": "04:15 PM",
+      "optimizedIndex": 12
+    },
+    {
+      "id": "stop-13",
+      "storeName": "Central Plaza Retail",
+      "address": "Bandra Kurla Block G",
+      "distanceFromHubKm": 28.0,
+      "estimatedDurationMinutes": 45,
+      "status": "PENDING",
+      "time": "05:00 PM",
+      "optimizedIndex": 13
+    },
+    {
+      "id": "stop-14",
+      "storeName": "Spar Elite Grocer",
+      "address": "CST Road Commerce Center",
+      "distanceFromHubKm": 31.2,
+      "estimatedDurationMinutes": 40,
+      "status": "PENDING",
+      "time": "05:45 PM",
+      "optimizedIndex": 14
+    },
+    {
+      "id": "stop-15",
+      "storeName": "Checkers Metro Outlet",
+      "address": "Kurla West Station View",
+      "distanceFromHubKm": 34.0,
+      "estimatedDurationMinutes": 55,
+      "status": "PENDING",
+      "time": "06:30 PM",
+      "optimizedIndex": 15
+    },
+    {
+      "id": "stop-16",
+      "storeName": "Mini Mercado Extra",
+      "address": "Avenida Paulista 1200, Sao Paulo",
+      "distanceFromHubKm": 36.2,
+      "estimatedDurationMinutes": 45,
+      "status": "PENDING",
+      "time": "07:15 PM",
+      "optimizedIndex": 16
     }
   ],
   "coordinatesPath": [
-    { "x": 100, "y": 140 },
-    { "x": 220, "y": 190 },
-    { "x": 310, "y": 110 },
-    { "x": 450, "y": 280 }
+    { "x": 50, "y": 60 },
+    { "x": 80, "y": 100 },
+    { "x": 120, "y": 140 },
+    { "x": 150, "y": 90 },
+    { "x": 180, "y": 180 },
+    { "x": 210, "y": 130 },
+    { "x": 230, "y": 160 },
+    { "x": 260, "y": 110 },
+    { "x": 290, "y": 200 },
+    { "x": 320, "y": 150 },
+    { "x": 350, "y": 240 },
+    { "x": 380, "y": 190 },
+    { "x": 410, "y": 280 },
+    { "x": 440, "y": 220 },
+    { "x": 470, "y": 300 }
   ]
 }
