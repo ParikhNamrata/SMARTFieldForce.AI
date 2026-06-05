@@ -1040,9 +1040,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
       if (cameraPurpose === 'bot-loc') {
         if (cameraStep === 'shopboard') {
-          const pendingStop = routeStops.find(s => s.status === 'PENDING') || routeStops[0];
+          const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
           const enhancedDataUrl = await enhanceImage(dataUrl);
-          const analysis = await analyzeStorefrontImage(enhancedDataUrl, pendingStop?.storeName || file.name);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setCameraStep('allSkus');
@@ -1086,9 +1086,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
       } else if (cameraPurpose === 'vision-loc') {
         if (cameraStep === 'shopboard') {
-          const pendingStop = routeStops.find(s => s.status === 'PENDING') || routeStops[0];
+          const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
           const enhancedDataUrl = await enhanceImage(dataUrl);
-          const analysis = await analyzeStorefrontImage(enhancedDataUrl, pendingStop?.storeName || file.name);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setIsVisionCameraActive(false);
@@ -1551,8 +1551,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     if (cameraPurpose === 'bot-loc') {
       if (cameraStep === 'shopboard') {
+        const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
         const enhancedCapturedUrl = await enhanceImage(capturedUrl);
-        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, simulatedShopBoard);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setCameraStep('allSkus');
@@ -1598,8 +1599,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     } else if (cameraPurpose === 'vision-loc') {
       if (cameraStep === 'shopboard') {
+        const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
         const enhancedCapturedUrl = await enhanceImage(capturedUrl);
-        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, simulatedShopBoard);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setIsVisionCameraActive(false);

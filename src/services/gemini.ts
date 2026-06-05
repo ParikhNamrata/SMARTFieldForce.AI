@@ -59,28 +59,52 @@ export async function analyzeStorefrontImage(dataUrl: string, hint?: string) {
     };
     
     // Perform OCR to read the text in the image
-    const prompt = `You are an expert retail auditor performing Optical Character Recognition (OCR) on a storefront photo. 
-Identify the store name / business brand visible in the image. Look specifically for storefront signs, awnings, logos with text, or window lettering.
-Read the exact shop name visible in the image. Be precise.
+    const prompt = `You are a precision retail auditor performing Optical Character Recognition (OCR) on a storefront photo. 
+Identify exactly ONE store name / business brand visible in the image.
+
+CRITICAL INSTRUCTIONS:
+1. Analysis: Carefully read the text on the main shop sign, awning, or storefront.
+2. Selection: Compare the text you see in the image with the CANDIDATE LIST provided below.
+3. Decisive Action: You MUST pick the SINGLE best match from the CANDIDATE LIST.
+4. Negative Constraint: DO NOT return more than one store name. DO NOT return the entire candidate list.
+5. Fallback: If no match is found in the list, return the exact text you see in the image.
+
+${hint ? `CANDIDATE LIST (Pick ONLY one from here):\n${hint}` : "No candidate list provided. Identify the name from the image text only."}
 
 Return ONLY a valid JSON object with the following schema:
 {
-  "storeName": "Name of the store exactly as read from the image (or 'Unknown' if no text is legible)",
-  "location": "A smart guess of the city based on the language/context/visuals, or 'Unknown'",
-  "confidence": <number between 0 and 100 representing your confidence in identifying the correct store name>
+  "storeName": "Name of the single store identified",
+  "location": "City/Area or 'Unknown'",
+  "confidence": <integer 0-100>
 }
-Do not write any markdown code blocks or additional text. Just return the raw JSON.`;
+NO other text, markdown, or explanation. ONLY raw JSON.`;
 
     const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
     const text = response.text().trim();
     
     const jsonMatch = text.match(/\{.*\}/s);
+    let analysis = { storeName: "Unknown", location: "Unknown", confidence: 0 };
+    
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      analysis = JSON.parse(jsonMatch[0]);
+    } else {
+      analysis = JSON.parse(text);
+    }
+
+    // Safety check: if the model echoed the candidate list instead of picking one
+    if (hint && analysis.storeName.includes("\n") || analysis.storeName.includes("•")) {
+       const candidates = hint.split("\n").map(c => c.replace(/^•\s*/, "").trim());
+       // Try to find if one of the candidates is the first thing in the string
+       for (const cand of candidates) {
+         if (analysis.storeName.includes(cand)) {
+           analysis.storeName = cand;
+           break;
+         }
+       }
     }
     
-    return JSON.parse(text);
+    return analysis;
   } catch (error) {
     console.error("Gemini Image Analysis Error:", error);
     return {
