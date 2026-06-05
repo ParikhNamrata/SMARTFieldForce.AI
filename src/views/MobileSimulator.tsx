@@ -1002,7 +1002,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     setSampleVisionData(prev => ({
       ...prev,
-      storeName: targetStop.storeName,
+      storeName: analysis.storeName || targetStop.storeName,
       location: targetStop.address || prev.location
     }));
     

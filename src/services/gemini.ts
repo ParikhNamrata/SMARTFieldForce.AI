@@ -59,14 +59,15 @@ export async function analyzeStorefrontImage(dataUrl: string, hint?: string) {
     };
     
     // Perform OCR to read the text in the image
-    const prompt = `You are an expert retail auditor. Look at this storefront photo. 
-Identify the store name / business brand displayed on the storefront, awning, or shop sign using Optical Character Recognition (OCR). 
-Read the exact shop name visible in the image.
+    const prompt = `You are an expert retail auditor performing Optical Character Recognition (OCR) on a storefront photo. 
+Identify the store name / business brand visible in the image. Look specifically for storefront signs, awnings, logos with text, or window lettering.
+Read the exact shop name visible in the image. Be precise.
+
 Return ONLY a valid JSON object with the following schema:
 {
-  "storeName": "Name of the store exactly as read from the image using OCR (or 'Unknown' if no text is legible)",
+  "storeName": "Name of the store exactly as read from the image (or 'Unknown' if no text is legible)",
   "location": "A smart guess of the city based on the language/context/visuals, or 'Unknown'",
-  "confidence": <number between 0 and 100>
+  "confidence": <number between 0 and 100 representing your confidence in identifying the correct store name>
 }
 Do not write any markdown code blocks or additional text. Just return the raw JSON.`;
 
