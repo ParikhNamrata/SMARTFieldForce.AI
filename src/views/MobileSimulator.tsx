@@ -47,7 +47,7 @@ import {
 } from 'lucide-react';
 import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
-import { answerFieldQuery, analyzeStorefrontImage, parseAIVoiceCommand } from '../services/gemini';
+import { answerFieldQuery, analyzeStorefrontImage, parseAIVoiceCommand, analyzeSKUImage } from '../services/gemini';
 import { enhanceImage } from '../lib/imageProcessor';
 import { dbService, InteractionLog } from '../services/db';
 import { generateAIReportSummary } from '../services/reporting';
@@ -618,8 +618,10 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       }
     } else if (aiResult?.action === 'count_inventory' && aiResult.product && aiResult.quantity !== null) {
       if (newShelfCounts[aiResult.product] !== undefined) {
-          newShelfCounts[aiResult.product] = Number(aiResult.quantity);
+          const addedQty = Number(aiResult.quantity);
+          newShelfCounts[aiResult.product] = (newShelfCounts[aiResult.product] || 0) + addedQty;
           updatedSomething = true;
+          feedback = `Added ${addedQty} to ${aiResult.product}. New total: ${newShelfCounts[aiResult.product]}.`;
       }
     }
 
@@ -1100,21 +1102,24 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         setIsVisionCameraActive(false);
         ensureAttendanceMarked("Uploaded storefront board");
         
-        if (cameraStep === 'allSkus') {
+      if (cameraStep === 'allSkus') {
+          const enhancedUrl = await enhanceImage(dataUrl);
+          const skuResult = await analyzeSKUImage(enhancedUrl);
+          
           setVisionSkuImageUrl(dataUrl);
-          setDetectedSkuCount(sampleVisionData.skus);
+          setDetectedSkuCount(skuResult.totalSkus);
           setShelfSkuCounts({
-            'dove-soap': 45,
-            'dove-shampoo': 30,
-            'lux-soap': 45,
-            'lifebuoy-wash': 36
+            'dove-soap': skuResult.breakdown['dove-soap'] || 0,
+            'dove-shampoo': skuResult.breakdown['dove-shampoo'] || 0,
+            'lux-soap': skuResult.breakdown['lux-soap'] || 0,
+            'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
           });
           
           setChatMessages(prev => [
             ...prev, 
             { 
               role: 'ai', 
-              text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf from custom uploaded image! Compliance 100% complete.` 
+              text: `📊 Image Recognition SKU Audit: Counted exactly ${skuResult.totalSkus} SKUs on display shelf from custom uploaded image! Compliance ${skuResult.confidence}% complete.` 
             }
           ]);
         }
@@ -1613,20 +1618,23 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       ensureAttendanceMarked("Shop board SKU");
       
       if (cameraStep === 'allSkus') {
+        const enhancedUrl = await enhanceImage(capturedUrl);
+        const skuResult = await analyzeSKUImage(enhancedUrl);
+        
         setVisionSkuImageUrl(capturedUrl);
-        setDetectedSkuCount(sampleVisionData.skus);
+        setDetectedSkuCount(skuResult.totalSkus);
         setShelfSkuCounts({
-          'dove-soap': 45,
-          'dove-shampoo': 30,
-          'lux-soap': 45,
-          'lifebuoy-wash': 36
+          'dove-soap': skuResult.breakdown['dove-soap'] || 0,
+          'dove-shampoo': skuResult.breakdown['dove-shampoo'] || 0,
+          'lux-soap': skuResult.breakdown['lux-soap'] || 0,
+          'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
         });
         
         setChatMessages(prev => [
           ...prev, 
           { 
             role: 'ai', 
-            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf! Verification 100% complete.` 
+            text: `📊 Image Recognition SKU Audit: Counted exactly ${skuResult.totalSkus} SKUs on display shelf! IR Verification ${skuResult.confidence}% accurate.` 
           }
         ]);
         
@@ -1635,7 +1643,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           type: 'chat',
           content: { 
             message: 'Camera SKU Count', 
-            response: `Counted exactly ${sampleVisionData.skus} SKUs on display shelf during IR audit.` 
+            response: `Counted exactly ${skuResult.totalSkus} SKUs on display shelf during IR audit.` 
           },
           summary: 'SKU Count Output'
         });

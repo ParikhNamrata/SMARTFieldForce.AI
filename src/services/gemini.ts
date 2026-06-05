@@ -144,3 +144,56 @@ Return ONLY a valid JSON object matching this schema:
     return { action: "unknown", product: null, quantity: null, feedback: "I'm offline, but I heard: " + query };
   }
 }
+
+export async function analyzeSKUImage(dataUrl: string) {
+  try {
+    if (!apiKey) {
+      return {
+        totalSkus: 156,
+        breakdown: { 'dove-soap': 45, 'dove-shampoo': 30, 'lux-soap': 45, 'lifebuoy-wash': 36 },
+        confidence: 80
+      };
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const base64Data = dataUrl.includes(",") ? dataUrl.split(',')[1] : dataUrl;
+    const mimeType = dataUrl.match(/data:([^;]+);/)?.[1] || "image/jpeg";
+
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType
+      }
+    };
+    
+    const prompt = `You are a precision retail auditor. Perform an Image Recognition (IR) audit on this shelf photo.
+Identify and count all Unilever products.
+
+Return ONLY a valid JSON object with exactly this schema:
+{
+  "totalSkus": number,
+  "breakdown": {
+    "dove-soap": number,
+    "dove-shampoo": number,
+    "lux-soap": number,
+    "lifebuoy-wash": number
+  },
+  "confidence": number
+}
+No markdown, no explanation. Just raw JSON.`;
+
+    const result = await model.generateContent([prompt, imagePart]);
+    const response = await result.response;
+    const text = response.text().trim();
+    const jsonMatch = text.match(/\{.*\}/s);
+    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("SKU Analysis Error:", error);
+    return {
+      totalSkus: 0,
+      breakdown: {},
+      confidence: 0
+    };
+  }
+}
