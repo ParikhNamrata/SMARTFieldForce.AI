@@ -38,30 +38,12 @@ export async function answerFieldQuery(query: string) {
 }
 
 export async function analyzeStorefrontImage(dataUrl: string, hint?: string) {
-  let matchingName = "";
   try {
-    if (hint) {
-      const hLower = hint.toLowerCase();
-      if (hLower.includes("mini") || hLower.includes("mercado") || hLower.includes("extra")) {
-        matchingName = "Mini Mercado Extra";
-      } else if (hLower.includes("elite") || hLower.includes("hub") || hLower.includes("442")) {
-        matchingName = "Smollan Elite Hub #442";
-      } else if (hLower.includes("south") || hLower.includes("hq") || hLower.includes("bandra")) {
-        matchingName = "Smollan South HQ (Bandra Hub)";
-      } else if (hLower.includes("checkers") || hLower.includes("metro") || hLower.includes("outlet")) {
-        matchingName = "Checkers Metro Outlet";
-      } else if (hLower.includes("mcdonald") || hLower.includes("mcdonalds")) {
-        matchingName = "McDonald's Storefront";
-      } else {
-        matchingName = hint;
-      }
-    }
-
     if (!apiKey) {
       return {
-        storeName: matchingName || "Mini Mercado Extra",
-        location: matchingName === "Mini Mercado Extra" ? "Sao Paulo, Brazil" : "Bandra West, Mumbai",
-        confidence: 98
+        storeName: hint || "Unknown Store",
+        location: "Unknown",
+        confidence: 0
       };
     }
 
@@ -72,18 +54,19 @@ export async function analyzeStorefrontImage(dataUrl: string, hint?: string) {
     const imagePart = {
       inlineData: {
         data: base64Data,
-         mimeType: mimeType
+        mimeType: mimeType
       }
     };
     
+    // Perform OCR to read the text in the image
     const prompt = `You are an expert retail auditor. Look at this storefront photo. 
-Identify the store name / business brand displayed on the storefront or shop sign. 
-If there is a storefront sign, read the exact shop name (for example, it might be "Mini Mercado Extra", "Mercado Extra" or another logo). [Hint context: The storefront name is likely "${matchingName || 'unknown'}"].
+Identify the store name / business brand displayed on the storefront, awning, or shop sign using Optical Character Recognition (OCR). 
+Read the exact shop name visible in the image.
 Return ONLY a valid JSON object with the following schema:
 {
-  "storeName": "Name of the store found or 'Mini Mercado Extra' if not clearly legible but displays a supermarket",
-  "location": "Detected city/neighborhood, or 'Bandra West, Mumbai' if not recognizable",
-  "confidence": 95
+  "storeName": "Name of the store exactly as read from the image using OCR (or 'Unknown' if no text is legible)",
+  "location": "A smart guess of the city based on the language/context/visuals, or 'Unknown'",
+  "confidence": <number between 0 and 100>
 }
 Do not write any markdown code blocks or additional text. Just return the raw JSON.`;
 
@@ -96,29 +79,43 @@ Do not write any markdown code blocks or additional text. Just return the raw JS
       return JSON.parse(jsonMatch[0]);
     }
     
-    try {
-      return JSON.parse(text);
-    } catch {
-      if (text.toLowerCase().includes("mercado") || text.toLowerCase().includes("extra") || text.toLowerCase().includes("mini")) {
-        return {
-          storeName: "Mini Mercado Extra",
-          location: "Sao Paulo, Brazil",
-          confidence: 95
-        };
-      }
-    }
-    
-    return {
-      storeName: matchingName || "Mini Mercado Extra",
-      location: "Sao Paulo, Brazil",
-      confidence: 95
-    };
+    return JSON.parse(text);
   } catch (error) {
     console.error("Gemini Image Analysis Error:", error);
     return {
-      storeName: matchingName || "Mini Mercado Extra",
-      location: "Sao Paulo, Brazil",
-      confidence: 95
+      storeName: hint || "Unknown Store",
+      location: "Unknown",
+      confidence: 50
     };
+  }
+}
+
+export async function parseAIVoiceCommand(query: string) {
+  try {
+    const prompt = `You are an intelligent retail field force voice assistant. Analyze the user's voice command: "${query}".
+Return ONLY a valid JSON object matching this schema:
+{
+  "action": "check-in" | "count_inventory" | "mark_out_of_stock" | "unknown",
+  "product": "Returns one of these EXACT keys: 'dove-soap', 'dove-shampoo', 'lux-soap', 'lifebuoy-wash', or null",
+  "quantity": "Number if count_inventory, or null",
+  "feedback": "A short, friendly spoken confirmation of what you just updated"
+}`;
+    if (!apiKey) {
+      if (query.toLowerCase().includes("check")) {
+          return { action: "check-in", product: null, quantity: null, feedback: "Simulated AI: I've checked you in to the store." };
+      }
+      return { action: "unknown", product: null, quantity: null, feedback: "Simulated AI: I heard " + query };
+    }
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text().trim();
+    const jsonMatch = text.match(/\{.*\}/s);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    return JSON.parse(text);
+  } catch (error) {
+    return { action: "unknown", product: null, quantity: null, feedback: "I'm offline, but I heard: " + query };
   }
 }

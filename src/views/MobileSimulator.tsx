@@ -47,7 +47,8 @@ import {
 } from 'lucide-react';
 import { AppConfig, AVAILABLE_FEATURES, FeatureKey, Feature, AVAILABLE_BOT_ACTIONS } from '../types';
 import { cn } from '../lib/utils';
-import { answerFieldQuery, analyzeStorefrontImage } from '../services/gemini';
+import { answerFieldQuery, analyzeStorefrontImage, parseAIVoiceCommand } from '../services/gemini';
+import { enhanceImage } from '../lib/imageProcessor';
 import { dbService, InteractionLog } from '../services/db';
 import { generateAIReportSummary } from '../services/reporting';
 
@@ -504,11 +505,11 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       bot: 'predictiveBot',
       vision: 'visionAutomation',
       reports: 'salesInsights',
-      training: 'trainingHub',
+      training: null,
       planner: 'routeOptimizer',
       performance: 'userProfile',
-      stock: 'inventoryRadar',
-      territory: 'territoryMap',
+      stock: null,
+      territory: null,
       order: 'orderManagement',
       quiz: 'quizModule'
     };
@@ -596,20 +597,39 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     }
   };
 
-  const parseVoiceCommand = (rawText: string) => {
+  const parseVoiceCommand = async (rawText: string, speakEnabled: boolean = true) => {
     const text = rawText.toLowerCase();
-    let feedback = "";
+    
+    // AI Parser Integration
+    const aiResult = await parseAIVoiceCommand(rawText);
+    let feedback = aiResult?.feedback || "";
     let updatedSomething = false;
 
     let newShelfCounts = { ...shelfSkuCounts };
     let newOrderProducts = [...orderProducts];
 
-    // Check check-in/attendance
-    if (text.includes("check-in") || text.includes("check in") || text.includes("attendance") || text.includes("login")) {
+    if (aiResult?.action === 'check-in') {
       ensureAttendanceMarked("Voice check-in complete");
-      feedback += "Checked in to Bandra Retail outlet. ";
       updatedSomething = true;
+    } else if (aiResult?.action === 'mark_out_of_stock' && aiResult.product) {
+      if (newShelfCounts[aiResult.product] !== undefined) {
+          newShelfCounts[aiResult.product] = 0;
+          updatedSomething = true;
+      }
+    } else if (aiResult?.action === 'count_inventory' && aiResult.product && aiResult.quantity !== null) {
+      if (newShelfCounts[aiResult.product] !== undefined) {
+          newShelfCounts[aiResult.product] = Number(aiResult.quantity);
+          updatedSomething = true;
+      }
     }
+
+    if (!updatedSomething) {
+      // Fallback to local regex matching
+      if (text.includes("check-in") || text.includes("check in") || text.includes("attendance") || text.includes("login")) {
+        ensureAttendanceMarked("Voice check-in complete");
+        feedback += "Checked in to Bandra Retail outlet. ";
+        updatedSomething = true;
+      }
 
     // Dove Soap count
     if (text.includes("dove") && (text.includes("soap") || text.includes("beauty") || text.includes("bar") || text.includes("cream"))) {
@@ -709,6 +729,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         }
       }
     }
+    }
 
     // Reset counts command
     if (text.includes("clear") || text.includes("reset") || text.includes("empty")) {
@@ -725,13 +746,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     if (updatedSomething) {
       setShelfSkuCounts(newShelfCounts);
       setOrderProducts(newOrderProducts);
-      speakText(feedback);
+      if (speakEnabled) speakText(feedback);
       return {
         success: true,
         summary: feedback
       };
     } else {
-      speakText("Voice registered, but could not identify specific SKU counts. Try saying Dove 22 or Lux 10!");
+      if (speakEnabled) speakText("Voice registered, but could not identify specific SKU counts. Try saying Dove 22 or Lux 10!");
       return {
         success: false,
         summary: "Could not identify product names or counts. Ensure you mention 'Dove, Lux, Lifebuoy, or Shampoo' followed by a number."
@@ -798,8 +819,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
             setIsVoiceActive(false);
             
             // Parse and run!
-            setTimeout(() => {
-              const parsed = parseVoiceCommand(transcript);
+            setTimeout(async () => {
+              const parsed = await parseVoiceCommand(transcript);
               setVoiceLog(prev => [
                 {
                   id: Date.now().toString(),
@@ -860,9 +881,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     setVoiceSpeechText(`Simulating: "${command}"`);
     setIsVoiceActive(true);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsVoiceActive(false);
-      const parsed = parseVoiceCommand(command);
+      const parsed = await parseVoiceCommand(command);
       setVoiceSpeechText(`Recognized: "${command}"`);
       
       setVoiceLog(prev => [
@@ -1003,6 +1024,10 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
     const reader = new FileReader();
     reader.onload = async () => {
       const dataUrl = reader.result as string;
@@ -1015,12 +1040,14 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
       if (cameraPurpose === 'bot-loc') {
         if (cameraStep === 'shopboard') {
-          const analysis = await analyzeStorefrontImage(dataUrl, file.name);
+          const pendingStop = routeStops.find(s => s.status === 'PENDING') || routeStops[0];
+          const enhancedDataUrl = await enhanceImage(dataUrl);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, pendingStop?.storeName || file.name);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setCameraStep('allSkus');
-            setCameraState('idle');
           }
+          setCameraState('idle');
           return;
         }
 
@@ -1059,11 +1086,14 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
       } else if (cameraPurpose === 'vision-loc') {
         if (cameraStep === 'shopboard') {
-          const analysis = await analyzeStorefrontImage(dataUrl, file.name);
+          const pendingStop = routeStops.find(s => s.status === 'PENDING') || routeStops[0];
+          const enhancedDataUrl = await enhanceImage(dataUrl);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, pendingStop?.storeName || file.name);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setIsVisionCameraActive(false);
           }
+          setCameraState('idle');
           return;
         }
 
@@ -1158,6 +1188,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isVisionProcessing, setIsVisionProcessing] = useState(false);
+  const [stockSearchQuery, setStockSearchQuery] = useState('');
   const [visionResult, setVisionResult] = useState<any>(null);
   const [logs, setLogs] = useState<InteractionLog[]>([]);
 
@@ -1179,6 +1210,30 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       description: string;
     }>;
   }>>(aiOrderSchemes.products as any);
+
+  useEffect(() => {
+    setOrderProducts(prev => prev.map(prod => {
+      const count = shelfSkuCounts[prod.id];
+      if (count !== undefined) {
+        let stockStatus: 'In Stock' | 'Critical OOS' | 'Low' = 'In Stock';
+        let suggestedQty = 0;
+        
+        if (count === 0) {
+          stockStatus = 'Critical OOS';
+          suggestedQty = Math.max(20, prod.lastOrderQty || 20);
+        } else if (count < 15) {
+          stockStatus = 'Low';
+          suggestedQty = Math.max(0, 30 - count);
+        } else {
+          stockStatus = 'In Stock';
+          suggestedQty = 0;
+        }
+
+        return { ...prod, stockStatus, suggestedQty };
+      }
+      return prod;
+    }));
+  }, [shelfSkuCounts]);
 
   const [isOrderBookingConfirmOpen, setIsOrderBookingConfirmOpen] = useState(false);
   const [bookedReceipt, setBookedReceipt] = useState<{
@@ -1438,23 +1493,10 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     setChatMessages(prev => [...prev, { role: 'ai', text: aiResponse, imageUrl: aiImageUrl }]);
     
-    // Check for audit-related patterns - Improved multi-brand detection
-    const updates: any = {};
-    const brands = ['dove', 'lux', 'lifebuoy', 'surf excel', 'pepsodent', 'ponds'];
-    
-    brands.forEach(brand => {
-       const regex = new RegExp(`${brand}.*?(\\d+)`, 'i');
-       const match = lowMsg.match(regex);
-       if (match) {
-          const key = `manual${brand.charAt(0).toUpperCase() + brand.slice(1).replace(' ', '')}`;
-          updates[key] = parseInt(match[1]);
-       }
-    });
-    
-    if (Object.keys(updates).length > 0) {
-       setAuditData((prev: any) => ({ ...prev, ...updates }));
-       const labels = Object.keys(updates).map(k => `${k.replace('manual', '')}: ${updates[k]}`).join(', ');
-       setChatMessages(prev => [...prev, { role: 'ai', text: `Got it! Logged manual audit for ${labels}. This data will be integrated into the deep report.` }]);
+    // Check for audit-related patterns using the shared AI voice command parser
+    const parsed = await parseVoiceCommand(userMsg, false);
+    if (parsed.success) {
+       setChatMessages(prev => [...prev, { role: 'ai', text: `Got it! ${parsed.summary} This data will be integrated across the app and deep reports.` }]);
     }
 
     await dbService.saveInteraction({
@@ -1509,7 +1551,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     if (cameraPurpose === 'bot-loc') {
       if (cameraStep === 'shopboard') {
-        const analysis = await analyzeStorefrontImage(capturedUrl, simulatedShopBoard);
+        const enhancedCapturedUrl = await enhanceImage(capturedUrl);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, simulatedShopBoard);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setCameraStep('allSkus');
@@ -1555,7 +1598,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
 
     } else if (cameraPurpose === 'vision-loc') {
       if (cameraStep === 'shopboard') {
-        const analysis = await analyzeStorefrontImage(capturedUrl, simulatedShopBoard);
+        const enhancedCapturedUrl = await enhanceImage(capturedUrl);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, simulatedShopBoard);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setIsVisionCameraActive(false);
@@ -1650,13 +1694,13 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
     // Merge AI data with manual chat audit data
     const finalReport = {
       ...sampleVisionData,
-      doveCount: auditData?.manualDove || 24,
-      luxCount: auditData?.manualLux || 12,
+      doveCount: shelfSkuCounts['dove-soap'] || 0,
+      luxCount: shelfSkuCounts['lux-soap'] || 0,
       brands: {
-        Dove: auditData?.manualDove || 24,
-        Lux: auditData?.manualLux || 12,
-        Lifebuoy: auditData?.manualLifebuoy || 8,
-        Pepsodent: auditData?.manualPepsodent || 15
+        Dove: shelfSkuCounts['dove-soap'] || 0,
+        Lux: shelfSkuCounts['lux-soap'] || 0,
+        Lifebuoy: shelfSkuCounts['lifebuoy-wash'] || 0,
+        Pepsodent: shelfSkuCounts['pepsodent'] || 0
       },
       missingSkus: ["Dove Deep Moisture 400ml", "Lux Scarlet 100g", "Lifebuoy Lemon"],
       planogramStatus: "Non-Compliant - Shelf Labels Missing",
@@ -1783,7 +1827,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
   }, [config.features, config.featureOrder]);
 
   const dashboardFeatures = useMemo(() => {
-    return enabledFeatures.filter(f => f.id !== 'voiceToText');
+    return enabledFeatures;
   }, [enabledFeatures]);
 
   const topFeatures = useMemo(() => {
@@ -1914,7 +1958,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                            trainingHub: 'training',
                            routeOptimizer: 'planner',
                            userProfile: 'performance',
-                           inventoryRadar: 'stock',
                            territoryMap: 'territory',
                            orderManagement: 'order',
                            quizModule: 'quiz'
@@ -1995,7 +2038,6 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               else if (dashboardFeatures[0].id === 'trainingHub') setActiveScreen('training');
                               else if (dashboardFeatures[0].id === 'routeOptimizer') setActiveScreen('planner');
                               else if (dashboardFeatures[0].id === 'userProfile') setActiveScreen('performance');
-                              else if (dashboardFeatures[0].id === 'inventoryRadar') setActiveScreen('stock');
                               else if (dashboardFeatures[0].id === 'territoryMap') setActiveScreen('territory');
                               else if (dashboardFeatures[0].id === 'orderManagement') setActiveScreen('order');
                               else if (dashboardFeatures[0].id === 'quizModule') setActiveScreen('quiz');
@@ -2068,7 +2110,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                             else if (feature.id === 'trainingHub') setActiveScreen('training');
                             else if (feature.id === 'routeOptimizer') setActiveScreen('planner');
                             else if (feature.id === 'userProfile') setActiveScreen('performance');
-                            else if (feature.id === 'inventoryRadar') setActiveScreen('stock');
+                            
                             else if (feature.id === 'territoryMap') setActiveScreen('territory');
                             else if (feature.id === 'orderManagement') setActiveScreen('order');
                             else if (feature.id === 'quizModule') setActiveScreen('quiz');
@@ -2655,45 +2697,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                 </motion.div>
               )}
 
-              {activeScreen === 'training' && (
-                <motion.div
-                  key="training"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="p-6 space-y-6"
-                >
-                   <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-slate-800 tracking-tight">Training Hub</h3>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Master your field goals</p>
-                   </div>
 
-                   <div className="space-y-4">
-                      {[
-                        { title: 'New Product Launch', duration: '5 min', points: '+50 XP', category: 'Innovation' },
-                        { title: 'Safety Protocol 2024', duration: '12 min', points: '+100 XP', category: 'Compliance' },
-                        { title: 'Advanced Selling Tips', duration: '8 min', points: '+80 XP', category: 'Sales' }
-                      ].map((item, idx) => (
-                        <div key={idx} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group active:scale-95 transition-all">
-                           <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
-                              <BookOpen className="w-6 h-6" />
-                           </div>
-                           <div className="flex-1">
-                              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{item.category}</p>
-                              <p className="text-sm font-bold text-slate-800 leading-tight">{item.title}</p>
-                              <div className="flex items-center gap-3 mt-2">
-                                 <span className="text-[9px] font-bold text-slate-400">{item.duration}</span>
-                                 <span className="text-[9px] font-black text-emerald-500">{item.points}</span>
-                              </div>
-                           </div>
-                           <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
-                              <ChevronRight className="w-4 h-4 text-slate-300" />
-                           </div>
-                           </div>
-                           ))}
-                           </div>
-                           </motion.div>
-                           )}
 
               {activeScreen === 'planner' && (
                 <motion.div
@@ -2889,6 +2893,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                        </motion.form>
                      )}
                    </AnimatePresence>
+
+                   {/* Action buttons (Add, Generate) */}
 
                    {/* Stateful Sequence Timeline */}
                    <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
@@ -3140,26 +3146,49 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                       </div>
                    </div>
 
-                   <div className="space-y-4">
-                      {[
-                        { item: 'Premium Detergent 2kg', stock: 'Critical', distance: '0.4km', color: 'red' },
-                        { item: 'Hellmanns Mayo 400g', stock: 'Low', distance: '1.2km', color: 'orange' },
-                        { item: 'Knorr Soup Pack', stock: 'Optimal', distance: '2.5km', color: 'emerald' }
-                      ].map((prod, i) => (
-                        <div key={i} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-                           <div className={cn("w-2 h-12 rounded-full", `bg-${prod.color}-500/20`)} />
+                   <div className="relative">
+                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                       <Search className="h-4 w-4 text-slate-400" />
+                     </div>
+                     <input
+                       type="text"
+                       placeholder="Search products by SKU name..."
+                       value={stockSearchQuery}
+                       onChange={(e) => setStockSearchQuery(e.target.value)}
+                       className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                     />
+                   </div>
+
+                     <div className="space-y-4">
+                      {orderProducts
+                         .filter((prod) => 
+                           (prod.name?.toLowerCase() || '').includes((stockSearchQuery || '').toLowerCase()) ||
+                           (prod.stockStatus?.toLowerCase() || '').includes((stockSearchQuery || '').toLowerCase()) ||
+                           (prod.id?.toLowerCase() || '').includes((stockSearchQuery || '').toLowerCase())
+                         )
+                         .map((prod, i) => {
+                        const count = shelfSkuCounts[prod.id] !== undefined ? shelfSkuCounts[prod.id] : 0;
+                        const bgLine = prod.stockStatus === 'Critical OOS' ? 'bg-red-500/20' : (prod.stockStatus === 'Low' ? 'bg-orange-500/20' : 'bg-emerald-500/20');
+                        const bgBadge = prod.stockStatus === 'Critical OOS' ? 'bg-red-500' : (prod.stockStatus === 'Low' ? 'bg-orange-500' : 'bg-emerald-500');
+                        
+                        return (
+                        <div key={prod.id} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                           <div className={cn("w-2 h-12 rounded-full", bgLine)} />
                            <div className="flex-1">
-                              <p className="text-xs font-bold text-slate-800 leading-tight">{prod.item}</p>
+                              <p className="text-xs font-bold text-slate-800 leading-tight">{prod.name}</p>
                               <div className="flex items-center gap-2 mt-1">
-                                 <span className={cn("text-[8px] font-black uppercase text-white px-1.5 py-0.5 rounded-full", `bg-${prod.color}-500`)}>{prod.stock}</span>
-                                 <span className="text-[8px] font-bold text-slate-400">{prod.distance} away</span>
+                                 <span className={cn("text-[8px] font-black uppercase text-white px-1.5 py-0.5 rounded-full", bgBadge)}>
+                                   {prod.stockStatus}
+                                 </span>
+                                 <span className="text-[8px] font-bold text-slate-400">{count} Units In-Store</span>
                               </div>
                            </div>
                            <button className="p-2 rounded-xl bg-slate-50 text-slate-400">
                               <Search className="w-4 h-4" />
                            </button>
                         </div>
-                      ))}
+                        )
+                      })}
                    </div>
                 </motion.div>
               )}
@@ -3923,20 +3952,8 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
               )}
             </AnimatePresence>
 
-            {/* FLOATING HANDS-FREE VOICE ASSISTANT TRIGGER */}
-            {!isVoiceSheetOpen && activeScreen !== 'planner' && activeScreen !== 'home' && activeScreen !== 'bot' && activeScreen !== 'vision' && (
-              <div className="absolute bottom-6 right-6 z-[90]">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={toggleVoice}
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xl hover:shadow-indigo-500/30 transition-all border border-indigo-400/20 cursor-pointer"
-                >
-                  <Mic className="w-5 h-5 animate-pulse" />
-                </motion.button>
-              </div>
-            )}
-
+            {/* FLOATING HANDS-FREE VOICE ASSISTANT TRIGGER (REMOVED) */}
+            
             {/* HANDS-FREE VOICE OVERLAY DRAWERS */}
             <AnimatePresence>
               {isVoiceSheetOpen && (
@@ -4122,9 +4139,9 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                               setVoiceSpeechText(`Simulating: "${sim.transcript}"`);
                               setIsVoiceActive(true);
                               
-                              setTimeout(() => {
+                              setTimeout(async () => {
                                 setIsVoiceActive(false);
-                                const parsed = parseVoiceCommand(sim.transcript);
+                                const parsed = await parseVoiceCommand(sim.transcript);
                                 
                                 setVoiceSpeechText(`Recognized: "${sim.transcript}"`);
                                 
@@ -4217,7 +4234,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
                   trainingHub: 'training',
                   routeOptimizer: 'planner',
                   userProfile: 'performance',
-                  inventoryRadar: 'stock',
+                  
                   territoryMap: 'territory',
                   orderManagement: 'order',
                   quizModule: 'quiz'
