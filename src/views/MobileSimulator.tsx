@@ -1044,7 +1044,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         if (cameraStep === 'shopboard') {
           const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
           const enhancedDataUrl = await enhanceImage(dataUrl);
-          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints, file.name);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setCameraStep('allSkus');
@@ -1057,6 +1057,23 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         setCheckInStep('location_checked_in');
         setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
         
+        const enhancedUrl = await enhanceImage(dataUrl);
+        const skuResult = await analyzeSKUImage(enhancedUrl);
+
+        setVisionSkuImageUrl(dataUrl);
+        setDetectedSkuCount(skuResult.totalSkus);
+        setShelfSkuCounts({
+          'dove-soap': skuResult.breakdown['dove-soap'] || 0,
+          'dove-shampoo': skuResult.breakdown['dove-shampoo'] || 0,
+          'lux-soap': skuResult.breakdown['lux-soap'] || 0,
+          'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
+        });
+
+        const breakdownEntries = Object.entries(skuResult.breakdown)
+          .filter(([_, count]) => (count as number) > 0)
+          .map(([key, count]) => `• **${key.replace('-', ' ').toUpperCase()}**: ${count} units`)
+          .join('\n');
+
         setChatMessages(prev => [
           ...prev,
           {
@@ -1070,7 +1087,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           },
           {
             role: 'ai',
-            text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf from gallery upload! Verification 100% complete.`,
+            text: `📊 **Image Recognition SKU Audit Complete!**\n\nIdentified a total of **${skuResult.totalSkus}** active SKUs on display shelf from gallery upload!\n\n**Visual Product Detection Breakdown:**\n${breakdownEntries || "• No Products Identified"}\n\nConfidence Rate: **${skuResult.confidence}%**`,
             imageUrl: dataUrl
           }
         ]);
@@ -1080,7 +1097,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           type: 'chat',
           content: { 
             message: 'Location Check-in via Gallery Upload', 
-            response: `📍 Check-in verified via custom uploaded photo at ${sampleVisionData.storeName}. Counted ${sampleVisionData.skus} display SKUs.` 
+            response: `📍 Check-in verified via custom uploaded photo at ${sampleVisionData.storeName}. Counted ${skuResult.totalSkus} display SKUs. Breakdown: ${JSON.stringify(skuResult.breakdown)}` 
           },
           summary: 'Check-in: Custom Photo Verified'
         });
@@ -1090,7 +1107,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         if (cameraStep === 'shopboard') {
           const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
           const enhancedDataUrl = await enhanceImage(dataUrl);
-          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints);
+          const analysis = await analyzeStorefrontImage(enhancedDataUrl, allStoreHints, file.name);
           const success = await verifyAndCheckInStore(analysis, dataUrl);
           if (success) {
             setIsVisionCameraActive(false);
@@ -1102,7 +1119,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         setIsVisionCameraActive(false);
         ensureAttendanceMarked("Uploaded storefront board");
         
-      if (cameraStep === 'allSkus') {
+        if (cameraStep === 'allSkus') {
           const enhancedUrl = await enhanceImage(dataUrl);
           const skuResult = await analyzeSKUImage(enhancedUrl);
           
@@ -1115,11 +1132,16 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
             'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
           });
           
+          const breakdownEntries = Object.entries(skuResult.breakdown)
+            .filter(([_, count]) => (count as number) > 0)
+            .map(([key, count]) => `• **${key.replace('-', ' ').toUpperCase()}**: ${count} units`)
+            .join('\n');
+
           setChatMessages(prev => [
             ...prev, 
             { 
               role: 'ai', 
-              text: `📊 Image Recognition SKU Audit: Counted exactly ${skuResult.totalSkus} SKUs on display shelf from custom uploaded image! Compliance ${skuResult.confidence}% complete.` 
+              text: `📊 **Image Recognition SKU Audit Complete!**\n\nIdentified a total of **${skuResult.totalSkus}** active SKUs on display shelf from custom uploaded image!\n\n**Visual Product Detection Breakdown:**\n${breakdownEntries || "• No Products Identified"}\n\nConfidence Rate: **${skuResult.confidence}%**` 
             }
           ]);
         }
@@ -1558,7 +1580,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       if (cameraStep === 'shopboard') {
         const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
         const enhancedCapturedUrl = await enhanceImage(capturedUrl);
-        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints, simulatedShopBoard);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setCameraStep('allSkus');
@@ -1571,7 +1593,22 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       setCheckInStep('location_checked_in');
       setCompletedStep2ActionIds(prev => prev.includes('loc_checkin') ? prev : [...prev, 'loc_checkin']);
       
+      const enhancedUrl = await enhanceImage(capturedUrl);
+      const skuResult = await analyzeSKUImage(enhancedUrl);
+
       setVisionSkuImageUrl(capturedUrl);
+      setDetectedSkuCount(skuResult.totalSkus);
+      setShelfSkuCounts({
+        'dove-soap': skuResult.breakdown['dove-soap'] || 0,
+        'dove-shampoo': skuResult.breakdown['dove-shampoo'] || 0,
+        'lux-soap': skuResult.breakdown['lux-soap'] || 0,
+        'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
+      });
+
+      const breakdownEntries = Object.entries(skuResult.breakdown)
+        .filter(([_, count]) => (count as number) > 0)
+        .map(([key, count]) => `• **${key.replace('-', ' ').toUpperCase()}**: ${count} units`)
+        .join('\n');
 
       setChatMessages(prev => [
         ...prev,
@@ -1586,7 +1623,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         },
         {
           role: 'ai',
-          text: `📊 Image Recognition SKU Audit: Counted exactly ${sampleVisionData.skus} SKUs on display shelf! Verification 100% complete.`,
+          text: `📊 **Image Recognition SKU Audit Complete!**\n\nIdentified a total of **${skuResult.totalSkus}** active SKUs on display shelf.\n\n**Visual Product Detection Breakdown:**\n${breakdownEntries || "• No Products Identified"}\n\nConfidence: **${skuResult.confidence}%**`,
           imageUrl: capturedUrl
         }
       ]);
@@ -1596,7 +1633,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
         type: 'chat',
         content: { 
           message: 'Location Check-in via Camera & SKU Count', 
-          response: `📍 Location Check-in completed. GPS coordinates matches. Checked storefront for ${sampleVisionData.storeName} and counted ${sampleVisionData.skus} display SKUs.` 
+          response: `📍 Location Check-in completed. GPS matches. Checked storefront for ${sampleVisionData.storeName} and counted ${skuResult.totalSkus} display SKUs. Breakdown: ${JSON.stringify(skuResult.breakdown)}` 
         },
         summary: 'Check-in: Storefront & SKU Verified'
       });
@@ -1606,7 +1643,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
       if (cameraStep === 'shopboard') {
         const allStoreHints = routeStops.map(s => `• ${s.storeName}`).join('\n');
         const enhancedCapturedUrl = await enhanceImage(capturedUrl);
-        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints);
+        const analysis = await analyzeStorefrontImage(enhancedCapturedUrl, allStoreHints, simulatedShopBoard);
         const success = await verifyAndCheckInStore(analysis, capturedUrl);
         if (success) {
           setIsVisionCameraActive(false);
@@ -1630,11 +1667,16 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           'lifebuoy-wash': skuResult.breakdown['lifebuoy-wash'] || 0
         });
         
+        const breakdownEntries = Object.entries(skuResult.breakdown)
+          .filter(([_, count]) => (count as number) > 0)
+          .map(([key, count]) => `• **${key.replace('-', ' ').toUpperCase()}**: ${count} units`)
+          .join('\n');
+
         setChatMessages(prev => [
           ...prev, 
           { 
             role: 'ai', 
-            text: `📊 Image Recognition SKU Audit: Counted exactly ${skuResult.totalSkus} SKUs on display shelf! IR Verification ${skuResult.confidence}% accurate.` 
+            text: `📊 **Image Recognition SKU Audit Complete!**\n\nIdentified a total of **${skuResult.totalSkus}** active SKUs on display shelf!\n\n**Visual Product Detection Breakdown:**\n${breakdownEntries || "• No Products Identified"}\n\nConfidence Rate: **${skuResult.confidence}%**` 
           }
         ]);
         
@@ -1643,7 +1685,7 @@ export default function MobileSimulator({ config }: MobileSimulatorProps) {
           type: 'chat',
           content: { 
             message: 'Camera SKU Count', 
-            response: `Counted exactly ${skuResult.totalSkus} SKUs on display shelf during IR audit.` 
+            response: `Counted exactly ${skuResult.totalSkus} SKUs on display shelf during IR audit. Breakdown: ${JSON.stringify(skuResult.breakdown)}` 
           },
           summary: 'SKU Count Output'
         });
